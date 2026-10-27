@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="LuxEngine.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="using:LuxEngine.App.Views"
+    Title="LuxEngine">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="Root" PreviewKeyDown="Root_PreviewKeyDown">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="36" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Title bar (drag area) -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Padding="12,0,140,0">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Image Source="ms-appx:///Assets/LuxEngine-64.png" Width="18" Height="18" />
+                <TextBlock Text="LuxEngine" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock x:Name="ShowTitle" Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Menu and live controls -->
+        <Grid Grid.Row="1" Padding="4,0,12,6" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <MenuBar Grid.Column="0">
+                <MenuBarItem Title="File">
+                    <MenuFlyoutItem Text="New show" Click="New_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Document" /></MenuFlyoutItem.Icon>
+                        <MenuFlyoutItem.KeyboardAccelerators><KeyboardAccelerator Modifiers="Control" Key="N" /></MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Open…" Click="Open_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="OpenFile" /></MenuFlyoutItem.Icon>
+                        <MenuFlyoutItem.KeyboardAccelerators><KeyboardAccelerator Modifiers="Control" Key="O" /></MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSubItem x:Name="RecentMenu" Text="Open recent" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="Save" Click="Save_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Save" /></MenuFlyoutItem.Icon>
+                        <MenuFlyoutItem.KeyboardAccelerators><KeyboardAccelerator Modifiers="Control" Key="S" /></MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Save as…" Click="SaveAs_Click" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="Exit" Click="Exit_Click" />
+                </MenuBarItem>
+                <MenuBarItem Title="Fixtures">
+                    <MenuFlyoutItem Text="Add fixture from library…" Click="AddFixture_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Add" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Create new fixture type…" Click="NewFixtureType_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Edit" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Import fixture file…" Click="ImportFixture_Click" />
+                    <MenuFlyoutItem Text="Open my fixtures folder" Click="OpenFixtureFolder_Click" />
+                </MenuBarItem>
+                <MenuBarItem Title="Output">
+                    <MenuFlyoutItem Text="DMX outputs…" Click="Outputs_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Globe" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Universe monitor…" Click="Monitor_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="ViewAll" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="MIDI controllers…" Click="Midi_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Audio" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuBarItem>
+                <MenuBarItem Title="View">
+                    <RadioMenuFlyoutItem x:Name="ThemeDefault" Text="Use Windows theme" GroupName="Theme" Click="Theme_Click" Tag="Default" />
+                    <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark" GroupName="Theme" Click="Theme_Click" Tag="Dark" />
+                    <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light" GroupName="Theme" Click="Theme_Click" Tag="Light" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="Full screen" Click="FullScreen_Click">
+                        <MenuFlyoutItem.KeyboardAccelerators><KeyboardAccelerator Key="F11" /></MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                </MenuBarItem>
+                <MenuBarItem Title="Help">
+                    <MenuFlyoutItem Text="Quick start guide" Click="QuickStart_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Help" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Keyboard shortcuts" Click="Shortcuts_Click" />
+                    <MenuFlyoutItem Text="Project on GitHub" Click="GitHub_Click" />
+                    <MenuFlyoutItem Text="About LuxEngine" Click="About_Click" />
+                </MenuBarItem>
+            </MenuBar>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="CueStatus" Text="No cue running" VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" MaxWidth="220" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <Button x:Name="OutputStatusButton" Click="Outputs_Click" Padding="10,4" ToolTipService.ToolTip="DMX output status">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Ellipse x:Name="OutputLed" Width="10" Height="10" Fill="{ThemeResource LuxOkBrush}" />
+                        <TextBlock x:Name="OutputStatusText" Text="Output" />
+                    </StackPanel>
+                </Button>
+
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <TextBlock Text="Master" VerticalAlignment="Center" />
+                    <Slider x:Name="MasterSlider" Width="150" Minimum="0" Maximum="100" Value="100"
+                            ValueChanged="MasterSlider_ValueChanged" VerticalAlignment="Center" />
+                    <TextBlock x:Name="MasterText" Text="100%" Width="38" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <ToggleButton x:Name="BlackoutButton" Content="BLACKOUT" Click="Blackout_Click" FontWeight="Bold"
+                              Padding="14,6" ToolTipService.ToolTip="Turn all lights off (B)" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Main area -->
+        <Grid Grid.Row="2" Padding="8,0,8,8" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" MinWidth="220" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: presets on top, fixtures below -->
+            <Grid Grid.Column="0" RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3*" />
+                    <RowDefinition Height="2*" />
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Style="{StaticResource CardStyle}" Padding="8">
+                    <views:PresetPanel x:Name="PresetPanel" />
+                </Border>
+                <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="8">
+                    <views:FixturePanel x:Name="FixturePanel" />
+                </Border>
+            </Grid>
+
+            <!-- Right: stage on top, Control / Cue below -->
+            <Grid Grid.Column="1" RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="160" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="380" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Style="{StaticResource CardStyle}" Padding="0">
+                    <views:StageView x:Name="Stage" />
+                </Border>
+
+                <Grid Grid.Row="1">
+                    <SelectorBar x:Name="ModeSelector" SelectionChanged="ModeSelector_SelectionChanged" HorizontalAlignment="Left">
+                        <SelectorBarItem x:Name="ControlTab" Text="Control" IsSelected="True">
+                            <SelectorBarItem.Icon><FontIcon Glyph="&#xE9E9;" /></SelectorBarItem.Icon>
+                        </SelectorBarItem>
+                        <SelectorBarItem x:Name="CueTab" Text="Cue">
+                            <SelectorBarItem.Icon><FontIcon Glyph="&#xE8FD;" /></SelectorBarItem.Icon>
+                        </SelectorBarItem>
+                    </SelectorBar>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" VerticalAlignment="Center">
+                        <Button x:Name="QuickGoButton" Click="QuickGo_Click" Style="{StaticResource AccentButtonStyle}" Padding="18,6"
+                                ToolTipService.ToolTip="Start the next cue (Space)">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE768;" FontSize="14" />
+                                <TextBlock Text="GO" FontWeight="Bold" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="0">
+                    <Grid>
+                        <views:ControlView x:Name="ControlView" />
+                        <views:CueView x:Name="CueView" Visibility="Collapsed" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
