@@ -101,6 +101,23 @@ public class LightingEngineTests
     }
 
     [Fact]
+    public void Cue_effects_leave_hand_controlled_fixtures_alone()
+    {
+        var t = new TestShow();
+        var chase = t.AddPreset("Chase", (t.Par1, "Intensity", 255), (t.Par2, "Intensity", 255));
+        chase.Effects.Add(new Effect { Type = EffectType.Chase, Speed = 1, Size = 1, FixtureIds = { t.Par1.Id, t.Par2.Id } });
+        t.AddCue(0, chase);
+        var engine = new LightingEngine(t.Show);
+        engine.Go();
+
+        engine.SetValue(t.Par2.Id, "Intensity", 200);
+
+        var u = engine.ComputeFrame(0.1).Universe(1);
+        Assert.Equal(255, u[0]);  // Par1 is lit by the chase at this moment
+        Assert.Equal(200, u[4]);  // Par2 stays at the hand-set level instead of being chased off
+    }
+
+    [Fact]
     public void Back_returns_to_previous_cue()
     {
         var t = new TestShow();

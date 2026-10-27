@@ -8,8 +8,9 @@ public static class EffectEngine
 {
     /// <param name="values">Channel values (0–255) to modify in place.</param>
     /// <param name="brightness">Per-fixture brightness multipliers, combined by multiplication.</param>
+    /// <param name="exclude">Fixtures the effect should leave alone (they keep their place in the pattern).</param>
     public static void Apply(Effect effect, double time, IReadOnlyDictionary<Guid, PatchedFixture> fixtures,
-        Dictionary<ChannelKey, double> values, Dictionary<Guid, double> brightness)
+        Dictionary<ChannelKey, double> values, Dictionary<Guid, double> brightness, IReadOnlySet<Guid>? exclude = null)
     {
         var ids = effect.FixtureIds.Where(fixtures.ContainsKey).ToList();
         int n = ids.Count;
@@ -19,6 +20,7 @@ public static class EffectEngine
 
         for (int i = 0; i < n; i++)
         {
+            if (exclude is not null && exclude.Contains(ids[i])) continue;
             var fixture = fixtures[ids[i]];
             double phase = Frac(cycle + effect.Spread * i / n);
 
@@ -64,6 +66,14 @@ public static class EffectEngine
             }
         }
     }
+
+    /// <summary>Which kind of channels an effect changes.</summary>
+    public static string Affects(EffectType type) => type switch
+    {
+        EffectType.Rainbow => "Color",
+        EffectType.Circle => "Position",
+        _ => "Dimmer",
+    };
 
     private static void Multiply(Dictionary<Guid, double> brightness, Guid id, double factor) =>
         brightness[id] = brightness.GetValueOrDefault(id, 1) * factor;

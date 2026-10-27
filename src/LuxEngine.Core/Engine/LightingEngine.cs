@@ -275,8 +275,14 @@ public sealed class LightingEngine
             foreach (var (key, v) in Programmer.Values)
                 if (values.ContainsKey(key)) values[key] = v;
 
+            // Effects from the running cue leave alone whatever you are controlling by hand;
+            // effects you start yourself always apply.
             var brightness = new Dictionary<Guid, double>();
-            foreach (var effect in CuePlayer.ActiveEffects.Concat(Programmer.Effects))
+            var handControlled = HandControlledFixtures();
+            foreach (var effect in CuePlayer.ActiveEffects)
+                EffectEngine.Apply(effect, now, _fixtures, values, brightness,
+                    handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
+            foreach (var effect in Programmer.Effects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness);
 
             double master = Blackout ? 0 : GrandMaster;
@@ -304,6 +310,35 @@ public sealed class LightingEngine
 
             _lastValues = values;
             return frame;
+        }
+    }
+
+    /// <summary>Fixtures with programmer values, grouped by what effects would change ("Dimmer", "Color", "Position").</summary>
+    private Dictionary<string, HashSet<Guid>> HandControlledFixtures()
+    {
+        var result = new Dictionary<string, HashSet<Guid>>();
+        foreach (var key in Programmer.Values.Keys)
+        {
+            if (!_channels.TryGetValue(key, out var ch) || !_fixtures.TryGetValue(key.FixtureId, out var fixture)) continue;
+            var type = ch.Channel.Type;
+            string? group = type switch
+            {
+                _ when type.IsIntensity() => "Dimmer",
+                _ when type.IsColorMix() => "Color",
+                ChannelType.Pan or ChannelType.Tilt => "Position",
+                _ => null,
+            };
+            if (group is null) continue;
+            Add(group, key.FixtureId);
+            // Without a dimmer channel, brightness is controlled through the colors.
+            if (group == "Color" && !fixture.HasDimmer) Add("Dimmer", key.FixtureId);
+        }
+        return result;
+
+        void Add(string group, Guid id)
+        {
+            if (!result.TryGetValue(group, out var set)) result[group] = set = new HashSet<Guid>();
+            set.Add(id);
         }
     }
 
