@@ -91,6 +91,13 @@ jobs:
             Start-Sleep 2
             Shot "3-cue-tab"
           } catch { Write-Host "Could not switch to the Cue tab: $_" }
+          foreach ($dialog in @("Add fixtures", "DMX outputs")) {
+            try {
+              Click $dialog; Start-Sleep 3
+              Shot ("4-" + ($dialog -replace ' ', '-'))
+              Click "Cancel"; Start-Sleep 1
+            } catch { Write-Host "Dialog '$dialog' check failed: $_" }
+          }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }

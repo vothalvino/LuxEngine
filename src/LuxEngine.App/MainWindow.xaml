@@ -103,7 +103,7 @@
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" MaxWidth="220" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
 
-                <Button x:Name="OutputStatusButton" Click="Outputs_Click" Padding="10,4" ToolTipService.ToolTip="DMX output status">
+                <Button x:Name="OutputStatusButton" Click="Outputs_Click" AutomationProperties.Name="DMX outputs" Padding="10,4" ToolTipService.ToolTip="DMX output status">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <Ellipse x:Name="OutputLed" Width="10" Height="10" Fill="{ThemeResource LuxOkBrush}" />
                         <TextBlock x:Name="OutputStatusText" Text="Output" />

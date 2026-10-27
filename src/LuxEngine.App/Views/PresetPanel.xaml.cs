@@ -46,6 +46,7 @@ public sealed partial class PresetPanel : UserControl
 
     private readonly HashSet<Guid> _collapsed = new();
     private Guid? _currentFolder;
+    private bool _restoringExpansion;
 
     public ObservableCollection<PresetNode> Nodes { get; } = new();
 
@@ -78,6 +79,22 @@ public sealed partial class PresetPanel : UserControl
 
         Tree.CanReorderItems = true;
         foreach (var node in BuildChildren(root)) Nodes.Add(node);
+
+        // TreeView doesn't always honour IsExpanded for items realized during the first layout,
+        // so open the folders again once the containers exist.
+        _restoringExpansion = true;
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            foreach (var node in Nodes) Expand(node);
+            _restoringExpansion = false;
+        });
+    }
+
+    private void Expand(PresetNode node)
+    {
+        if (!node.IsFolder || !node.IsExpanded) return;
+        if (Tree.ContainerFromItem(node) is TreeViewItem item) item.IsExpanded = true;
+        foreach (var child in node.Children) Expand(child);
     }
 
     private IEnumerable<PresetNode> BuildChildren(PresetFolder folder)
@@ -121,7 +138,7 @@ public sealed partial class PresetPanel : UserControl
 
     private void Tree_Collapsed(TreeView sender, TreeViewCollapsedEventArgs args)
     {
-        if (args.Item is not PresetNode node) return;
+        if (args.Item is not PresetNode node || _restoringExpansion) return;
         node.IsExpanded = false;
         _collapsed.Add(node.Id);
     }

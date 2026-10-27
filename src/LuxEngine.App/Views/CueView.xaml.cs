@@ -254,11 +254,17 @@ public sealed partial class CueView : UserControl
         row.Presets = names.Count == 0 ? "No presets yet — drag some here" : string.Join(" + ", names);
     }
 
-    private void CueName_TextChanged(object sender, TextChangedEventArgs e) => EditCue(c => c.Name = CueName.Text);
+    private void CueName_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (SelectedCue is { } cue && cue.Name != CueName.Text) EditCue(c => c.Name = CueName.Text);
+    }
 
     private void Timing_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
         static double Safe(double v) => double.IsNaN(v) ? 0 : v;
+        if (SelectedCue is not { } cue) return;
+        if (cue.FadeIn == Safe(FadeInBox.Value) && cue.FadeOut == Safe(FadeOutBox.Value) &&
+            cue.Delay == Safe(DelayBox.Value) && cue.FollowDelay == Safe(FollowDelayBox.Value)) return;
         EditCue(c =>
         {
             c.FadeIn = Safe(FadeInBox.Value);
@@ -271,7 +277,7 @@ public sealed partial class CueView : UserControl
     private void Follow_Toggled(object sender, RoutedEventArgs e)
     {
         FollowDelayBox.IsEnabled = FollowSwitch.IsOn;
-        EditCue(c => c.AutoFollow = FollowSwitch.IsOn);
+        if (SelectedCue is { } cue && cue.AutoFollow != FollowSwitch.IsOn) EditCue(c => c.AutoFollow = FollowSwitch.IsOn);
     }
 
     // ------------------------------------------------------------------ presets in the cue
