@@ -104,9 +104,7 @@ public sealed partial class ControlView : UserControl
     {
         var ch = fixture.Channels.FirstOrDefault(c => c.Channel.Type == type);
         if (ch.Channel is null) return null;
-        var id = fixture.Instance.Id;
-        if (AppServices.Engine.Programmer.TryGet(id, ch.Channel.Name, out var programmed)) return programmed;
-        return AppServices.Engine.GetOutput(id, ch.Channel.Name);
+        return AppServices.Engine.GetPlaybackValue(fixture.Instance.Id, ch.Channel.Name);
     }
 
     private double ReadDimmer(PatchedFixture fixture)
@@ -190,14 +188,17 @@ public sealed partial class ControlView : UserControl
             if (fixture.HasDimmer)
             {
                 ColorMixer.Apply(AppServices.Engine, fixture, color);
-                // Picking a color on a dark light should make it visible.
-                if ((Read(fixture, ChannelType.Intensity) ?? 0) == 0)
+                // Take the dimmer under hand control too, so cue effects don't hide the new color.
+                // A dark light is turned on so the color is visible.
+                double dimmer = Read(fixture, ChannelType.Intensity) ?? 0;
+                if (dimmer == 0)
                 {
-                    AppServices.Engine.SetValue(new[] { fixture.Instance.Id }, ChannelType.Intensity, 255);
+                    dimmer = 255;
                     _syncing = true;
                     DimmerSlider.Value = 100;
                     _syncing = false;
                 }
+                AppServices.Engine.SetValue(new[] { fixture.Instance.Id }, ChannelType.Intensity, (byte)Math.Round(dimmer));
             }
             else
             {

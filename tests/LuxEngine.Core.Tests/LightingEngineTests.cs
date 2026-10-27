@@ -118,6 +118,23 @@ public class LightingEngineTests
     }
 
     [Fact]
+    public void Playback_value_ignores_effects_and_prefers_programmer()
+    {
+        var t = new TestShow();
+        var chase = t.AddPreset("Chase", (t.Par1, "Intensity", 180), (t.Par2, "Intensity", 180));
+        chase.Effects.Add(new Effect { Type = EffectType.Chase, Speed = 1, Size = 1, FixtureIds = { t.Par1.Id, t.Par2.Id } });
+        t.AddCue(0, chase);
+        var engine = new LightingEngine(t.Show);
+        engine.Go();
+        engine.ComputeFrame(0.1);
+
+        Assert.Equal(0, engine.GetOutput(t.Par2.Id, "Intensity"));          // chased off right now
+        Assert.Equal(180, engine.GetPlaybackValue(t.Par2.Id, "Intensity")); // but the cue sets 180
+        engine.SetValue(t.Par2.Id, "Intensity", 50);
+        Assert.Equal(50, engine.GetPlaybackValue(t.Par2.Id, "Intensity"));
+    }
+
+    [Fact]
     public void Back_returns_to_previous_cue()
     {
         var t = new TestShow();

@@ -150,6 +150,22 @@ public sealed class LightingEngine
         lock (_sync) return Programmer.ToPreset(name, fixtureIds);
     }
 
+    /// <summary>
+    /// The value a channel is set to before effects and the master: the programmer value if you set one,
+    /// otherwise what the running cue gives it, otherwise its default. Null for unknown channels.
+    /// </summary>
+    public double? GetPlaybackValue(Guid fixtureId, string channel)
+    {
+        lock (_sync)
+        {
+            EnsurePatch();
+            var key = new ChannelKey(fixtureId, channel);
+            if (Programmer.Values.TryGetValue(key, out var programmed)) return programmed;
+            if (CuePlayer.Current.TryGetValue(key, out var cue)) return cue;
+            return _channels.TryGetValue(key, out var ch) ? ch.Channel.Default : null;
+        }
+    }
+
     /// <summary>The current output value of a channel (what is on stage), or null if unknown.</summary>
     public double? GetOutput(Guid fixtureId, string channel) =>
         _lastValues.TryGetValue(new ChannelKey(fixtureId, channel), out var v) ? v : null;
