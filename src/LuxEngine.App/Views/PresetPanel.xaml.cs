@@ -63,7 +63,6 @@ public sealed partial class PresetPanel : UserControl
 
     public void Refresh()
     {
-        RememberExpansion(Nodes);
         Nodes.Clear();
         var root = AppServices.Engine.Show.PresetRoot;
         var query = SearchBox?.Text?.Trim() ?? "";
@@ -113,14 +112,18 @@ public sealed partial class PresetPanel : UserControl
         };
     }
 
-    private void RememberExpansion(IEnumerable<PresetNode> nodes)
+    private void Tree_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
     {
-        foreach (var node in nodes.Where(n => n.IsFolder))
-        {
-            if (node.IsExpanded) _collapsed.Remove(node.Id);
-            else _collapsed.Add(node.Id);
-            RememberExpansion(node.Children);
-        }
+        if (args.Item is not PresetNode node) return;
+        node.IsExpanded = true;
+        _collapsed.Remove(node.Id);
+    }
+
+    private void Tree_Collapsed(TreeView sender, TreeViewCollapsedEventArgs args)
+    {
+        if (args.Item is not PresetNode node) return;
+        node.IsExpanded = false;
+        _collapsed.Add(node.Id);
     }
 
     private void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args) => Refresh();

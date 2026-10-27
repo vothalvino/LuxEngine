@@ -165,7 +165,7 @@
                         </SelectorBarItem>
                     </SelectorBar>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" VerticalAlignment="Center">
-                        <Button x:Name="QuickGoButton" Click="QuickGo_Click" Style="{StaticResource AccentButtonStyle}" Padding="18,6"
+                        <Button x:Name="QuickGoButton" Click="QuickGo_Click" AutomationProperties.Name="GO" Style="{StaticResource AccentButtonStyle}" Padding="18,6"
                                 ToolTipService.ToolTip="Start the next cue (Space)">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE768;" FontSize="14" />

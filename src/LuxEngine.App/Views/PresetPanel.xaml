@@ -35,10 +35,11 @@
         <TreeView Grid.Row="2" x:Name="Tree" ItemsSource="{x:Bind Nodes}" SelectionMode="Single"
                   CanDragItems="True" CanReorderItems="True" AllowDrop="True"
                   ItemInvoked="Tree_ItemInvoked" DragItemsStarting="Tree_DragItemsStarting"
-                  DragItemsCompleted="Tree_DragItemsCompleted" RightTapped="Tree_RightTapped">
+                  DragItemsCompleted="Tree_DragItemsCompleted" RightTapped="Tree_RightTapped"
+                  Expanding="Tree_Expanding" Collapsed="Tree_Collapsed">
             <TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:PresetNode">
-                    <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                    <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="{x:Bind IsExpanded, Mode=OneWay}"
                                   ToolTipService.ToolTip="{x:Bind Detail, Mode=OneWay}">
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>

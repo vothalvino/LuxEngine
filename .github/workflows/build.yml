@@ -67,16 +67,30 @@ jobs:
           Start-Sleep 20
           if ($app.HasExited) { throw "LuxEngine exited during startup (code $($app.ExitCode))" }
           Shot "1-startup"
-          $shell = New-Object -ComObject WScript.Shell
-          $null = $shell.AppActivate($app.Id)
-          Start-Sleep 1
-          [System.Windows.Forms.SendKeys]::SendWait(" ")
-          Start-Sleep 1
-          [System.Windows.Forms.SendKeys]::SendWait(" ")
-          Start-Sleep 1
-          [System.Windows.Forms.SendKeys]::SendWait(" ")
-          Start-Sleep 3
+          # Drive the real UI through Windows UI Automation, like a user clicking.
+          Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+          $A = [System.Windows.Automation.AutomationElement]
+          $win = $A::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Children,
+            (New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $app.Id)))
+          if (-not $win) { throw "Main window not found" }
+          function Find($name) {
+            $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+              (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, $name)))
+          }
+          function Click($name) {
+            $el = Find $name
+            if (-not $el) { throw "UI element '$name' not found" }
+            $el.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+          }
+          Click "GO"; Start-Sleep 2
+          Click "GO"; Start-Sleep 2
+          Click "GO"; Start-Sleep 3
           Shot "2-after-go"
+          try {
+            (Find "Cue").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            Start-Sleep 2
+            Shot "3-cue-tab"
+          } catch { Write-Host "Could not switch to the Cue tab: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }

@@ -46,7 +46,7 @@
                                      Stroke="{ThemeResource ControlStrokeColorDefaultBrush}" StrokeThickness="1" VerticalAlignment="Center" />
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
-                                <TextBlock Text="{x:Bind Model}" Style="{StaticResource CaptionTextBlockStyle}"
+                                <TextBlock Text="{x:Bind Model}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="NoWrap"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                             <TextBlock Grid.Column="2" Text="{x:Bind Address, Mode=OneWay}" FontFamily="Consolas"

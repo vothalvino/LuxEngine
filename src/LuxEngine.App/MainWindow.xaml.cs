@@ -31,7 +31,7 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "LuxEngine.ico"));
-        AppWindow.Resize(new Windows.Graphics.SizeInt32(1500, 940));
+        FitToScreen();
         AppWindow.Closing += AppWindow_Closing;
         Closed += (_, _) =>
         {
@@ -56,6 +56,18 @@ public sealed partial class MainWindow : Window
 
         UpdateTitle();
         BuildRecentMenu();
+    }
+
+    /// <summary>Opens at 1500×940, or maximized on screens too small for that.</summary>
+    private void FitToScreen()
+    {
+        var work = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary).WorkArea;
+        if (work.Width < 1560 || work.Height < 1000)
+        {
+            if (AppWindow.Presenter is OverlappedPresenter presenter) presenter.Maximize();
+            return;
+        }
+        AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(work.X + (work.Width - 1500) / 2, work.Y + (work.Height - 940) / 2, 1500, 940));
     }
 
     /// <summary>Called once after the window opened: recover, open a file, or welcome a new user.</summary>
