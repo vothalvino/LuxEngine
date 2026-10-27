@@ -31,7 +31,7 @@ public sealed partial class StageView : UserControl
     }
 
     private readonly Dictionary<Guid, FixtureVisual> _visuals = new();
-    private readonly DispatcherQueueTimer _timer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _timer;
     private Point _pressPoint;
     private bool _rubberBand;
     private Guid? _dragFixture;

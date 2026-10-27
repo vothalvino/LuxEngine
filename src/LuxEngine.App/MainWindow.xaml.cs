@@ -16,8 +16,8 @@ namespace LuxEngine.App;
 
 public sealed partial class MainWindow : Window
 {
-    private readonly DispatcherQueueTimer _statusTimer;
-    private readonly DispatcherQueueTimer _autosaveTimer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _statusTimer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _autosaveTimer;
     private bool _closeConfirmed;
     private bool _updatingMaster;
 
@@ -143,7 +143,8 @@ public sealed partial class MainWindow : Window
     {
         var engine = AppServices.Engine;
         if (BlackoutButton.IsChecked != engine.Blackout) BlackoutButton.IsChecked = engine.Blackout;
-        BlackoutButton.Background = engine.Blackout ? (Brush)Application.Current.Resources["LuxDangerBrush"] : null;
+        if (engine.Blackout) BlackoutButton.Background = (Brush)Application.Current.Resources["LuxDangerBrush"];
+        else BlackoutButton.ClearValue(Control.BackgroundProperty);
         double master = Math.Round(engine.GrandMaster * 100);
         if (Math.Abs(MasterSlider.Value - master) > 0.5)
         {

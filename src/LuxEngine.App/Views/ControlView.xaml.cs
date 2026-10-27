@@ -154,8 +154,11 @@ public sealed partial class ControlView : UserControl
             var button = new Button
             {
                 Style = (Style)Application.Current.Resources["SwatchButtonStyle"],
-                Background = new SolidColorBrush(color),
-                BorderBrush = new SolidColorBrush(Color.FromArgb(80, 128, 128, 128)),
+                Content = new Microsoft.UI.Xaml.Shapes.Ellipse
+                {
+                    Width = 24, Height = 24, Fill = new SolidColorBrush(color),
+                    Stroke = new SolidColorBrush(Color.FromArgb(80, 128, 128, 128)), StrokeThickness = 1,
+                },
                 Tag = color,
             };
             ToolTipService.SetToolTip(button, name);
