@@ -13,6 +13,10 @@
   <a href="https://github.com/vothalvino/LuxEngine/releases/latest"><b>⬇ Download LuxEngine for Windows</b></a>
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/cues.png" width="800" alt="LuxEngine cue list: each cue combines several presets" />
+</p>
+
 ---
 
 ## Features
@@ -26,6 +30,14 @@
 - **Outputs.** Art-Net, sACN (E1.31), Enttec DMX USB Pro and Open DMX USB, with as many universes as you need.
 - **External control.** MIDI controllers (learn mode) and sound-to-light from music playing on the PC or a microphone.
 - **Safe for live use.** Blackout, master fader, autosave with crash recovery, and keeps Windows awake during a show.
+
+## Screenshots
+
+| Live control | Fixture library |
+|---|---|
+| ![Control tab with four pars set to blue](docs/screenshots/control.png) | ![Searching the built-in fixture library](docs/screenshots/fixture-library.png) |
+
+These screenshots are taken automatically by the CI smoke test on Windows, using the bundled demo show (*Help → Open demo show*).
 
 ## Install
 
