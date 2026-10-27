@@ -1,0 +1,1 @@
+[{"id":"hazebase/base-hazer-pro","manufacturer":"Hazebase","model":"base*hazer*pro","category":"Hazer","channels":[{"name":"Haze","type":"generic","default":0},{"name":"Fan","type":"effect","default":0}],"modes":[{"name":"2-channel","channels":["Haze","Fan"]}]}]

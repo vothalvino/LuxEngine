@@ -1,0 +1,1 @@
+[{"id":"rockville/rockpar50","manufacturer":"Rockville","model":"RockPAR50","category":"Color Changer","channels":[{"name":"Red","type":"red","default":0},{"name":"Green","type":"green","default":0},{"name":"Blue","type":"blue","default":0}],"modes":[{"name":"3 Channel","channels":["Red","Green","Blue"]}]}]

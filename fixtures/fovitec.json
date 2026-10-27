@@ -1,0 +1,1 @@
+[{"id":"fovitec/600xb","manufacturer":"Fovitec","model":"600XB","category":"Dimmer","channels":[{"name":"Intensity","type":"intensity","default":0},{"name":"Color Temperature","type":"colorTemperature","default":0}],"modes":[{"name":"2-channel","channels":["Intensity","Color Temperature"]}]}]
