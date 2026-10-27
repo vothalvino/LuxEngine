@@ -1,0 +1,1653 @@
+{
+  "version": 1,
+  "name": "Demo",
+  "fixtureDefinitions": {
+    "generic/dimmer-rgbw-par": {
+      "id": "generic/dimmer-rgbw-par",
+      "manufacturer": "Generic",
+      "model": "Dimmer RGBW Par",
+      "category": "Color Changer",
+      "isUserDefined": false,
+      "channels": [
+        {
+          "name": "Intensity",
+          "type": "intensity",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "Red",
+          "type": "red",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "Green",
+          "type": "green",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "Blue",
+          "type": "blue",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "White",
+          "type": "white",
+          "default": 0,
+          "capabilities": []
+        }
+      ],
+      "modes": [
+        {
+          "name": "5-channel",
+          "channels": [
+            "Intensity",
+            "Red",
+            "Green",
+            "Blue",
+            "White"
+          ],
+          "channelCount": 5
+        }
+      ],
+      "displayName": "Generic Dimmer RGBW Par"
+    },
+    "chauvet-dj/intimidator-spot-110": {
+      "id": "chauvet-dj/intimidator-spot-110",
+      "manufacturer": "Chauvet DJ",
+      "model": "Intimidator Spot 110",
+      "category": "Moving Head",
+      "isUserDefined": false,
+      "channels": [
+        {
+          "name": "Pan",
+          "type": "pan",
+          "default": 128,
+          "capabilities": []
+        },
+        {
+          "name": "Tilt",
+          "type": "tilt",
+          "default": 128,
+          "capabilities": []
+        },
+        {
+          "name": "Pan/Tilt Speed",
+          "type": "speed",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "Color Wheel",
+          "type": "colorWheel",
+          "default": 0,
+          "capabilities": [
+            {
+              "from": 0,
+              "to": 31,
+              "label": "Open"
+            },
+            {
+              "from": 32,
+              "to": 63,
+              "label": "Red"
+            },
+            {
+              "from": 64,
+              "to": 95,
+              "label": "Green"
+            },
+            {
+              "from": 96,
+              "to": 127,
+              "label": "Blue"
+            },
+            {
+              "from": 128,
+              "to": 159,
+              "label": "Yellow"
+            },
+            {
+              "from": 160,
+              "to": 191,
+              "label": "Purple"
+            },
+            {
+              "from": 192,
+              "to": 223,
+              "label": "Orange"
+            },
+            {
+              "from": 224,
+              "to": 255,
+              "label": "Light Blue"
+            }
+          ]
+        },
+        {
+          "name": "Strobe",
+          "type": "strobe",
+          "default": 0,
+          "capabilities": [
+            {
+              "from": 0,
+              "to": 15,
+              "label": "Shutter Strobe Open"
+            },
+            {
+              "from": 16,
+              "to": 131,
+              "label": "Shutter Strobe Strobe 0Hz \u2192 23Hz"
+            },
+            {
+              "from": 132,
+              "to": 139,
+              "label": "Shutter Strobe Open"
+            },
+            {
+              "from": 140,
+              "to": 181,
+              "label": "Shutter Strobe RampUp 0Hz \u2192 23Hz"
+            },
+            {
+              "from": 182,
+              "to": 189,
+              "label": "Shutter Strobe Open"
+            },
+            {
+              "from": 190,
+              "to": 231,
+              "label": "Shutter Strobe RampDown 0Hz \u2192 23Hz"
+            },
+            {
+              "from": 232,
+              "to": 239,
+              "label": "Shutter Strobe Open"
+            },
+            {
+              "from": 240,
+              "to": 247,
+              "label": "Shutter Strobe Strobe"
+            },
+            {
+              "from": 248,
+              "to": 255,
+              "label": "Shutter Strobe Open"
+            }
+          ]
+        },
+        {
+          "name": "Dimmer",
+          "type": "intensity",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "Gobo Wheel",
+          "type": "gobo",
+          "default": 0,
+          "capabilities": [
+            {
+              "from": 0,
+              "to": 31,
+              "label": "Open"
+            },
+            {
+              "from": 32,
+              "to": 63,
+              "label": "Gobo"
+            },
+            {
+              "from": 64,
+              "to": 95,
+              "label": "Gobo"
+            },
+            {
+              "from": 96,
+              "to": 127,
+              "label": "Gobo"
+            },
+            {
+              "from": 128,
+              "to": 159,
+              "label": "Gobo"
+            },
+            {
+              "from": 160,
+              "to": 191,
+              "label": "Gobo"
+            },
+            {
+              "from": 192,
+              "to": 223,
+              "label": "Gobo"
+            },
+            {
+              "from": 224,
+              "to": 255,
+              "label": "Gobo"
+            }
+          ]
+        },
+        {
+          "name": "Function",
+          "type": "maintenance",
+          "default": 0,
+          "capabilities": [
+            {
+              "from": 0,
+              "to": 69,
+              "label": "No Function"
+            },
+            {
+              "from": 70,
+              "to": 89,
+              "label": "Blackout on pan/tilt move on"
+            },
+            {
+              "from": 90,
+              "to": 109,
+              "label": "Blackout on pan/tilt move off"
+            },
+            {
+              "from": 110,
+              "to": 129,
+              "label": "Blackout on color wheel move on"
+            },
+            {
+              "from": 130,
+              "to": 149,
+              "label": "Blackout on color wheel move off"
+            },
+            {
+              "from": 150,
+              "to": 169,
+              "label": "Blackout on color wheel move on"
+            },
+            {
+              "from": 170,
+              "to": 189,
+              "label": "Blackout on color wheel move off"
+            },
+            {
+              "from": 190,
+              "to": 199,
+              "label": "No Function"
+            },
+            {
+              "from": 200,
+              "to": 209,
+              "label": "Reset all"
+            },
+            {
+              "from": 210,
+              "to": 249,
+              "label": "No Function"
+            },
+            {
+              "from": 250,
+              "to": 255,
+              "label": "Effect Sound-active program"
+            }
+          ]
+        },
+        {
+          "name": "Movement Macro",
+          "type": "effect",
+          "default": 0,
+          "capabilities": [
+            {
+              "from": 0,
+              "to": 15,
+              "label": "No Function"
+            },
+            {
+              "from": 16,
+              "to": 35,
+              "label": "Effect Movement macro 1"
+            },
+            {
+              "from": 36,
+              "to": 55,
+              "label": "Effect Movement macro 2"
+            },
+            {
+              "from": 56,
+              "to": 75,
+              "label": "Effect Movement macro 3"
+            },
+            {
+              "from": 76,
+              "to": 95,
+              "label": "Effect Movement macro 4"
+            },
+            {
+              "from": 96,
+              "to": 115,
+              "label": "Effect Movement macro 5"
+            },
+            {
+              "from": 116,
+              "to": 135,
+              "label": "Effect Movement macro 6"
+            },
+            {
+              "from": 136,
+              "to": 155,
+              "label": "Effect Movement macro 7"
+            },
+            {
+              "from": 156,
+              "to": 175,
+              "label": "Effect Movement macro 8"
+            },
+            {
+              "from": 176,
+              "to": 195,
+              "label": "Effect Movement macro 9"
+            },
+            {
+              "from": 196,
+              "to": 215,
+              "label": "Effect Movement macro 10"
+            },
+            {
+              "from": 216,
+              "to": 235,
+              "label": "Effect Movement macro 11"
+            },
+            {
+              "from": 236,
+              "to": 255,
+              "label": "Effect Movement macro 12"
+            }
+          ]
+        },
+        {
+          "name": "Movement Macro Speed",
+          "type": "speed",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "Pan fine",
+          "type": "panFine",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "Tilt fine",
+          "type": "tiltFine",
+          "default": 0,
+          "capabilities": []
+        }
+      ],
+      "modes": [
+        {
+          "name": "12-channel",
+          "channels": [
+            "Pan",
+            "Pan fine",
+            "Tilt",
+            "Tilt fine",
+            "Pan/Tilt Speed",
+            "Color Wheel",
+            "Strobe",
+            "Dimmer",
+            "Gobo Wheel",
+            "Function",
+            "Movement Macro",
+            "Movement Macro Speed"
+          ],
+          "channelCount": 12
+        },
+        {
+          "name": "6-channel",
+          "channels": [
+            "Pan",
+            "Tilt",
+            "Color Wheel",
+            "Strobe",
+            "Dimmer",
+            "Gobo Wheel"
+          ],
+          "channelCount": 6
+        }
+      ],
+      "displayName": "Chauvet DJ Intimidator Spot 110"
+    }
+  },
+  "fixtures": [
+    {
+      "id": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+      "name": "Par 1",
+      "definitionId": "generic/dimmer-rgbw-par",
+      "modeName": "5-channel",
+      "universe": 1,
+      "address": 1,
+      "stageX": 0.05,
+      "stageY": 0.15
+    },
+    {
+      "id": "66d396f4-df51-4550-9cb3-707ff6655252",
+      "name": "Par 2",
+      "definitionId": "generic/dimmer-rgbw-par",
+      "modeName": "5-channel",
+      "universe": 1,
+      "address": 6,
+      "stageX": 0.1785714285714286,
+      "stageY": 0.15
+    },
+    {
+      "id": "40005dd2-1252-4155-a1d3-c872dd30beff",
+      "name": "Par 3",
+      "definitionId": "generic/dimmer-rgbw-par",
+      "modeName": "5-channel",
+      "universe": 1,
+      "address": 11,
+      "stageX": 0.30714285714285716,
+      "stageY": 0.15
+    },
+    {
+      "id": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+      "name": "Par 4",
+      "definitionId": "generic/dimmer-rgbw-par",
+      "modeName": "5-channel",
+      "universe": 1,
+      "address": 16,
+      "stageX": 0.4357142857142857,
+      "stageY": 0.15
+    },
+    {
+      "id": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+      "name": "Par 5",
+      "definitionId": "generic/dimmer-rgbw-par",
+      "modeName": "5-channel",
+      "universe": 1,
+      "address": 21,
+      "stageX": 0.5642857142857144,
+      "stageY": 0.15
+    },
+    {
+      "id": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+      "name": "Par 6",
+      "definitionId": "generic/dimmer-rgbw-par",
+      "modeName": "5-channel",
+      "universe": 1,
+      "address": 26,
+      "stageX": 0.692857142857143,
+      "stageY": 0.15
+    },
+    {
+      "id": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+      "name": "Par 7",
+      "definitionId": "generic/dimmer-rgbw-par",
+      "modeName": "5-channel",
+      "universe": 1,
+      "address": 31,
+      "stageX": 0.8214285714285715,
+      "stageY": 0.15
+    },
+    {
+      "id": "a6d5a570-8870-4e1a-804a-095e8923446b",
+      "name": "Par 8",
+      "definitionId": "generic/dimmer-rgbw-par",
+      "modeName": "5-channel",
+      "universe": 1,
+      "address": 36,
+      "stageX": 0.9500000000000001,
+      "stageY": 0.15
+    },
+    {
+      "id": "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+      "name": "Spot 1",
+      "definitionId": "chauvet-dj/intimidator-spot-110",
+      "modeName": "12-channel",
+      "universe": 1,
+      "address": 101,
+      "stageX": 0.3,
+      "stageY": 0.6
+    },
+    {
+      "id": "8f40291e-3a34-41da-adc6-13a18ecace70",
+      "name": "Spot 2",
+      "definitionId": "chauvet-dj/intimidator-spot-110",
+      "modeName": "12-channel",
+      "universe": 1,
+      "address": 113,
+      "stageX": 0.7,
+      "stageY": 0.6
+    }
+  ],
+  "presetRoot": {
+    "id": "6721bf74-af5e-427e-bfbf-301781cb1226",
+    "name": "Presets",
+    "folders": [
+      {
+        "id": "13dedcf5-0adb-406f-aaba-aa9ed140a434",
+        "name": "Colors",
+        "folders": [],
+        "presets": [
+          {
+            "id": "21aa2436-e160-4e2d-b0a1-cd3fb2aa6831",
+            "name": "Deep blue",
+            "color": "#1E3CFF",
+            "values": [
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Red",
+                "value": 0
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Green",
+                "value": 40
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Blue",
+                "value": 255
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Red",
+                "value": 0
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Green",
+                "value": 40
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Blue",
+                "value": 255
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Red",
+                "value": 0
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Green",
+                "value": 40
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Blue",
+                "value": 255
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Red",
+                "value": 0
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Green",
+                "value": 40
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Blue",
+                "value": 255
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Red",
+                "value": 0
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Green",
+                "value": 40
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Blue",
+                "value": 255
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Red",
+                "value": 0
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Green",
+                "value": 40
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Blue",
+                "value": 255
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Red",
+                "value": 0
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Green",
+                "value": 40
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Blue",
+                "value": 255
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Red",
+                "value": 0
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Green",
+                "value": 40
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Blue",
+                "value": 255
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "White",
+                "value": 0
+              }
+            ],
+            "effects": [],
+            "fixtureIds": [
+              "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+              "66d396f4-df51-4550-9cb3-707ff6655252",
+              "40005dd2-1252-4155-a1d3-c872dd30beff",
+              "18fd8d0e-f152-42f1-be10-b0da899e143a",
+              "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+              "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+              "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+              "a6d5a570-8870-4e1a-804a-095e8923446b"
+            ]
+          },
+          {
+            "id": "0787f937-4591-4531-a6ce-8ad4a9f04014",
+            "name": "Red",
+            "color": "#FF2020",
+            "values": [
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Blue",
+                "value": 0
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Blue",
+                "value": 0
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Blue",
+                "value": 0
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Blue",
+                "value": 0
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Blue",
+                "value": 0
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Blue",
+                "value": 0
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Blue",
+                "value": 0
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Blue",
+                "value": 0
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "White",
+                "value": 0
+              }
+            ],
+            "effects": [],
+            "fixtureIds": [
+              "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+              "66d396f4-df51-4550-9cb3-707ff6655252",
+              "40005dd2-1252-4155-a1d3-c872dd30beff",
+              "18fd8d0e-f152-42f1-be10-b0da899e143a",
+              "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+              "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+              "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+              "a6d5a570-8870-4e1a-804a-095e8923446b"
+            ]
+          },
+          {
+            "id": "4709b7ec-c1fe-4ae5-ba78-52586ba46f55",
+            "name": "Warm white",
+            "color": "#FFC680",
+            "values": [
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Green",
+                "value": 140
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Blue",
+                "value": 40
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "White",
+                "value": 200
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Green",
+                "value": 140
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Blue",
+                "value": 40
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "White",
+                "value": 200
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Green",
+                "value": 140
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Blue",
+                "value": 40
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "White",
+                "value": 200
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Green",
+                "value": 140
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Blue",
+                "value": 40
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "White",
+                "value": 200
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Green",
+                "value": 140
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Blue",
+                "value": 40
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "White",
+                "value": 200
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Green",
+                "value": 140
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Blue",
+                "value": 40
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "White",
+                "value": 200
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Green",
+                "value": 140
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Blue",
+                "value": 40
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "White",
+                "value": 200
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Green",
+                "value": 140
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Blue",
+                "value": 40
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "White",
+                "value": 200
+              }
+            ],
+            "effects": [],
+            "fixtureIds": [
+              "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+              "66d396f4-df51-4550-9cb3-707ff6655252",
+              "40005dd2-1252-4155-a1d3-c872dd30beff",
+              "18fd8d0e-f152-42f1-be10-b0da899e143a",
+              "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+              "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+              "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+              "a6d5a570-8870-4e1a-804a-095e8923446b"
+            ]
+          },
+          {
+            "id": "ccd0eef2-32eb-44c8-ad5d-8e86f85ff0c4",
+            "name": "Magenta",
+            "color": "#FF00C8",
+            "values": [
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Blue",
+                "value": 200
+              },
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Blue",
+                "value": 200
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Blue",
+                "value": 200
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Blue",
+                "value": 200
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Blue",
+                "value": 200
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Blue",
+                "value": 200
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Blue",
+                "value": 200
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "White",
+                "value": 0
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Red",
+                "value": 255
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Green",
+                "value": 0
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Blue",
+                "value": 200
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "White",
+                "value": 0
+              }
+            ],
+            "effects": [],
+            "fixtureIds": [
+              "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+              "66d396f4-df51-4550-9cb3-707ff6655252",
+              "40005dd2-1252-4155-a1d3-c872dd30beff",
+              "18fd8d0e-f152-42f1-be10-b0da899e143a",
+              "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+              "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+              "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+              "a6d5a570-8870-4e1a-804a-095e8923446b"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "d5cad641-bd49-4fe4-88f9-f0bd51fdfa55",
+        "name": "Intensity",
+        "folders": [],
+        "presets": [
+          {
+            "id": "d8765a31-8a70-4f59-b139-12aa8176e3b9",
+            "name": "Pars full",
+            "color": "#FFFFFF",
+            "values": [
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Intensity",
+                "value": 255
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Intensity",
+                "value": 255
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Intensity",
+                "value": 255
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Intensity",
+                "value": 255
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Intensity",
+                "value": 255
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Intensity",
+                "value": 255
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Intensity",
+                "value": 255
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Intensity",
+                "value": 255
+              }
+            ],
+            "effects": [],
+            "fixtureIds": [
+              "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+              "66d396f4-df51-4550-9cb3-707ff6655252",
+              "40005dd2-1252-4155-a1d3-c872dd30beff",
+              "18fd8d0e-f152-42f1-be10-b0da899e143a",
+              "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+              "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+              "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+              "a6d5a570-8870-4e1a-804a-095e8923446b"
+            ]
+          },
+          {
+            "id": "5f838ca5-923e-4f43-9ffe-104beb8e8522",
+            "name": "Pars 50%",
+            "color": "#FFFFFF",
+            "values": [
+              {
+                "fixtureId": "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                "channel": "Intensity",
+                "value": 128
+              },
+              {
+                "fixtureId": "66d396f4-df51-4550-9cb3-707ff6655252",
+                "channel": "Intensity",
+                "value": 128
+              },
+              {
+                "fixtureId": "40005dd2-1252-4155-a1d3-c872dd30beff",
+                "channel": "Intensity",
+                "value": 128
+              },
+              {
+                "fixtureId": "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                "channel": "Intensity",
+                "value": 128
+              },
+              {
+                "fixtureId": "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                "channel": "Intensity",
+                "value": 128
+              },
+              {
+                "fixtureId": "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                "channel": "Intensity",
+                "value": 128
+              },
+              {
+                "fixtureId": "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                "channel": "Intensity",
+                "value": 128
+              },
+              {
+                "fixtureId": "a6d5a570-8870-4e1a-804a-095e8923446b",
+                "channel": "Intensity",
+                "value": 128
+              }
+            ],
+            "effects": [],
+            "fixtureIds": [
+              "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+              "66d396f4-df51-4550-9cb3-707ff6655252",
+              "40005dd2-1252-4155-a1d3-c872dd30beff",
+              "18fd8d0e-f152-42f1-be10-b0da899e143a",
+              "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+              "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+              "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+              "a6d5a570-8870-4e1a-804a-095e8923446b"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "408828d4-4a75-4bea-bd23-d44b3a8f1ad8",
+        "name": "Positions",
+        "folders": [],
+        "presets": [
+          {
+            "id": "5478bd7a-d281-4779-b1ea-7b60d70c714d",
+            "name": "Spots center",
+            "color": "#FFB938",
+            "values": [
+              {
+                "fixtureId": "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+                "channel": "Pan",
+                "value": 128
+              },
+              {
+                "fixtureId": "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+                "channel": "Tilt",
+                "value": 128
+              },
+              {
+                "fixtureId": "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+                "channel": "Dimmer",
+                "value": 255
+              },
+              {
+                "fixtureId": "8f40291e-3a34-41da-adc6-13a18ecace70",
+                "channel": "Pan",
+                "value": 128
+              },
+              {
+                "fixtureId": "8f40291e-3a34-41da-adc6-13a18ecace70",
+                "channel": "Tilt",
+                "value": 128
+              },
+              {
+                "fixtureId": "8f40291e-3a34-41da-adc6-13a18ecace70",
+                "channel": "Dimmer",
+                "value": 255
+              }
+            ],
+            "effects": [],
+            "fixtureIds": [
+              "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+              "8f40291e-3a34-41da-adc6-13a18ecace70"
+            ]
+          },
+          {
+            "id": "a4e2a203-32bf-494d-b085-05f36c505689",
+            "name": "Spots on audience",
+            "color": "#FFB938",
+            "values": [
+              {
+                "fixtureId": "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+                "channel": "Pan",
+                "value": 128
+              },
+              {
+                "fixtureId": "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+                "channel": "Tilt",
+                "value": 200
+              },
+              {
+                "fixtureId": "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+                "channel": "Dimmer",
+                "value": 255
+              },
+              {
+                "fixtureId": "8f40291e-3a34-41da-adc6-13a18ecace70",
+                "channel": "Pan",
+                "value": 128
+              },
+              {
+                "fixtureId": "8f40291e-3a34-41da-adc6-13a18ecace70",
+                "channel": "Tilt",
+                "value": 200
+              },
+              {
+                "fixtureId": "8f40291e-3a34-41da-adc6-13a18ecace70",
+                "channel": "Dimmer",
+                "value": 255
+              }
+            ],
+            "effects": [],
+            "fixtureIds": [
+              "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+              "8f40291e-3a34-41da-adc6-13a18ecace70"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "5fca15cd-6e3b-4e84-9d30-9102f56312c1",
+        "name": "Effects",
+        "folders": [],
+        "presets": [
+          {
+            "id": "6f56cd75-96c2-4189-a095-96683a8069f3",
+            "name": "Rainbow wave",
+            "color": "#7A5CFF",
+            "values": [],
+            "effects": [
+              {
+                "id": "59470fe5-97cc-4b14-aa33-44d65a89302c",
+                "type": "rainbow",
+                "speed": 0.2,
+                "size": 1,
+                "spread": 1,
+                "fixtureIds": [
+                  "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                  "66d396f4-df51-4550-9cb3-707ff6655252",
+                  "40005dd2-1252-4155-a1d3-c872dd30beff",
+                  "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                  "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                  "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                  "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                  "a6d5a570-8870-4e1a-804a-095e8923446b"
+                ]
+              }
+            ],
+            "fixtureIds": [
+              "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+              "66d396f4-df51-4550-9cb3-707ff6655252",
+              "40005dd2-1252-4155-a1d3-c872dd30beff",
+              "18fd8d0e-f152-42f1-be10-b0da899e143a",
+              "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+              "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+              "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+              "a6d5a570-8870-4e1a-804a-095e8923446b"
+            ]
+          },
+          {
+            "id": "b9324e98-7848-42bc-9e35-aa15c8dcd355",
+            "name": "Chase",
+            "color": "#3DD68C",
+            "values": [],
+            "effects": [
+              {
+                "id": "47a02e2a-5c31-4906-8dfd-928bdf411c55",
+                "type": "chase",
+                "speed": 0.5,
+                "size": 0.9,
+                "spread": 1,
+                "fixtureIds": [
+                  "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+                  "66d396f4-df51-4550-9cb3-707ff6655252",
+                  "40005dd2-1252-4155-a1d3-c872dd30beff",
+                  "18fd8d0e-f152-42f1-be10-b0da899e143a",
+                  "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+                  "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+                  "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+                  "a6d5a570-8870-4e1a-804a-095e8923446b"
+                ]
+              }
+            ],
+            "fixtureIds": [
+              "67c96f5e-80a3-40f7-b96e-ffd6a8ef8e76",
+              "66d396f4-df51-4550-9cb3-707ff6655252",
+              "40005dd2-1252-4155-a1d3-c872dd30beff",
+              "18fd8d0e-f152-42f1-be10-b0da899e143a",
+              "0a4ecc11-ddb9-4301-bf68-42a14c668b51",
+              "2275daa8-dcf3-4eaf-b4c4-12038d69f705",
+              "e162c89e-b9cd-4136-bd11-5197bf5c1f35",
+              "a6d5a570-8870-4e1a-804a-095e8923446b"
+            ]
+          },
+          {
+            "id": "fda7a389-2451-4e58-bdec-ae5021211aae",
+            "name": "Spots circle",
+            "color": "#FFB938",
+            "values": [],
+            "effects": [
+              {
+                "id": "6ea31de0-99f7-4bdf-abbe-9a224bc936d6",
+                "type": "circle",
+                "speed": 0.25,
+                "size": 0.6,
+                "spread": 0.5,
+                "fixtureIds": [
+                  "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+                  "8f40291e-3a34-41da-adc6-13a18ecace70"
+                ]
+              }
+            ],
+            "fixtureIds": [
+              "9fa57e7e-730c-4322-8fa0-f11394e31e6a",
+              "8f40291e-3a34-41da-adc6-13a18ecace70"
+            ]
+          }
+        ]
+      }
+    ],
+    "presets": []
+  },
+  "cueList": {
+    "id": "746a4ae3-b661-433e-809e-a294d0fe54d8",
+    "name": "Main",
+    "cues": [
+      {
+        "id": "1a2ac487-705d-4f3e-aa4c-35118f272dfa",
+        "name": "Preshow \u2013 blue wash",
+        "presetIds": [
+          "21aa2436-e160-4e2d-b0a1-cd3fb2aa6831",
+          "5f838ca5-923e-4f43-9ffe-104beb8e8522"
+        ],
+        "fadeIn": 3,
+        "fadeOut": 3,
+        "delay": 0,
+        "autoFollow": false,
+        "followDelay": 0
+      },
+      {
+        "id": "79621be1-8cda-4287-b7dc-a91fa9e4e99e",
+        "name": "Band on \u2013 warm \u002B spots",
+        "presetIds": [
+          "4709b7ec-c1fe-4ae5-ba78-52586ba46f55",
+          "d8765a31-8a70-4f59-b139-12aa8176e3b9",
+          "5478bd7a-d281-4779-b1ea-7b60d70c714d"
+        ],
+        "fadeIn": 2,
+        "fadeOut": 2,
+        "delay": 0,
+        "autoFollow": false,
+        "followDelay": 0
+      },
+      {
+        "id": "b6b6236b-5d24-4b72-bcb5-b84e42d1d9e2",
+        "name": "Chorus \u2013 red chase",
+        "presetIds": [
+          "0787f937-4591-4531-a6ce-8ad4a9f04014",
+          "d8765a31-8a70-4f59-b139-12aa8176e3b9",
+          "b9324e98-7848-42bc-9e35-aa15c8dcd355",
+          "a4e2a203-32bf-494d-b085-05f36c505689"
+        ],
+        "fadeIn": 1,
+        "fadeOut": 1,
+        "delay": 0,
+        "autoFollow": false,
+        "followDelay": 0
+      },
+      {
+        "id": "fe9d849c-989e-4960-9602-32a4a3b4f144",
+        "name": "Bridge \u2013 rainbow \u002B circle",
+        "presetIds": [
+          "d8765a31-8a70-4f59-b139-12aa8176e3b9",
+          "6f56cd75-96c2-4189-a095-96683a8069f3",
+          "fda7a389-2451-4e58-bdec-ae5021211aae"
+        ],
+        "fadeIn": 4,
+        "fadeOut": 4,
+        "delay": 0,
+        "autoFollow": false,
+        "followDelay": 0
+      },
+      {
+        "id": "bc93151e-5d66-4044-ba57-675aeb846a0c",
+        "name": "Ending \u2013 magenta",
+        "presetIds": [
+          "ccd0eef2-32eb-44c8-ad5d-8e86f85ff0c4",
+          "5f838ca5-923e-4f43-9ffe-104beb8e8522"
+        ],
+        "fadeIn": 5,
+        "fadeOut": 5,
+        "delay": 0,
+        "autoFollow": false,
+        "followDelay": 0
+      }
+    ],
+    "loop": false
+  },
+  "outputs": [
+    {
+      "id": "f394a6bd-c5fe-4482-a21b-a47735fa2c49",
+      "type": "artNet",
+      "enabled": true,
+      "universe": 1,
+      "target": "255.255.255.255",
+      "networkUniverse": 0,
+      "localAddress": ""
+    }
+  ],
+  "midiMappings": []
+}

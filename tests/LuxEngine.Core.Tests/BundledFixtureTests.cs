@@ -39,3 +39,24 @@ public class BundledFixtureTests
         Assert.Contains(mover.Channels, c => c.Type == ChannelType.Pan);
     }
 }
+
+public class DemoShowTests
+{
+    [Fact]
+    public void Demo_show_loads_and_plays_a_multi_preset_cue()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "LuxEngine.sln"))) dir = dir.Parent;
+        var show = Shows.ShowSerializer.Load(Path.Combine(dir!.FullName, "samples", "Demo.luxshow"));
+        var engine = new Engine.LightingEngine(show, () => 0);
+
+        engine.GoTo(2); // "Chorus – red chase": red + full + chase + spots on audience
+        engine.CuePlayer.Complete();
+        var frame = engine.ComputeFrame(0.05);
+        var par = show.Fixtures[0];
+
+        Assert.Equal(255, frame.Universe(1)[par.Address]);       // red channel of the first par
+        Assert.Equal(4, show.CueList.Cues[2].PresetIds.Count);
+        Assert.NotEmpty(engine.CuePlayer.ActiveEffects);
+    }
+}

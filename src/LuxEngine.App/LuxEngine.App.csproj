@@ -40,6 +40,8 @@
     <Content Include="Assets\LuxEngine.ico" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\LuxEngine.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\LuxEngine-64.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\samples\*.luxshow" Link="samples\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Include="..\..\fixtures\*.json" Link="fixtures\%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

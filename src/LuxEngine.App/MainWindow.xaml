@@ -89,6 +89,7 @@
                     <MenuFlyoutItem Text="Quick start guide" Click="QuickStart_Click">
                         <MenuFlyoutItem.Icon><SymbolIcon Symbol="Help" /></MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Open demo show" Click="Demo_Click" />
                     <MenuFlyoutItem Text="Keyboard shortcuts" Click="Shortcuts_Click" />
                     <MenuFlyoutItem Text="Project on GitHub" Click="GitHub_Click" />
                     <MenuFlyoutItem Text="About LuxEngine" Click="About_Click" />

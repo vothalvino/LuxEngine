@@ -351,6 +351,14 @@ public sealed partial class MainWindow : Window
 
     private async void Midi_Click(object sender, RoutedEventArgs e) => await DialogHelper.ShowAsync(new MidiDialog());
 
+    private async void Demo_Click(object sender, RoutedEventArgs e)
+    {
+        var demo = Path.Combine(AppContext.BaseDirectory, "samples", "Demo.luxshow");
+        if (!File.Exists(demo)) return;
+        // Open as an untitled copy so the bundled demo is never overwritten.
+        if (await ConfirmDiscardAsync()) TryOpen(demo, keepPath: false);
+    }
+
     private async void QuickStart_Click(object sender, RoutedEventArgs e) => await QuickStartDialog.ShowAsync();
 
     private async void Shortcuts_Click(object sender, RoutedEventArgs e) =>
