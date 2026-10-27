@@ -44,7 +44,7 @@ public sealed partial class ControlView : UserControl
 
         SoundSource.SelectedIndex = AppServices.Settings.AudioSource == nameof(AudioSource.Microphone) ? 1 : 0;
 
-        _meterTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        _meterTimer = DispatcherQueue.CreateTimer();
         _meterTimer.Interval = TimeSpan.FromMilliseconds(50);
         _meterTimer.Tick += (_, _) => SoundMeter.Value = AppServices.Sound.Level;
         _meterTimer.Start();

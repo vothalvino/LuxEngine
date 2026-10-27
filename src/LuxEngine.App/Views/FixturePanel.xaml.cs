@@ -51,7 +51,7 @@ public sealed partial class FixturePanel : UserControl
         AppServices.Selection.Changed += SyncSelectionFromModel;
         Loaded += (_, _) => Refresh();
 
-        _colorTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        _colorTimer = DispatcherQueue.CreateTimer();
         _colorTimer.Interval = TimeSpan.FromMilliseconds(100);
         _colorTimer.Tick += (_, _) => UpdateColors();
         _colorTimer.Start();

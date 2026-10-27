@@ -57,7 +57,7 @@ public sealed partial class CueView : UserControl
         AppServices.SelectedPresetChanged += UpdateAddPresetButton;
         Loaded += (_, _) => Refresh();
 
-        _timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromMilliseconds(50);
         _timer.Tick += (_, _) => UpdatePlayback();
         _timer.Start();

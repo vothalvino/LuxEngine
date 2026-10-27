@@ -49,7 +49,7 @@ public sealed class UniverseMonitorDialog : ContentDialog
         Content = layout;
 
         UpdateOwners();
-        _timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromMilliseconds(100);
         _timer.Tick += (_, _) => Tick();
         Opened += (_, _) => _timer.Start();

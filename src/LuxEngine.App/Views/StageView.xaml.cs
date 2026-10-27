@@ -48,7 +48,7 @@ public sealed partial class StageView : UserControl
         AppServices.Selection.Changed += UpdateSelection;
         Loaded += (_, _) => Rebuild();
 
-        _timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromMilliseconds(33);
         _timer.Tick += (_, _) => UpdateColors();
         _timer.Start();

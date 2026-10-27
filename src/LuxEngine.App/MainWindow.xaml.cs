@@ -144,7 +144,7 @@ public sealed partial class MainWindow : Window
         var engine = AppServices.Engine;
         if (BlackoutButton.IsChecked != engine.Blackout) BlackoutButton.IsChecked = engine.Blackout;
         if (engine.Blackout) BlackoutButton.Background = (Brush)Application.Current.Resources["LuxDangerBrush"];
-        else BlackoutButton.ClearValue(Control.BackgroundProperty);
+        else BlackoutButton.ClearValue(Microsoft.UI.Xaml.Controls.Control.BackgroundProperty);
         double master = Math.Round(engine.GrandMaster * 100);
         if (Math.Abs(MasterSlider.Value - master) > 0.5)
         {
