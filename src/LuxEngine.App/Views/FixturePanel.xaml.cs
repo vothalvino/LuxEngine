@@ -32,6 +32,9 @@ public sealed class FixtureRow : ObservableObject
     public string Address { get => _address; set => SetProperty(ref _address, value); }
     public Brush ColorBrush { get => _colorBrush; set => SetProperty(ref _colorBrush, value); }
     public Brush? AddressBrush { get => _addressBrush; set => SetProperty(ref _addressBrush, value); }
+
+    /// <summary>Used as the accessible name of the list item (screen readers, UI automation).</summary>
+    public override string ToString() => Name;
 }
 
 public sealed partial class FixturePanel : UserControl

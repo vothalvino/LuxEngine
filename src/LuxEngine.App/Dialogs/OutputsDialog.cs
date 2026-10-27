@@ -108,12 +108,11 @@ public sealed class OutputsDialog : ContentDialog
 
         var remove = new Button { Content = new FontIcon { Glyph = "", FontSize = 13 }, VerticalAlignment = VerticalAlignment.Bottom, Padding = new Thickness(8, 7, 8, 7) };
 
-        void UpdateForType()
+        void UpdateForType(string value)
         {
             var t = Types[Math.Max(0, type.SelectedIndex)].Type;
             bool network = t is OutputType.ArtNet or OutputType.Sacn;
             netUniverse.Visibility = adapter.Visibility = network ? Visibility.Visible : Visibility.Collapsed;
-            string current = target.Text;
             target.Items.Clear();
             if (t == OutputType.ArtNet)
             {
@@ -136,21 +135,25 @@ public sealed class OutputsDialog : ContentDialog
                 foreach (var port in SerialPort.GetPortNames().OrderBy(p => p)) target.Items.Add(port);
                 target.PlaceholderText = "COM port";
             }
-            target.Text = current;
+            if (target.Items.Contains(value)) target.SelectedItem = value;
+            else target.Text = value;
         }
 
-        target.Text = config.Target;
-        UpdateForType();
+        UpdateForType(config.Target);
+        // An editable ComboBox only shows typed text once its template is loaded.
+        target.Loaded += (_, _) =>
+        {
+            if (string.IsNullOrEmpty(target.Text) && target.SelectedItem is null) target.Text = config.Target;
+        };
         type.SelectionChanged += (_, _) =>
         {
             var t = Types[Math.Max(0, type.SelectedIndex)].Type;
-            target.Text = t switch
+            UpdateForType(t switch
             {
                 OutputType.ArtNet => "255.255.255.255",
                 OutputType.Sacn => "",
                 _ => SerialPort.GetPortNames().FirstOrDefault() ?? "",
-            };
-            UpdateForType();
+            });
         };
 
         var panel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
@@ -177,7 +180,7 @@ public sealed class OutputsDialog : ContentDialog
             config.Enabled = enabled.IsChecked == true;
             config.Type = Types[Math.Max(0, type.SelectedIndex)].Type;
             config.Universe = double.IsNaN(universe.Value) ? 1 : (int)universe.Value;
-            config.Target = (target.Text ?? "").Trim();
+            config.Target = (string.IsNullOrWhiteSpace(target.Text) ? target.SelectedItem as string ?? "" : target.Text).Trim();
             config.NetworkUniverse = double.IsNaN(netUniverse.Value) ? 0 : (int)netUniverse.Value;
             config.LocalAddress = adapter.SelectedIndex > 0 ? _adapters[adapter.SelectedIndex - 1].Ip : "";
         };

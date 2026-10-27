@@ -162,6 +162,7 @@ public sealed partial class ControlView : UserControl
                 Tag = color,
             };
             ToolTipService.SetToolTip(button, name);
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(button, name);
             button.Click += (s, _) => ApplyColor((Color)((Button)s).Tag, fromSwatch: true);
             Swatches.Children.Add(button);
         }

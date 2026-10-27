@@ -98,6 +98,21 @@ jobs:
               Click "Cancel"; Start-Sleep 1
             } catch { Write-Host "Dialog '$dialog' check failed: $_" }
           }
+          try {
+            (Find "Control").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            Start-Sleep 1
+            $listItem = [System.Windows.Automation.ControlType]::ListItem
+            foreach ($n in 1..4) {
+              $cond = New-Object System.Windows.Automation.AndCondition(
+                (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Par $n")),
+                (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, $listItem)))
+              $item = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond)
+              $item.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).AddToSelection()
+            }
+            Start-Sleep 1
+            Click "Blue"; Start-Sleep 2
+            Shot "5-control"
+          } catch { Write-Host "Control check failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }
