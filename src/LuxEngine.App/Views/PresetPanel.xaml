@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="LuxEngine.App.Views.PresetPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:LuxEngine.App.Views">
+
+    <Grid RowSpacing="6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Padding="4,0,0,0">
+            <TextBlock Text="PRESETS" Style="{StaticResource PanelHeaderStyle}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4">
+                <Button Style="{StaticResource IconButtonStyle}" Click="NewFolder_Click" ToolTipService.ToolTip="New folder">
+                    <FontIcon Glyph="&#xE8F4;" FontSize="16" />
+                </Button>
+                <Button Style="{StaticResource AccentButtonStyle}" Padding="10,6" Click="Record_Click"
+                        ToolTipService.ToolTip="Save the current look (from Control) as a new preset">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE710;" FontSize="14" />
+                        <TextBlock Text="Preset" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <AutoSuggestBox Grid.Row="1" x:Name="SearchBox" PlaceholderText="Search presets" QueryIcon="Find"
+                        TextChanged="SearchBox_TextChanged" />
+
+        <TreeView Grid.Row="2" x:Name="Tree" ItemsSource="{x:Bind Nodes}" SelectionMode="Single"
+                  CanDragItems="True" CanReorderItems="True" AllowDrop="True"
+                  ItemInvoked="Tree_ItemInvoked" DragItemsStarting="Tree_DragItemsStarting"
+                  DragItemsCompleted="Tree_DragItemsCompleted" RightTapped="Tree_RightTapped"
+                  Expanding="Tree_Expanding" Collapsed="Tree_Collapsed">
+            <TreeView.ItemTemplate>
+                <DataTemplate x:DataType="local:PresetNode">
+                    <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="{x:Bind IsExpanded, Mode=OneWay}"
+                                  ToolTipService.ToolTip="{x:Bind Detail, Mode=OneWay}">
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="{x:Bind Glyph}" FontSize="15" Foreground="{x:Bind AccentBrush, Mode=OneWay}" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind Name, Mode=OneWay}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{x:Bind Badge, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                        </Grid>
+                    </TreeViewItem>
+                </DataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+
+        <TextBlock Grid.Row="3" x:Name="HintText" TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}"
+                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" Margin="4,0"
+                   Text="Click a preset to use it live. Drag presets into folders, or onto a cue in the Cue tab." />
+    </Grid>
+</UserControl>

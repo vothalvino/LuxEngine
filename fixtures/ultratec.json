@@ -1,0 +1,1 @@
+[{"id":"ultratec/radiance-hazer","manufacturer":"Ultratec","model":"Radiance Hazer","category":"Hazer","channels":[{"name":"Haze","type":"generic","default":0},{"name":"Fan","type":"effect","default":0}],"modes":[{"name":"2-channel","channels":["Haze","Fan"]}]}]

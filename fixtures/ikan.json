@@ -1,0 +1,1 @@
+[{"id":"ikan/stryder-sfb150","manufacturer":"Ikan","model":"Stryder SFB150","category":"Other","channels":[{"name":"Intensity","type":"intensity","default":0},{"name":"CCT","type":"colorTemperature","default":0}],"modes":[{"name":"Default","channels":["Intensity","CCT"]}]}]

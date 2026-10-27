@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>LuxEngine.App</RootNamespace>
+    <AssemblyName>LuxEngine</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\LuxEngine.ico</ApplicationIcon>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!-- Lets "dotnet build/publish" generate resources.pri without Visual Studio -->
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <SelfContained>true</SelfContained>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>1.0.0</Version>
+    <Product>LuxEngine</Product>
+    <Description>Open-source DMX lighting controller</Description>
+    <Copyright>Copyright (c) 2026 vothalvino</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LuxEngine.Core\LuxEngine.Core.csproj" />
+    <ProjectReference Include="..\LuxEngine.Output\LuxEngine.Output.csproj" />
+    <ProjectReference Include="..\LuxEngine.Control\LuxEngine.Control.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\LuxEngine.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\LuxEngine.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\LuxEngine-64.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\samples\*.luxshow" Link="samples\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\fixtures\*.json" Link="fixtures\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
