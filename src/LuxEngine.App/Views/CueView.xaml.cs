@@ -32,9 +32,9 @@ public sealed class CueRow : ObservableObject
 
 public sealed class CuePresetRow
 {
-    public required Guid PresetId { get; init; }
-    public required string Name { get; init; }
-    public required Brush ColorBrush { get; init; }
+    public Guid PresetId { get; set; }
+    public string Name { get; set; } = "";
+    public Brush? ColorBrush { get; set; }
 }
 
 /// <summary>The cue list: each cue fades to a combination of presets.</summary>
