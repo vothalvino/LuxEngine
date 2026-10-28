@@ -102,22 +102,25 @@ public sealed class ButtonPageView : UserControl
         UpdateLevels();
     }
 
+    /// <summary>A short bar in the gap between two touching buttons, showing they are linked.</summary>
     private void AddConnector(int row, int column, bool horizontal)
     {
-        var line = new Rectangle
+        var link = new Rectangle
         {
-            Fill = (Brush)Application.Current.Resources["TextFillColorTertiaryBrush"],
-            Width = horizontal ? double.NaN : 6,
-            Height = horizontal ? 6 : double.NaN,
-            HorizontalAlignment = horizontal ? HorizontalAlignment.Stretch : HorizontalAlignment.Center,
-            VerticalAlignment = horizontal ? VerticalAlignment.Center : VerticalAlignment.Stretch,
-            Margin = horizontal ? new Thickness(40, 0, 40, 0) : new Thickness(0, 24, 0, 24),
+            Fill = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+            Width = horizontal ? 12 : 18,
+            Height = horizontal ? 18 : 12,
+            RadiusX = 3,
+            RadiusY = 3,
+            HorizontalAlignment = horizontal ? HorizontalAlignment.Right : HorizontalAlignment.Center,
+            VerticalAlignment = horizontal ? VerticalAlignment.Center : VerticalAlignment.Bottom,
+            Margin = horizontal ? new Thickness(0, 0, -6, 0) : new Thickness(0, 0, 0, -6),
+            IsHitTestVisible = false,
         };
-        Grid.SetRow(line, row);
-        Grid.SetColumn(line, column);
-        if (horizontal) Grid.SetColumnSpan(line, 2);
-        else Grid.SetRowSpan(line, 2);
-        _grid.Children.Add(line);
+        Canvas.SetZIndex(link, 1);
+        Grid.SetRow(link, row);
+        Grid.SetColumn(link, column);
+        _grid.Children.Add(link);
     }
 
     private FrameworkElement EmptyCell(int row, int column)
