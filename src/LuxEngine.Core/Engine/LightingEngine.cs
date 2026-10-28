@@ -368,8 +368,13 @@ public sealed class LightingEngine
             // Effects from the running cue leave alone whatever you are controlling by hand;
             // effects you start yourself always apply.
             var brightness = new Dictionary<Guid, double>();
-            var handControlled = HandControlledFixtures();
-            foreach (var effect in CuePlayer.ActiveEffects.Concat(buttonEffects))
+            // Cue list effects also leave alone what a cue button controls.
+            var handControlled = ControlledFixtures(Programmer.Values.Keys);
+            var overCueList = ControlledFixtures(Programmer.Values.Keys.Concat(_buttonValues.Keys));
+            foreach (var effect in CuePlayer.ActiveEffects)
+                EffectEngine.Apply(effect, now, _fixtures, values, brightness,
+                    overCueList.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
+            foreach (var effect in buttonEffects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness,
                     handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
             foreach (var effect in Programmer.Effects)
@@ -403,11 +408,11 @@ public sealed class LightingEngine
         }
     }
 
-    /// <summary>Fixtures with programmer values, grouped by what effects would change ("Dimmer", "Color", "Position").</summary>
-    private Dictionary<string, HashSet<Guid>> HandControlledFixtures()
+    /// <summary>Fixtures that have any of the given channels set, grouped by what effects would change ("Dimmer", "Color", "Position").</summary>
+    private Dictionary<string, HashSet<Guid>> ControlledFixtures(IEnumerable<ChannelKey> keys)
     {
         var result = new Dictionary<string, HashSet<Guid>>();
-        foreach (var key in Programmer.Values.Keys)
+        foreach (var key in keys)
         {
             if (!_channels.TryGetValue(key, out var ch) || !_fixtures.TryGetValue(key.FixtureId, out var fixture)) continue;
             var type = ch.Channel.Type;

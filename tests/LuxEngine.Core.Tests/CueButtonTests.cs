@@ -1,4 +1,5 @@
 using LuxEngine.Core.Cues;
+using LuxEngine.Core.Effects;
 using LuxEngine.Core.Engine;
 using LuxEngine.Core.Presets;
 
@@ -82,5 +83,24 @@ public class CueButtonTests
         var off = engine.ComputeFrame().Universe(1);
         Assert.Equal(255, off[1]);               // back to the cue's red
         Assert.Equal(0, off[4]);
+    }
+
+    [Fact]
+    public void Cue_list_effects_leave_button_controlled_fixtures_alone()
+    {
+        var t = new TestShow();
+        var chase = t.AddPreset("Chase", (t.Par1, "Intensity", 255), (t.Par2, "Intensity", 255));
+        chase.Effects.Add(new Effect { Type = EffectType.Chase, Speed = 1, Size = 1, FixtureIds = { t.Par1.Id, t.Par2.Id } });
+        t.AddCue(0, chase);
+        var full = t.AddPreset("Par 2 full", (t.Par2, "Intensity", 255));
+        var button = AddButton(t, 0, 0, full);
+        var engine = new LightingEngine(t.Show);
+        engine.Go();
+
+        Assert.Equal(0, engine.ComputeFrame(0.1).Universe(1)[4]);   // chased off
+        engine.SetButton(button.Id, true);
+        var u = engine.ComputeFrame(0.1).Universe(1);
+        Assert.Equal(255, u[0]);   // Par1 still follows the chase
+        Assert.Equal(255, u[4]);   // Par2 belongs to the button now
     }
 }
