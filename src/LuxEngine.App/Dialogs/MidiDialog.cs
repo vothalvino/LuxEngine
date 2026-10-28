@@ -18,6 +18,7 @@ public sealed class MidiDialog : ContentDialog
         [MidiActions.Release] = "Release",
         [MidiActions.Blackout] = "Blackout",
         [MidiActions.Preset] = "Use a preset",
+        [MidiActions.CueButton] = "Cue button",
     };
 
     private readonly StackPanel _list = new() { Spacing = 6 };
@@ -109,6 +110,19 @@ public sealed class MidiDialog : ContentDialog
             {
                 if (choose.SelectedIndex >= 0)
                     AppServices.Document.Edit(ShowChange.None, _ => mapping.Target = presets[choose.SelectedIndex].Id);
+            };
+            row.Children.Add(choose);
+        }
+        else if (mapping.Action == MidiActions.CueButton)
+        {
+            var buttons = AppServices.Engine.Show.ButtonPage.Buttons.OrderBy(b => b.Row).ThenBy(b => b.Column).ToList();
+            var choose = new ComboBox { Width = 160, PlaceholderText = "Choose button" };
+            foreach (var b in buttons) choose.Items.Add(string.IsNullOrWhiteSpace(b.Name) ? $"Button {b.Row + 1}.{b.Column + 1}" : b.Name);
+            choose.SelectedIndex = buttons.FindIndex(b => b.Id == mapping.Target);
+            choose.SelectionChanged += (_, _) =>
+            {
+                if (choose.SelectedIndex >= 0)
+                    AppServices.Document.Edit(ShowChange.None, _ => mapping.Target = buttons[choose.SelectedIndex].Id);
             };
             row.Children.Add(choose);
         }

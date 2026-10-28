@@ -1,3 +1,4 @@
+using LuxEngine.Core.Cues;
 using LuxEngine.Core.Engine;
 using LuxEngine.Core.Shows;
 using Melanchall.DryWetMidi.Core;
@@ -23,8 +24,9 @@ public static class MidiActions
     public const string Release = "Release";
     public const string Blackout = "Blackout";
     public const string Preset = "Preset";
+    public const string CueButton = "CueButton";
 
-    public static readonly string[] All = { GrandMaster, Go, Back, Pause, Release, Blackout, Preset };
+    public static readonly string[] All = { GrandMaster, Go, Back, Pause, Release, Blackout, Preset, CueButton };
 }
 
 /// <summary>Listens to all connected MIDI inputs and runs the show's MIDI mappings.</summary>
@@ -168,6 +170,17 @@ public sealed class MidiController : IDisposable
                 case MidiActions.Preset when pressed && mapping.Target is Guid id:
                     var preset = show.PresetRoot.FindPreset(id);
                     if (preset is not null) _engine.ApplyPreset(preset);
+                    break;
+                case MidiActions.CueButton when mapping.Target is Guid buttonId:
+                    var button = show.ButtonPage.Find(buttonId);
+                    if (button is null) continue;
+                    if (button.Mode == CueButtonMode.Flash)
+                    {
+                        if (down == wasDown) continue;
+                        _engine.SetButton(buttonId, down);
+                    }
+                    else if (pressed) _engine.ToggleButton(buttonId);
+                    else continue;
                     break;
                 default:
                     continue;

@@ -91,6 +91,27 @@ jobs:
             Start-Sleep 2
             Shot "3-cue-tab"
           } catch { Write-Host "Could not switch to the Cue tab: $_" }
+          try {
+            Add-Type -Namespace Lux -Name Mouse -MemberDefinition @"
+              [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
+              [DllImport("user32.dll")] public static extern void mouse_event(int f, int x, int y, int d, int e);
+"@
+            function MouseClick($name) {
+              $el = Find $name
+              if (-not $el) { throw "UI element '$name' not found" }
+              $r = $el.Current.BoundingRectangle
+              [Lux.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+              [Lux.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Lux.Mouse]::mouse_event(4, 0, 0, 0, 0)
+            }
+            (Find "Buttons").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            Start-Sleep 2
+            Shot "3b-buttons"
+            MouseClick "Deep blue button"; Start-Sleep 1
+            MouseClick "Red button"; Start-Sleep 1        # touches Deep blue, so Deep blue turns off
+            MouseClick "Spots center button"; Start-Sleep 2
+            Shot "3c-buttons-on"
+            (Find "Cue list").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+          } catch { Write-Host "Buttons check failed: $_" }
           foreach ($dialog in @("Add fixtures", "DMX outputs")) {
             try {
               Click $dialog; Start-Sleep 3

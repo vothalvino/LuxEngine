@@ -5,7 +5,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:LuxEngine.App.Views">
 
-    <Grid Padding="12,10,12,12" ColumnSpacing="12">
+    <Grid>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <SelectorBar x:Name="PageSelector" Margin="8,4,8,0" SelectionChanged="PageSelector_SelectionChanged">
+        <SelectorBarItem x:Name="CueListTab" Text="Cue list" IsSelected="True">
+            <SelectorBarItem.Icon><FontIcon Glyph="&#xE8FD;" /></SelectorBarItem.Icon>
+        </SelectorBarItem>
+        <SelectorBarItem x:Name="ButtonsTab" Text="Buttons">
+            <SelectorBarItem.Icon><FontIcon Glyph="&#xF0E2;" /></SelectorBarItem.Icon>
+        </SelectorBarItem>
+    </SelectorBar>
+
+    <local:ButtonPageView Grid.Row="1" x:Name="ButtonsPage" Visibility="Collapsed" />
+
+    <Grid Grid.Row="1" x:Name="CueListPage" Padding="12,4,12,12" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*" MinWidth="320" />
             <ColumnDefinition Width="2*" MinWidth="300" />
@@ -190,5 +207,6 @@
 
         <TextBlock Grid.Column="1" x:Name="NoCueSelected" Text="Select a cue to edit it." VerticalAlignment="Center"
                    HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Visibility="Collapsed" />
+    </Grid>
     </Grid>
 </UserControl>

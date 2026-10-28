@@ -63,6 +63,7 @@ public sealed class Show
     public List<FixtureInstance> Fixtures { get; set; } = new();
     public PresetFolder PresetRoot { get; set; } = new() { Name = "Presets" };
     public CueList CueList { get; set; } = new();
+    public ButtonPage ButtonPage { get; set; } = new();
     public List<OutputConfig> Outputs { get; set; } = new();
     public List<MidiMapping> MidiMappings { get; set; } = new();
 
@@ -104,6 +105,7 @@ public sealed class Show
 
         PresetRoot.Remove(id);
         foreach (var cue in CueList.Cues) cue.PresetIds.RemoveAll(removedPresets.Contains);
+        foreach (var button in ButtonPage.Buttons) button.PresetIds.RemoveAll(removedPresets.Contains);
     }
 
     /// <summary>A starter show with Art-Net output and example folders.</summary>
