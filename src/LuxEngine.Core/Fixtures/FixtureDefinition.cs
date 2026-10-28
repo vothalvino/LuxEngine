@@ -6,6 +6,22 @@ public sealed class ChannelCapability
     public int From { get; set; }
     public int To { get; set; } = 255;
     public string Label { get; set; } = "";
+
+    /// <summary>Returns a user-facing problem with a channel's ranges, or null when they are fine.</summary>
+    public static string? Validate(IReadOnlyList<ChannelCapability> capabilities)
+    {
+        foreach (var cap in capabilities)
+        {
+            if (cap.From is < 0 or > 255 || cap.To is < 0 or > 255) return "Range values must be between 0 and 255.";
+            if (cap.From > cap.To) return $"The range {cap.From}–{cap.To} starts after it ends.";
+            if (string.IsNullOrWhiteSpace(cap.Label)) return $"The range {cap.From}–{cap.To} needs a description.";
+        }
+        var sorted = capabilities.OrderBy(c => c.From).ToList();
+        for (int i = 1; i < sorted.Count; i++)
+            if (sorted[i].From <= sorted[i - 1].To)
+                return $"The ranges \"{sorted[i - 1].Label}\" and \"{sorted[i].Label}\" overlap.";
+        return null;
+    }
 }
 
 public sealed class ChannelDefinition
