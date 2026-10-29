@@ -51,7 +51,7 @@ public sealed partial class StageView : UserControl
         Loaded += (_, _) => Rebuild();
 
         _timer = DispatcherQueue.CreateTimer();
-        _timer.Interval = TimeSpan.FromMilliseconds(33);
+        _timer.Interval = TimeSpan.FromMilliseconds(16);   // fast enough to show strobes
         _timer.Tick += (_, _) => UpdateColors();
         _timer.Start();
     }
