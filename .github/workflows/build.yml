@@ -261,8 +261,18 @@ jobs:
                   (New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $app.Id)))))
               # Menus opened earlier can leave hidden copies behind: use the one on screen.
               $item = $items | Where-Object { -not $_.Current.IsOffscreen -and $_.Current.BoundingRectangle.Width -gt 0 } | Select-Object -Last 1
-              $item.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+              # Radio menu items support Select or Toggle rather than Invoke.
+              $p = $null
+              if ($item.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$p)) { $p.Select() }
+              elseif ($item.TryGetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern, [ref]$p)) { $p.Toggle() }
+              elseif ($item.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$p)) { $p.Invoke() }
+              else {
+                $r = $item.Current.BoundingRectangle
+                [Lux.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+                [Lux.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 150; [Lux.Mouse]::mouse_event(4, 0, 0, 0, 0)
+              }
               Start-Sleep 2
+              Press 0x1B; Start-Sleep 1                                              # close the menu if still open
               Press 0x71; Start-Sleep 1                                              # F2: Control tab
               SelectLight "Par 1"
               foreach ($n in 2..4) {
