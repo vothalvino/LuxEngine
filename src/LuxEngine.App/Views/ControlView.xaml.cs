@@ -165,6 +165,7 @@ public sealed partial class ControlView : UserControl
             else if (!MixesColor(fixture) && fixture.Channels.Any(c => c.Channel.Type.IsAdditiveColor()))
             {
                 ScaleWhites(fixture, level);
+                RefreshChannelSliders();
             }
             else if (fixture.Channels.Any(c => c.Channel.Type.IsColorMix()))
             {
@@ -384,9 +385,27 @@ public sealed partial class ControlView : UserControl
         ChannelType.Red, ChannelType.Green, ChannelType.Blue,
     };
 
+    private readonly Dictionary<ChannelType, (Slider Slider, PatchedFixture Owner)> _channelSliders = new();
+
+    /// <summary>Moves the "More controls" sliders to the current values, e.g. after the dimmer changed them.</summary>
+    private void RefreshChannelSliders()
+    {
+        _syncing = true;
+        try
+        {
+            foreach (var (type, (slider, owner)) in _channelSliders)
+                if (Read(owner, type) is double v && slider.Value != v) slider.Value = v;
+        }
+        finally
+        {
+            _syncing = false;
+        }
+    }
+
     private void BuildChannelRows(List<PatchedFixture> fixtures, bool colorCardShown)
     {
         ChannelRows.Children.Clear();
+        _channelSliders.Clear();
         var types = fixtures.SelectMany(f => f.Channels.Select(c => c.Channel.Type))
             .Where(t => !HandledElsewhere.Contains(t) && !(t == ChannelType.White && colorCardShown))
             .Distinct()
@@ -429,6 +448,7 @@ public sealed partial class ControlView : UserControl
             Grid.SetColumn(slider, 1);
             row.Children.Add(label);
             row.Children.Add(slider);
+            _channelSliders[type] = (slider, owner);
 
             if (channel.Capabilities.Count > 1)
             {
