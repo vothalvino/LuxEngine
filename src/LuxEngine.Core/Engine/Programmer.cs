@@ -37,9 +37,11 @@ public sealed class Programmer
         }
     }
 
+    /// <summary>Starts an effect. It replaces an effect of the same type on the same lights; a movement replaces any other movement.</summary>
     public void AddEffect(Effect effect)
     {
-        _effects.RemoveAll(e => e.Type == effect.Type && e.FixtureIds.Intersect(effect.FixtureIds).Any());
+        _effects.RemoveAll(e => (e.Type == effect.Type || (e.Type.IsMovement() && effect.Type.IsMovement()))
+                                && e.FixtureIds.Intersect(effect.FixtureIds).Any());
         _effects.Add(effect);
     }
 

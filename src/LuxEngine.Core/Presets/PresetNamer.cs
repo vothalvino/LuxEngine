@@ -36,7 +36,7 @@ public static class PresetNamer
             parts.Add(pan.Concat(tilt).All(v => Math.Abs(v - 128) <= 8) ? "Center" : "Position");
 
         foreach (var name in OtherSettings(preset, TypeOf, show)) parts.Add(name);
-        foreach (var type in preset.Effects.Select(e => e.Type).Distinct()) parts.Add(type.ToString());
+        foreach (var type in preset.Effects.Select(e => e.Type).Distinct()) parts.Add(type.DisplayName());
 
         // The light names plus at most three details keep the name short enough for the preset list.
         return string.Join(" · ", parts.Take(4));

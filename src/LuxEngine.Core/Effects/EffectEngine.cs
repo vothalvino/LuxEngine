@@ -68,6 +68,20 @@ public static class EffectEngine
                     Offset(values, fixture, ChannelType.Pan, size * 64 * Math.Cos(angle));
                     Offset(values, fixture, ChannelType.Tilt, size * 64 * Math.Sin(angle));
                     break;
+
+                case EffectType.Figure8:
+                    double a8 = 2 * Math.PI * phase;
+                    Offset(values, fixture, ChannelType.Pan, size * 64 * Math.Sin(a8));
+                    Offset(values, fixture, ChannelType.Tilt, size * 32 * Math.Sin(2 * a8));
+                    break;
+
+                case EffectType.PanSweep:
+                    Offset(values, fixture, ChannelType.Pan, size * 64 * Math.Sin(2 * Math.PI * phase));
+                    break;
+
+                case EffectType.TiltSweep:
+                    Offset(values, fixture, ChannelType.Tilt, size * 64 * Math.Sin(2 * Math.PI * phase));
+                    break;
             }
         }
     }
@@ -76,7 +90,7 @@ public static class EffectEngine
     public static string Affects(EffectType type) => type switch
     {
         EffectType.Rainbow => "Color",
-        EffectType.Circle => "Position",
+        _ when type.IsMovement() => "Position",
         _ => "Dimmer",
     };
 

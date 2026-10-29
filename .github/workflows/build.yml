@@ -176,6 +176,15 @@ jobs:
             Click "Full"; Start-Sleep 2
             Shot "8b-white-only-full"
           } catch { Write-Host "White-only light check failed: $_" }
+          try {
+            $cond = New-Object System.Windows.Automation.AndCondition(
+              (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Spot 1")),
+              (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::ListItem)))
+            $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond).GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            Start-Sleep 1
+            Click "∞ Figure 8"; Start-Sleep 2
+            Shot "9-movement"
+          } catch { Write-Host "Movement check failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }

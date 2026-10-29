@@ -97,6 +97,7 @@ public sealed partial class ControlView : UserControl
         Cards.Children.Insert(hasColor ? Cards.Children.Count : Cards.Children.IndexOf(ColorCard), ChannelsCard);
         WhiteSlider.Visibility = WhiteLabel.Visibility = hasWhite ? Visibility.Visible : Visibility.Collapsed;
         PositionCard.Visibility = hasPosition ? Visibility.Visible : Visibility.Collapsed;
+        MovementCard.Visibility = hasPosition ? Visibility.Visible : Visibility.Collapsed;
 
         _syncing = true;
         try
@@ -329,11 +330,55 @@ public sealed partial class ControlView : UserControl
         var selected = Selected.ToHashSet();
         lock (AppServices.Engine.SyncRoot)
         {
-            foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => ef.FixtureIds.Any(selected.Contains)))
+            foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => !ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)))
             {
                 effect.Speed = effect.Type == EffectType.Strobe ? Math.Max(SpeedSlider.Value * 4, 2) : SpeedSlider.Value;
                 effect.Size = SizeSlider.Value;
                 effect.Spread = SpreadSlider.Value;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ movement
+
+    private static List<PatchedFixture> SelectedMovers() =>
+        SelectedFixtures().Where(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt)).ToList();
+
+    private void Movement_Click(object sender, RoutedEventArgs e)
+    {
+        var movers = SelectedMovers();
+        if (movers.Count == 0) return;
+        AppServices.Engine.AddEffect(new Effect
+        {
+            Type = Enum.Parse<EffectType>((string)((FrameworkElement)sender).Tag),
+            Speed = MoveSpeedSlider.Value,
+            Size = MoveSizeSlider.Value,
+            Spread = MoveSpreadSlider.Value,
+            FixtureIds = movers.Select(f => f.Instance.Id).ToList(),
+        });
+    }
+
+    private void StopMovement_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = Selected.ToHashSet();
+        lock (AppServices.Engine.SyncRoot)
+        {
+            foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)).ToList())
+                AppServices.Engine.Programmer.RemoveEffect(effect.Id);
+        }
+    }
+
+    private void MoveParam_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        if (MoveSpeedSlider is null || MoveSizeSlider is null || MoveSpreadSlider is null) return;
+        var selected = Selected.ToHashSet();
+        lock (AppServices.Engine.SyncRoot)
+        {
+            foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)))
+            {
+                effect.Speed = MoveSpeedSlider.Value;
+                effect.Size = MoveSizeSlider.Value;
+                effect.Spread = MoveSpreadSlider.Value;
             }
         }
     }
@@ -675,7 +720,7 @@ public sealed partial class ControlView : UserControl
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 row.Children.Add(new TextBlock
                 {
-                    Text = $"Effect: {effect.Type} (speed {effect.Speed:0.##}, on {effect.FixtureIds.Count} light{(effect.FixtureIds.Count == 1 ? "" : "s")})",
+                    Text = $"Effect: {effect.Type.DisplayName()} (speed {effect.Speed:0.##}, on {effect.FixtureIds.Count} light{(effect.FixtureIds.Count == 1 ? "" : "s")})",
                     VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis,
                 });
                 var remove = new Button { Content = new FontIcon { Glyph = "\uE711", FontSize = 11 }, Padding = new Thickness(6, 4, 6, 4) };

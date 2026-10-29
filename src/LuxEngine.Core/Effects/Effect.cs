@@ -12,6 +12,28 @@ public enum EffectType
     Strobe,
     /// <summary>Moving heads draw a circle.</summary>
     Circle,
+    /// <summary>Moving heads draw a figure 8.</summary>
+    Figure8,
+    /// <summary>Moving heads swing left and right.</summary>
+    PanSweep,
+    /// <summary>Moving heads swing up and down.</summary>
+    TiltSweep,
+}
+
+public static class EffectTypes
+{
+    /// <summary>Effects that move pan/tilt (only one of them runs on a light at a time).</summary>
+    public static bool IsMovement(this EffectType type) =>
+        type is EffectType.Circle or EffectType.Figure8 or EffectType.PanSweep or EffectType.TiltSweep;
+
+    /// <summary>Name shown to people, e.g. "Figure 8".</summary>
+    public static string DisplayName(this EffectType type) => type switch
+    {
+        EffectType.Figure8 => "Figure 8",
+        EffectType.PanSweep => "Pan sweep",
+        EffectType.TiltSweep => "Tilt sweep",
+        _ => type.ToString(),
+    };
 }
 
 /// <summary>A running effect applied to a set of fixtures.</summary>

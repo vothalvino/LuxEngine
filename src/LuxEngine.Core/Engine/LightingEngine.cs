@@ -455,7 +455,12 @@ public sealed class LightingEngine
                     v = Math.Clamp(v, 0, 255);
                     values[key] = v;
                     if (ch.Address is >= 1 and <= PatchHelper.UniverseSize)
-                        data[ch.Address - 1] = (byte)Math.Round(v);
+                    {
+                        // Inverting only changes what is sent, so the stage view and presets keep normal directions.
+                        bool invert = (fixture.Instance.InvertPan && type is ChannelType.Pan or ChannelType.PanFine)
+                                   || (fixture.Instance.InvertTilt && type is ChannelType.Tilt or ChannelType.TiltFine);
+                        data[ch.Address - 1] = (byte)Math.Round(invert ? 255 - v : v);
+                    }
                 }
             }
 
