@@ -77,7 +77,7 @@ public sealed class ButtonPageView : UserControl
         _viewer.ViewChanged += (_, _) => _zoomText.Text = $"{_viewer.ZoomFactor * 100:0}%";
         _viewer.SizeChanged += (_, _) =>
         {
-            if (!_fitted && _viewer.ActualWidth > 0) { _fitted = true; Fit(); }
+            if (!_fitted && _viewer.ActualWidth > 0) { _fitted = true; Fit(minimumZoom: 0.8); }
         };
         _viewer.AddHandler(PointerPressedEvent, new PointerEventHandler(Pan_Pressed), true);
         _viewer.AddHandler(PointerMovedEvent, new PointerEventHandler(Pan_Moved), true);
@@ -178,14 +178,27 @@ public sealed class ButtonPageView : UserControl
         _viewer.ChangeView(cx * zoom - _viewer.ViewportWidth / 2, cy * zoom - _viewer.ViewportHeight / 2, zoom);
     }
 
-    /// <summary>Zooms so the whole grid fits in the visible area.</summary>
-    private void Fit()
+    /// <summary>
+    /// Zooms so the whole grid fits in the visible area. With a minimum zoom (used when the page opens),
+    /// it stays readable and scrolls to the first buttons instead.
+    /// </summary>
+    private void Fit() => Fit(_viewer.MinZoomFactor);
+
+    private void Fit(double minimumZoom)
     {
-        var (rowFrom, rowTo, columnFrom, columnTo) = Page.Extent();
+        var page = Page;
+        var (rowFrom, rowTo, columnFrom, columnTo) = page.Extent();
         double width = (columnTo - columnFrom + 1) * CellWidth + 16, height = (rowTo - rowFrom + 1) * CellHeight + 16;
         if (_viewer.ActualWidth <= 0 || _viewer.ActualHeight <= 0) return;
-        float zoom = (float)Math.Clamp(Math.Min(_viewer.ActualWidth / width, _viewer.ActualHeight / height), _viewer.MinZoomFactor, 1.5);
-        _viewer.ChangeView(0, 0, zoom);
+        float zoom = (float)Math.Clamp(Math.Min(_viewer.ActualWidth / width, _viewer.ActualHeight / height), minimumZoom, 1.5);
+        double x = 0, y = 0;
+        if (page.Buttons.Count > 0 && zoom * width > _viewer.ActualWidth + 1)
+        {
+            // Start one square before the top-left button so it does not sit against the edge.
+            x = (page.Buttons.Min(b => b.Column) - columnFrom - 1) * CellWidth * zoom;
+            y = (page.Buttons.Min(b => b.Row) - rowFrom - 1) * CellHeight * zoom;
+        }
+        _viewer.ChangeView(Math.Max(0, x), Math.Max(0, y), zoom, true);
     }
 
     /// <summary>Drag the background (or use the middle mouse button anywhere) to move around the grid.</summary>
