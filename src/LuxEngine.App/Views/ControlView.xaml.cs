@@ -41,12 +41,25 @@ public sealed partial class ControlView : UserControl
             if (change.HasFlag(ShowChange.Patch)) SyncFromSelection();
         };
         Loaded += (_, _) => SyncFromSelection();
+        AppServices.PresetEditor.Changed += OnPresetEditChanged;
+        AppServices.Document.Changed += change =>
+        {
+            var editor = AppServices.PresetEditor;
+            if (!editor.IsEditing) return;
+            if (change == ShowChange.All) editor.Abandon();   // another show was opened
+            else if (AppServices.Engine.Show.PresetRoot.FindPreset(editor.Editing!.Id) is null) editor.Cancel();
+        };
 
         SoundSource.SelectedIndex = AppServices.Settings.AudioSource == nameof(AudioSource.Microphone) ? 1 : 0;
 
         _meterTimer = DispatcherQueue.CreateTimer();
         _meterTimer.Interval = TimeSpan.FromMilliseconds(50);
-        _meterTimer.Tick += (_, _) => SoundMeter.Value = AppServices.Sound.Level;
+        _meterTimer.Tick += (_, _) =>
+        {
+            SoundMeter.Value = AppServices.Sound.Level;
+            UpdatePresetEditInfo();
+            UpdateSaveButton(SavePresetButton);
+        };
         _meterTimer.Start();
     }
 
@@ -445,6 +458,42 @@ public sealed partial class ControlView : UserControl
         _baseColors.Clear();
         SyncFromSelection();
     }
+
+    // ------------------------------------------------------------------ preset editing
+
+    private void OnPresetEditChanged()
+    {
+        var preset = AppServices.PresetEditor.Editing;
+        PresetEditBar.Visibility = preset is null ? Visibility.Collapsed : Visibility.Visible;
+        _baseColors.Clear();
+        SyncFromSelection();
+        if (preset is null) return;
+        PresetEditTitle.Text = $"Editing preset \"{preset.Name}\"";
+        UpdatePresetEditInfo();
+    }
+
+    private void UpdatePresetEditInfo()
+    {
+        if (!AppServices.PresetEditor.IsEditing) return;
+        int count = AppServices.Engine.ProgrammerFixtures().Count;
+        PresetEditInfo.Text = $"{count} light{(count == 1 ? "" : "s")} in this preset (marked with a ring). The controls show the preset's values; change what you need, then save.";
+    }
+
+    /// <summary>"Save as preset" only makes sense when something has been set (and not while editing a preset).</summary>
+    internal static void UpdateSaveButton(Button button)
+    {
+        bool editing = AppServices.PresetEditor.IsEditing;
+        bool enabled = !editing && !AppServices.Engine.Programmer.IsEmpty;
+        if (button.IsEnabled == enabled) return;
+        button.IsEnabled = enabled;
+        ToolTipService.SetToolTip(button, editing ? "Finish editing the preset first"
+            : enabled ? "Save the current look as a new preset"
+            : "Nothing to save yet: select lights and set a color, dimmer or position first");
+    }
+
+    private void PresetEditSave_Click(object sender, RoutedEventArgs e) => AppServices.PresetEditor.Save();
+
+    private void PresetEditCancel_Click(object sender, RoutedEventArgs e) => AppServices.PresetEditor.Cancel();
 
     private async void SavePreset_Click(object sender, RoutedEventArgs e)
     {

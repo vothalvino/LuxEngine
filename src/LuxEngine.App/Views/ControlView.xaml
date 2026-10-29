@@ -7,11 +7,39 @@
     <Grid RowSpacing="8" Padding="12,10,12,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!-- Shown while a preset is being edited -->
+        <Border Grid.Row="0" x:Name="PresetEditBar" Visibility="Collapsed" CornerRadius="8" Padding="12,8"
+                Background="{StaticResource LuxAccentBrush}">
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Glyph="&#xE70F;" FontSize="16" Foreground="#1B1B1B" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="PresetEditTitle" Foreground="#1B1B1B" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="PresetEditInfo" Foreground="#1B1B1B" Opacity="0.85" TextTrimming="CharacterEllipsis"
+                               Style="{StaticResource CaptionTextBlockStyle}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <Button Click="PresetEditCancel_Click" Content="Cancel" />
+                    <Button Click="PresetEditSave_Click" AutomationProperties.Name="Save preset changes">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE74E;" FontSize="14" />
+                            <TextBlock Text="Save changes" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Selection summary and actions -->
-        <Grid Grid.Row="0" ColumnSpacing="8">
+        <Grid Grid.Row="1" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -25,7 +53,7 @@
                         <TextBlock Text="Clear" />
                     </StackPanel>
                 </Button>
-                <Button Click="SavePreset_Click" Style="{StaticResource AccentButtonStyle}">
+                <Button x:Name="SavePresetButton" Click="SavePreset_Click" Style="{StaticResource AccentButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE74E;" FontSize="14" />
                         <TextBlock Text="Save as preset" />
@@ -34,7 +62,7 @@
             </StackPanel>
         </Grid>
 
-        <ScrollViewer Grid.Row="1" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto"
+        <ScrollViewer Grid.Row="2" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto"
                       VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
             <StackPanel x:Name="Cards" Orientation="Horizontal" Spacing="10">
 
@@ -166,7 +194,7 @@
         </ScrollViewer>
 
         <!-- Shown when nothing is selected -->
-        <Border Grid.Row="1" x:Name="NothingSelected" Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.92"
+        <Border Grid.Row="2" x:Name="NothingSelected" Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.92"
                 CornerRadius="8" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
                 <FontIcon Glyph="&#xE8B0;" FontSize="30" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

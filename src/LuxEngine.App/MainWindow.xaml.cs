@@ -191,6 +191,8 @@ public sealed partial class MainWindow : Window
 
     public void ShowCueTab() => ModeSelector.SelectedItem = CueTab;
 
+    public void ShowControlTab() => ModeSelector.SelectedItem = ControlTab;
+
     private void Root_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
     {
         var focused = FocusManager.GetFocusedElement(Content.XamlRoot);

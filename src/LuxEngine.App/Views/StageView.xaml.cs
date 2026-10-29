@@ -27,6 +27,7 @@ public sealed partial class StageView : UserControl
         public required GradientStop GlowCenter;
         public required Ellipse Body;
         public required Ellipse Beam;
+        public required Ellipse PresetRing;
         public required TextBlock Label;
     }
 
@@ -83,6 +84,15 @@ public sealed partial class StageView : UserControl
                 HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
                 Visibility = Visibility.Collapsed,
             };
+            // Marks the lights that belong to the preset being edited.
+            var ring = new Ellipse
+            {
+                Width = BodySize + 16, Height = BodySize + 16, IsHitTestVisible = false,
+                Stroke = new SolidColorBrush(Color.FromArgb(255, 255, 200, 61)), StrokeThickness = 2.5,
+                StrokeDashArray = new DoubleCollection { 2, 1.5 },
+                HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
+                Visibility = Visibility.Collapsed,
+            };
             var label = new TextBlock
             {
                 Text = fixture.Name, FontSize = 11, Foreground = new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)),
@@ -94,10 +104,11 @@ public sealed partial class StageView : UserControl
             root.Children.Add(glow);
             root.Children.Add(body);
             root.Children.Add(beam);
+            root.Children.Add(ring);
             root.Children.Add(label);
             ToolTipService.SetToolTip(root, $"{fixture.Name}\nUniverse {fixture.Universe}, address {fixture.Address}");
             StageCanvas.Children.Add(root);
-            _visuals[fixture.Id] = new FixtureVisual { Id = fixture.Id, Root = root, Glow = glow, GlowCenter = center, Body = body, Beam = beam, Label = label };
+            _visuals[fixture.Id] = new FixtureVisual { Id = fixture.Id, Root = root, Glow = glow, GlowCenter = center, Body = body, Beam = beam, PresetRing = ring, Label = label };
         }
         EmptyText.Visibility = _visuals.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         Layout();
@@ -133,6 +144,13 @@ public sealed partial class StageView : UserControl
 
     private void UpdateColors()
     {
+        var inPreset = AppServices.PresetEditor.IsEditing ? AppServices.Engine.ProgrammerFixtures() : null;
+        foreach (var v in _visuals.Values)
+        {
+            var visibility = inPreset?.Contains(v.Id) == true ? Visibility.Visible : Visibility.Collapsed;
+            if (v.PresetRing.Visibility != visibility) v.PresetRing.Visibility = visibility;
+        }
+
         foreach (var v in _visuals.Values)
         {
             var look = AppServices.Engine.GetLook(v.Id);

@@ -19,6 +19,7 @@ public sealed class FixtureRow : ObservableObject
     private string _address = "";
     private Brush _colorBrush = new SolidColorBrush(Colors.Black);
     private Brush? _addressBrush;
+    private Visibility _inPreset = Visibility.Collapsed;
 
     public FixtureRow(Guid id, string model)
     {
@@ -32,6 +33,9 @@ public sealed class FixtureRow : ObservableObject
     public string Address { get => _address; set => SetProperty(ref _address, value); }
     public Brush ColorBrush { get => _colorBrush; set => SetProperty(ref _colorBrush, value); }
     public Brush? AddressBrush { get => _addressBrush; set => SetProperty(ref _addressBrush, value); }
+
+    /// <summary>Visible when the light belongs to the preset being edited.</summary>
+    public Visibility InPreset { get => _inPreset; set => SetProperty(ref _inPreset, value); }
 
     /// <summary>Used as the accessible name of the list item (screen readers, UI automation).</summary>
     public override string ToString() => Name;
@@ -89,8 +93,10 @@ public sealed partial class FixturePanel : UserControl
 
     private void UpdateColors()
     {
+        var inPreset = AppServices.PresetEditor.IsEditing ? AppServices.Engine.ProgrammerFixtures() : null;
         foreach (var row in Rows)
         {
+            row.InPreset = inPreset?.Contains(row.Id) == true ? Visibility.Visible : Visibility.Collapsed;
             var color = ColorMixer.FromLook(AppServices.Engine.GetLook(row.Id));
             if (row.ColorBrush is SolidColorBrush b && b.Color == color) continue;
             row.ColorBrush = new SolidColorBrush(color);
@@ -146,6 +152,17 @@ public sealed partial class FixturePanel : UserControl
         var edit = new MenuFlyoutItem { Text = "Edit name and address…", Icon = new FontIcon { Glyph = "" } };
         edit.Click += async (_, _) => await FixturePropertiesDialog.EditAsync(row.Id);
         menu.Items.Add(edit);
+
+        var editType = new MenuFlyoutItem { Text = "Edit fixture type (channels, ranges)…", Icon = new FontIcon { Glyph = "\uE90F" } };
+        editType.Click += async (_, _) => await FixtureEditorDialog.EditAsync(row.Id);
+        menu.Items.Add(editType);
+
+        if (AppServices.PresetEditor.IsEditing && AppServices.Engine.ProgrammerFixtures().Contains(row.Id))
+        {
+            var removeFromPreset = new MenuFlyoutItem { Text = "Remove from the preset being edited", Icon = new FontIcon { Glyph = "\uE738" } };
+            removeFromPreset.Click += (_, _) => AppServices.Engine.ReleaseFixture(row.Id);
+            menu.Items.Add(removeFromPreset);
+        }
 
         var sameType = new MenuFlyoutItem { Text = "Select all of this type", Icon = new FontIcon { Glyph = "" } };
         sameType.Click += (_, _) => AppServices.Selection.Set(show.Fixtures.Where(f => f.DefinitionId == fixture.DefinitionId).Select(f => f.Id));

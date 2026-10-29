@@ -164,3 +164,40 @@ public class LightingEngineTests
         Assert.Equal(128, value.Value);
     }
 }
+
+public class PresetEditTests
+{
+    [Fact]
+    public void Editing_a_preset_shows_only_its_values_saves_changes_and_restores_the_live_look()
+    {
+        var t = new TestShow();
+        var preset = t.AddPreset("Look", (t.Par1, "Intensity", 200), (t.Par1, "Red", 255));
+        var engine = new LightingEngine(t.Show);
+        engine.SetValue(t.Par2.Id, "Intensity", 99);           // something set by hand before editing
+
+        var before = engine.BeginPresetEdit(preset);
+        Assert.Equal(new[] { t.Par1.Id }, engine.ProgrammerFixtures());
+        Assert.Equal(255, engine.GetPlaybackValue(t.Par1.Id, "Red"));
+
+        engine.SetValue(t.Par1.Id, "Red", 128);                // a small change
+        engine.SetValue(t.NoDimmer.Id, "Blue", 50);            // add another light
+        engine.EndPresetEdit(preset, before, save: true);
+
+        Assert.Equal(3, preset.Values.Count);
+        Assert.Contains(new Presets.PresetValue(t.Par1.Id, "Red", 128), preset.Values);
+        Assert.Equal(new[] { t.Par2.Id }, engine.ProgrammerFixtures());   // live look is back
+    }
+
+    [Fact]
+    public void Cancelling_leaves_the_preset_unchanged()
+    {
+        var t = new TestShow();
+        var preset = t.AddPreset("Look", (t.Par1, "Intensity", 200));
+        var engine = new LightingEngine(t.Show);
+        var before = engine.BeginPresetEdit(preset);
+        engine.ReleaseFixture(t.Par1.Id);
+        engine.EndPresetEdit(preset, before, save: false);
+        Assert.Single(preset.Values);
+        Assert.Empty(engine.ProgrammerFixtures());
+    }
+}

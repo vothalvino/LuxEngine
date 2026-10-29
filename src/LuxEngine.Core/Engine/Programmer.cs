@@ -3,6 +3,9 @@ using LuxEngine.Core.Presets;
 
 namespace LuxEngine.Core.Engine;
 
+/// <summary>A saved copy of the programmer, to put things back after editing a preset.</summary>
+public sealed record ProgrammerSnapshot(IReadOnlyDictionary<ChannelKey, byte> Values, IReadOnlyList<Effect> Effects);
+
 /// <summary>
 /// Values set by hand in the Control view, or by clicking a preset. The programmer has the
 /// highest priority: its values override whatever the running cue is doing until it is cleared.
@@ -49,6 +52,20 @@ public sealed class Programmer
         foreach (var key in _values.Keys.Where(k => k.FixtureId == fixtureId).ToList()) _values.Remove(key);
         foreach (var effect in _effects) effect.FixtureIds.Remove(fixtureId);
         _effects.RemoveAll(e => e.FixtureIds.Count == 0);
+    }
+
+    /// <summary>Every fixture with a value or effect in the programmer.</summary>
+    public HashSet<Guid> FixtureIds() =>
+        _values.Keys.Select(k => k.FixtureId).Concat(_effects.SelectMany(e => e.FixtureIds)).ToHashSet();
+
+    public ProgrammerSnapshot Snapshot() =>
+        new(new Dictionary<ChannelKey, byte>(_values), _effects.Select(e => e.Clone()).ToList());
+
+    public void Restore(ProgrammerSnapshot snapshot)
+    {
+        Clear();
+        foreach (var (key, value) in snapshot.Values) _values[key] = value;
+        _effects.AddRange(snapshot.Effects.Select(e => e.Clone()));
     }
 
     public void Clear()
