@@ -252,7 +252,7 @@ jobs:
           } catch { Write-Host "Keyboard check failed: $_" }
           try {
             # The same screens in both themes, for checking the look.
-            foreach ($theme in @("Dark")) {
+            foreach ($theme in @("Dark", "Light")) {
               MouseClick "View"; Start-Sleep 1
               # The opened menu is its own pop-up window, so look for the item anywhere in this app.
               $items = $A::RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants,
