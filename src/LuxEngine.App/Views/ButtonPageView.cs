@@ -25,7 +25,25 @@ public sealed class ButtonPageView : UserControl
         "#3B82F6", "#EF4444", "#22C55E", "#F59E0B", "#A855F7", "#EC4899", "#14B8A6", "#F97316", "#94A3B8",
     };
 
+    private const double CellWidth = 132;
+    private const double CellHeight = 76;
+
     private readonly Grid _grid = new();
+    private readonly ScrollViewer _viewer = new()
+    {
+        ZoomMode = ZoomMode.Enabled,
+        MinZoomFactor = 0.3f,
+        MaxZoomFactor = 3f,
+        HorizontalScrollMode = ScrollMode.Enabled,
+        VerticalScrollMode = ScrollMode.Enabled,
+        HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+    };
+    private readonly Border _canvas = new() { Background = new SolidColorBrush(Colors.Transparent), Padding = new Thickness(8) };
+    private readonly TextBlock _zoomText = new() { Width = 44, TextAlignment = TextAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+    private Windows.Foundation.Point? _panStart;
+    private (double X, double Y) _panOffset;
+    private bool _fitted;
     private readonly Dictionary<Guid, (Border Face, Rectangle Level)> _faces = new();
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _timer;
 
@@ -36,7 +54,7 @@ public sealed class ButtonPageView : UserControl
         var hint = new TextBlock
         {
             Text = "Click a button to switch it on or off. Buttons that touch each other are linked: only one of them can be on. "
-                 + "Drag presets onto a button or an empty square; drag a button to move it.",
+                 + "Drag presets onto a button or an empty square; drag a button to move it. Drag the background to move around; Ctrl + wheel zooms.",
             TextWrapping = TextWrapping.Wrap,
             VerticalAlignment = VerticalAlignment.Center,
             Foreground = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
@@ -45,16 +63,32 @@ public sealed class ButtonPageView : UserControl
         var toolbar = new Grid { ColumnSpacing = 12 };
         toolbar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         toolbar.ColumnDefinitions.Add(new ColumnDefinition());
+        toolbar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         Grid.SetColumn(hint, 1);
+        var zoom = ZoomControls();
+        Grid.SetColumn(zoom, 2);
         toolbar.Children.Add(release);
         toolbar.Children.Add(hint);
+        toolbar.Children.Add(zoom);
+
+        _canvas.Child = _grid;
+        _viewer.Content = _canvas;
+        _viewer.ViewChanged += (_, _) => _zoomText.Text = $"{_viewer.ZoomFactor * 100:0}%";
+        _viewer.SizeChanged += (_, _) =>
+        {
+            if (!_fitted && _viewer.ActualWidth > 0) { _fitted = true; Fit(); }
+        };
+        _viewer.AddHandler(PointerPressedEvent, new PointerEventHandler(Pan_Pressed), true);
+        _viewer.AddHandler(PointerMovedEvent, new PointerEventHandler(Pan_Moved), true);
+        _viewer.AddHandler(PointerReleasedEvent, new PointerEventHandler(Pan_Released), true);
+        _viewer.PointerCaptureLost += (_, _) => _panStart = null;
 
         var root = new Grid { RowSpacing = 8, Padding = new Thickness(12, 4, 12, 12) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition());
-        Grid.SetRow(_grid, 1);
+        Grid.SetRow(_viewer, 1);
         root.Children.Add(toolbar);
-        root.Children.Add(_grid);
+        root.Children.Add(_viewer);
         Content = root;
 
         AppServices.Document.Changed += change =>
@@ -80,8 +114,8 @@ public sealed class ButtonPageView : UserControl
         _grid.ColumnDefinitions.Clear();
         _faces.Clear();
         var page = Page;
-        for (int r = 0; r < page.Rows; r++) _grid.RowDefinitions.Add(new RowDefinition());
-        for (int c = 0; c < page.Columns; c++) _grid.ColumnDefinitions.Add(new ColumnDefinition());
+        for (int r = 0; r < page.Rows; r++) _grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(CellHeight) });
+        for (int c = 0; c < page.Columns; c++) _grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(CellWidth) });
 
         // Connectors first so they sit behind the buttons and show which buttons are linked.
         foreach (var b in page.Buttons)
@@ -103,6 +137,76 @@ public sealed class ButtonPageView : UserControl
     }
 
     /// <summary>A short bar in the gap between two touching buttons, showing they are linked.</summary>
+    // ------------------------------------------------------------------ zoom and pan
+
+    private FrameworkElement ZoomControls()
+    {
+        Button Icon(string glyph, string tip, Action click)
+        {
+            var b = new Button { Content = new FontIcon { Glyph = glyph, FontSize = 13 }, Padding = new Thickness(8, 6, 8, 6) };
+            ToolTipService.SetToolTip(b, tip);
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(b, tip);
+            b.Click += (_, _) => click();
+            return b;
+        }
+        var panel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4, VerticalAlignment = VerticalAlignment.Center };
+        panel.Children.Add(Icon("\uE71F", "Zoom out (Ctrl + mouse wheel)", () => ZoomBy(1 / 1.25)));
+        panel.Children.Add(_zoomText);
+        panel.Children.Add(Icon("\uE8A3", "Zoom in (Ctrl + mouse wheel)", () => ZoomBy(1.25)));
+        panel.Children.Add(Icon("\uE9A6", "Fit all buttons", Fit));
+        _zoomText.Text = "100%";
+        return panel;
+    }
+
+    /// <summary>Zooms around the middle of the visible area.</summary>
+    private void ZoomBy(double factor)
+    {
+        float old = _viewer.ZoomFactor;
+        float zoom = (float)Math.Clamp(old * factor, _viewer.MinZoomFactor, _viewer.MaxZoomFactor);
+        double cx = (_viewer.HorizontalOffset + _viewer.ViewportWidth / 2) / old;
+        double cy = (_viewer.VerticalOffset + _viewer.ViewportHeight / 2) / old;
+        _viewer.ChangeView(cx * zoom - _viewer.ViewportWidth / 2, cy * zoom - _viewer.ViewportHeight / 2, zoom);
+    }
+
+    /// <summary>Zooms so the whole grid fits in the visible area.</summary>
+    private void Fit()
+    {
+        double width = Page.Columns * CellWidth + 16, height = Page.Rows * CellHeight + 16;
+        if (_viewer.ActualWidth <= 0 || _viewer.ActualHeight <= 0) return;
+        float zoom = (float)Math.Clamp(Math.Min(_viewer.ActualWidth / width, _viewer.ActualHeight / height), _viewer.MinZoomFactor, 1.5);
+        _viewer.ChangeView(0, 0, zoom);
+    }
+
+    /// <summary>Drag the background (or use the middle mouse button anywhere) to move around the grid.</summary>
+    private void Pan_Pressed(object sender, PointerRoutedEventArgs e)
+    {
+        var point = e.GetCurrentPoint(_viewer);
+        bool background = e.OriginalSource == _canvas || e.OriginalSource == _grid;
+        if (!point.Properties.IsMiddleButtonPressed && !(background && point.Properties.IsLeftButtonPressed)) return;
+        if (e.Pointer.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Touch) return; // touch pans by itself
+        _panStart = point.Position;
+        _panOffset = (_viewer.HorizontalOffset, _viewer.VerticalOffset);
+        _viewer.CapturePointer(e.Pointer);
+        ProtectedCursor = Microsoft.UI.Input.InputSystemCursor.Create(Microsoft.UI.Input.InputSystemCursorShape.SizeAll);
+        e.Handled = true;
+    }
+
+    private void Pan_Moved(object sender, PointerRoutedEventArgs e)
+    {
+        if (_panStart is not { } start) return;
+        var p = e.GetCurrentPoint(_viewer).Position;
+        _viewer.ChangeView(_panOffset.X - (p.X - start.X), _panOffset.Y - (p.Y - start.Y), null, true);
+        e.Handled = true;
+    }
+
+    private void Pan_Released(object sender, PointerRoutedEventArgs e)
+    {
+        if (_panStart is null) return;
+        _panStart = null;
+        _viewer.ReleasePointerCapture(e.Pointer);
+        ProtectedCursor = null;
+    }
+
     private void AddConnector(int row, int column, bool horizontal)
     {
         var link = new Rectangle

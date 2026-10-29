@@ -107,6 +107,14 @@ jobs:
             MouseClick "Red button"; Start-Sleep 1        # touches Deep blue, so Deep blue turns off
             MouseClick "Spots center button"; Start-Sleep 2
             Shot "3c-buttons-on"
+            Click "Zoom in (Ctrl + mouse wheel)"; Click "Zoom in (Ctrl + mouse wheel)"; Start-Sleep 1
+            $r = (Find "Red button").Current.BoundingRectangle
+            $x = [int]($r.X + $r.Width / 2); $y = [int]($r.Y + $r.Height / 2)
+            [Lux.Mouse]::SetCursorPos($x, $y); [Lux.Mouse]::mouse_event(0x20, 0, 0, 0, 0)    # middle button down
+            foreach ($i in 1..10) { [Lux.Mouse]::SetCursorPos($x - 15 * $i, $y - 6 * $i); Start-Sleep -Milliseconds 30 }
+            [Lux.Mouse]::mouse_event(0x40, 0, 0, 0, 0); Start-Sleep 1
+            Shot "3d-zoomed-and-panned"
+            Click "Fit all buttons"; Start-Sleep 1
             (Find "Cue list").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
           } catch { Write-Host "Buttons check failed: $_" }
           foreach ($dialog in @("Add fixtures", "DMX outputs")) {
