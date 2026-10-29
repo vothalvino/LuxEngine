@@ -391,9 +391,6 @@ public sealed partial class ControlView : UserControl
         }
     }
 
-    private static List<PatchedFixture> SelectedMovers() =>
-        SelectedFixtures().Where(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt)).ToList();
-
     /// <summary>Copies the Movement card's settings into an effect.</summary>
     private void ApplyMoveSettings(Effect effect)
     {
