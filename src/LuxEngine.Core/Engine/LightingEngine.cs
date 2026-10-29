@@ -189,6 +189,21 @@ public sealed class LightingEngine
         lock (_sync) Programmer.Release(fixtureId, channel);
     }
 
+    /// <summary>Changes a running effect in the programmer (speed, size, shape, area, …).</summary>
+    public void UpdateEffect(Guid effectId, Action<Effect> change)
+    {
+        lock (_sync)
+        {
+            var effect = Programmer.Effects.FirstOrDefault(e => e.Id == effectId);
+            if (effect is not null) change(effect);
+        }
+    }
+
+    public void RestoreProgrammer(ProgrammerSnapshot snapshot)
+    {
+        lock (_sync) Programmer.Restore(snapshot);
+    }
+
     public void RemoveEffect(Guid effectId)
     {
         lock (_sync) Programmer.RemoveEffect(effectId);
@@ -429,12 +444,12 @@ public sealed class LightingEngine
             var overCueList = ControlledFixtures(Programmer.Values.Keys.Concat(_buttonValues.Keys));
             foreach (var effect in CuePlayer.ActiveEffects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness,
-                    overCueList.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
+                    overCueList.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show);
             foreach (var effect in buttonEffects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness,
-                    handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
+                    handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show);
             foreach (var effect in Programmer.Effects)
-                EffectEngine.Apply(effect, now, _fixtures, values, brightness);
+                EffectEngine.Apply(effect, now, _fixtures, values, brightness, show: _show);
 
             double master = Blackout ? 0 : GrandMaster;
             if (SoundToLightAmount > 0)

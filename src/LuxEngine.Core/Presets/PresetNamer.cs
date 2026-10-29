@@ -36,10 +36,20 @@ public static class PresetNamer
             parts.Add(pan.Concat(tilt).All(v => Math.Abs(v - 128) <= 8) ? "Center" : "Position");
 
         foreach (var name in OtherSettings(preset, TypeOf, show)) parts.Add(name);
-        foreach (var type in preset.Effects.Select(e => e.Type).Distinct()) parts.Add(type.DisplayName());
+        foreach (var name in preset.Effects.Select(e => EffectName(show, e)).Distinct()) parts.Add(name);
 
         // The light names plus at most three details keep the name short enough for the preset list.
         return string.Join(" · ", parts.Take(4));
+    }
+
+    /// <summary>"Rainbow", "Figure 8", "My square on Wall".</summary>
+    public static string EffectName(Show show, Effect effect)
+    {
+        var name = effect.Type == EffectType.Shape
+            ? show.Shapes.FirstOrDefault(s => s.Id == effect.ShapeId)?.Name ?? "Shape"
+            : effect.Type.DisplayName();
+        var area = effect.AreaId is Guid id ? show.Areas.FirstOrDefault(a => a.Id == id) : null;
+        return area is null ? name : $"{name} on {area.Name}";
     }
 
     /// <summary>"Pars", "Par 1–4", "Par 1, 3", "Pars + Spots", "All lights" or "5 lights".</summary>

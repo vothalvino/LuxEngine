@@ -40,8 +40,13 @@ public sealed partial class ControlView : UserControl
         AppServices.Document.Changed += change =>
         {
             if (change.HasFlag(ShowChange.Patch)) SyncFromSelection();
+            if (change == ShowChange.All) FillMovementLists();
         };
-        Loaded += (_, _) => SyncFromSelection();
+        Loaded += (_, _) =>
+        {
+            FillMovementLists();
+            SyncFromSelection();
+        };
         AppServices.PresetEditor.Changed += OnPresetEditChanged;
         AppServices.Document.Changed += change =>
         {
@@ -346,18 +351,73 @@ public sealed partial class ControlView : UserControl
     private static List<PatchedFixture> SelectedMovers() =>
         SelectedFixtures().Where(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt)).ToList();
 
+    /// <summary>One entry in the shape list: a built-in movement or a shape from the show's library.</summary>
+    private sealed record ShapeChoice(string Label, EffectType Type, Guid? ShapeId)
+    {
+        public override string ToString() => Label;
+    }
+
+    private sealed record AreaChoice(string Label, Guid? AreaId)
+    {
+        public override string ToString() => Label;
+    }
+
+    private bool _fillingMoveLists;
+
+    /// <summary>Refills the shape and area lists from the show, keeping the current choice.</summary>
+    private void FillMovementLists()
+    {
+        var show = AppServices.Engine.Show;
+        var shape = ShapeBox.SelectedItem as ShapeChoice;
+        var area = AreaBox.SelectedItem as AreaChoice;
+        _fillingMoveLists = true;
+        try
+        {
+            ShapeBox.Items.Clear();
+            foreach (var type in new[] { EffectType.Circle, EffectType.Figure8, EffectType.PanSweep, EffectType.TiltSweep })
+                ShapeBox.Items.Add(new ShapeChoice(type.DisplayName(), type, null));
+            foreach (var s in show.Shapes) ShapeBox.Items.Add(new ShapeChoice($"★ {s.Name}", EffectType.Shape, s.Id));
+            ShapeBox.SelectedItem = ShapeBox.Items.OfType<ShapeChoice>().FirstOrDefault(c => c.Type == shape?.Type && c.ShapeId == shape?.ShapeId)
+                                    ?? ShapeBox.Items[0];
+
+            AreaBox.Items.Clear();
+            AreaBox.Items.Add(new AreaChoice("Around where it points", null));
+            foreach (var a in show.Areas) AreaBox.Items.Add(new AreaChoice(a.Name, a.Id));
+            AreaBox.SelectedItem = AreaBox.Items.OfType<AreaChoice>().FirstOrDefault(c => c.AreaId == area?.AreaId) ?? AreaBox.Items[0];
+        }
+        finally
+        {
+            _fillingMoveLists = false;
+        }
+    }
+
+    private static List<PatchedFixture> SelectedMovers() =>
+        SelectedFixtures().Where(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt)).ToList();
+
+    /// <summary>Copies the Movement card's settings into an effect.</summary>
+    private void ApplyMoveSettings(Effect effect)
+    {
+        if (ShapeBox.SelectedItem is ShapeChoice shape)
+        {
+            effect.Type = shape.Type;
+            effect.ShapeId = shape.ShapeId;
+        }
+        effect.AreaId = (AreaBox.SelectedItem as AreaChoice)?.AreaId;
+        effect.Speed = MoveSpeedSlider.Value;
+        effect.Size = MoveSizeSlider.Value;
+        effect.Width = MoveWidthSlider.Value;
+        effect.Height = MoveHeightSlider.Value;
+        effect.Spread = MoveSpreadSlider.Value;
+        effect.Reverse = MoveReverseBox.IsChecked == true;
+    }
+
     private void Movement_Click(object sender, RoutedEventArgs e)
     {
         var movers = SelectedMovers();
         if (movers.Count == 0) return;
-        AppServices.Engine.AddEffect(new Effect
-        {
-            Type = Enum.Parse<EffectType>((string)((FrameworkElement)sender).Tag),
-            Speed = MoveSpeedSlider.Value,
-            Size = MoveSizeSlider.Value,
-            Spread = MoveSpreadSlider.Value,
-            FixtureIds = movers.Select(f => f.Instance.Id).ToList(),
-        });
+        var effect = new Effect { FixtureIds = movers.Select(f => f.Instance.Id).ToList() };
+        ApplyMoveSettings(effect);
+        AppServices.Engine.AddEffect(effect);
     }
 
     private void StopMovement_Click(object sender, RoutedEventArgs e)
@@ -370,19 +430,34 @@ public sealed partial class ControlView : UserControl
         }
     }
 
-    private void MoveParam_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    /// <summary>Changes to the Movement card apply straight away to movements running on the selected lights.</summary>
+    private void UpdateRunningMovement()
     {
-        if (MoveSpeedSlider is null || MoveSizeSlider is null || MoveSpreadSlider is null) return;
+        if (_fillingMoveLists || MoveReverseBox is null || MoveSpreadSlider is null || ShapeBox is null || AreaBox is null) return;
         var selected = Selected.ToHashSet();
         lock (AppServices.Engine.SyncRoot)
         {
             foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)))
-            {
-                effect.Speed = MoveSpeedSlider.Value;
-                effect.Size = MoveSizeSlider.Value;
-                effect.Spread = MoveSpreadSlider.Value;
-            }
+                ApplyMoveSettings(effect);
         }
+    }
+
+    private void MoveParam_ValueChanged(object sender, RangeBaseValueChangedEventArgs e) => UpdateRunningMovement();
+
+    private void MoveSetting_Changed(object sender, RoutedEventArgs e) => UpdateRunningMovement();
+
+    private void MoveChoice_Changed(object sender, SelectionChangedEventArgs e) => UpdateRunningMovement();
+
+    private async void Shapes_Click(object sender, RoutedEventArgs e)
+    {
+        await Dialogs.ShapeLibraryDialog.ShowLibraryAsync();
+        FillMovementLists();
+    }
+
+    private async void Areas_Click(object sender, RoutedEventArgs e)
+    {
+        await Dialogs.AreaDialog.ShowAreasAsync();
+        FillMovementLists();
     }
 
     // ------------------------------------------------------------------ sound to light
@@ -722,15 +797,25 @@ public sealed partial class ControlView : UserControl
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 row.Children.Add(new TextBlock
                 {
-                    Text = $"Effect: {effect.Type.DisplayName()} (speed {effect.Speed:0.##}, on {effect.FixtureIds.Count} light{(effect.FixtureIds.Count == 1 ? "" : "s")})",
+                    Text = $"Effect: {Core.Presets.PresetNamer.EffectName(AppServices.Engine.Show, effect)} (speed {effect.Speed:0.##}, on {effect.FixtureIds.Count} light{(effect.FixtureIds.Count == 1 ? "" : "s")})",
                     VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis,
                 });
                 var remove = new Button { Content = new FontIcon { Glyph = "\uE711", FontSize = 11 }, Padding = new Thickness(6, 4, 6, 4) };
                 ToolTipService.SetToolTip(remove, "Take this effect out of the preset (for all its lights)");
                 var effectId = effect.Id;
                 remove.Click += (_, _) => AppServices.Engine.RemoveEffect(effectId);
-                Grid.SetColumn(remove, 1);
-                row.Children.Add(remove);
+                var edit = new Button { Content = "Edit…", Padding = new Thickness(8, 4, 8, 4) };
+                ToolTipService.SetToolTip(edit, "Change speed, size, spread and, for movement, shape, area and direction");
+                edit.Click += async (_, _) =>
+                {
+                    await Dialogs.EffectEditDialog.EditAsync(effectId);
+                    UpdatePresetValues(rebuild: true);
+                };
+                var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
+                buttons.Children.Add(edit);
+                buttons.Children.Add(remove);
+                Grid.SetColumn(buttons, 1);
+                row.Children.Add(buttons);
                 PresetValueRows.Children.Add(row);
             }
         }

@@ -154,22 +154,58 @@
                 </Border>
 
                 <!-- Movement effects for moving heads -->
-                <Border Style="{StaticResource CardStyle}" x:Name="MovementCard" Width="256">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Movement" Style="{StaticResource SectionTitleStyle}" />
-                        <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="2" ItemWidth="114" ItemHeight="38">
-                            <Button Content="⭕ Circle" Tag="Circle" Click="Movement_Click" HorizontalAlignment="Stretch" Margin="2" />
-                            <Button Content="∞ Figure 8" Tag="Figure8" Click="Movement_Click" HorizontalAlignment="Stretch" Margin="2" />
-                            <Button Content="↔ Pan sweep" Tag="PanSweep" Click="Movement_Click" HorizontalAlignment="Stretch" Margin="2" />
-                            <Button Content="↕ Tilt sweep" Tag="TiltSweep" Click="Movement_Click" HorizontalAlignment="Stretch" Margin="2" />
-                        </VariableSizedWrapGrid>
-                        <Button Content="Stop movement" Click="StopMovement_Click" HorizontalAlignment="Stretch" Margin="2,0" />
-                        <Grid ColumnSpacing="8">
+                <Border Style="{StaticResource CardStyle}" x:Name="MovementCard" Width="470">
+                    <Grid ColumnSpacing="14" RowSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.ColumnSpan="2" Text="Movement" Style="{StaticResource SectionTitleStyle}" />
+
+                        <StackPanel Grid.Row="1" Spacing="6">
+                            <Grid ColumnSpacing="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="ShapeBox" Header="Shape" HorizontalAlignment="Stretch" SelectionChanged="MoveChoice_Changed" />
+                                <Button Grid.Column="1" Content="Shapes…" Click="Shapes_Click" VerticalAlignment="Bottom" Padding="8,5"
+                                        ToolTipService.ToolTip="Draw, change, duplicate and name movement shapes" />
+                            </Grid>
+                            <Grid ColumnSpacing="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="AreaBox" Header="Area" HorizontalAlignment="Stretch" SelectionChanged="MoveChoice_Changed"
+                                          ToolTipService.ToolTip="Keep the movement inside an area such as the wall" />
+                                <Button Grid.Column="1" Content="Areas…" Click="Areas_Click" VerticalAlignment="Bottom" Padding="8,5"
+                                        ToolTipService.ToolTip="Set up areas such as Stage or Wall for each moving head" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
+                                <Button Click="Movement_Click" Style="{StaticResource AccentButtonStyle}" AutomationProperties.Name="Start movement">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE768;" FontSize="13" />
+                                        <TextBlock Text="Start" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Content="Stop" Click="StopMovement_Click" ToolTipService.ToolTip="Stop the movement on the selected lights" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Grid Grid.Row="1" Grid.Column="1" ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="52" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
@@ -180,12 +216,19 @@
                             <TextBlock Grid.Row="1" Text="Size" VerticalAlignment="Center" />
                             <Slider Grid.Row="1" Grid.Column="1" x:Name="MoveSizeSlider" Minimum="0" Maximum="1" StepFrequency="0.05" Value="0.5"
                                     ValueChanged="MoveParam_ValueChanged" />
-                            <TextBlock Grid.Row="2" Text="Spread" VerticalAlignment="Center"
-                                       ToolTipService.ToolTip="0 = all heads move together; higher = each head a bit later, across the stage" />
-                            <Slider Grid.Row="2" Grid.Column="1" x:Name="MoveSpreadSlider" Minimum="0" Maximum="1" StepFrequency="0.05" Value="0"
+                            <TextBlock Grid.Row="2" Text="Width" VerticalAlignment="Center" ToolTipService.ToolTip="How far it goes left/right (pan)" />
+                            <Slider Grid.Row="2" Grid.Column="1" x:Name="MoveWidthSlider" Minimum="0" Maximum="1" StepFrequency="0.05" Value="1"
                                     ValueChanged="MoveParam_ValueChanged" />
+                            <TextBlock Grid.Row="3" Text="Height" VerticalAlignment="Center" ToolTipService.ToolTip="How far it goes up/down (tilt)" />
+                            <Slider Grid.Row="3" Grid.Column="1" x:Name="MoveHeightSlider" Minimum="0" Maximum="1" StepFrequency="0.05" Value="1"
+                                    ValueChanged="MoveParam_ValueChanged" />
+                            <TextBlock Grid.Row="4" Text="Spread" VerticalAlignment="Center"
+                                       ToolTipService.ToolTip="0 = all heads move together; higher = each head a bit later, across the stage" />
+                            <Slider Grid.Row="4" Grid.Column="1" x:Name="MoveSpreadSlider" Minimum="0" Maximum="1" StepFrequency="0.05" Value="0"
+                                    ValueChanged="MoveParam_ValueChanged" />
+                            <CheckBox Grid.Row="5" Grid.ColumnSpan="2" x:Name="MoveReverseBox" Content="Reverse direction" Click="MoveSetting_Changed" />
                         </Grid>
-                    </StackPanel>
+                    </Grid>
                 </Border>
 
                 <!-- Effects -->

@@ -331,6 +331,10 @@ public sealed partial class MainWindow : Window
 
     private async void NewFixtureType_Click(object sender, RoutedEventArgs e) => await FixtureEditorDialog.CreateAsync();
 
+    private async void Shapes_Click(object sender, RoutedEventArgs e) => await ShapeLibraryDialog.ShowLibraryAsync();
+
+    private async void Areas_Click(object sender, RoutedEventArgs e) => await AreaDialog.ShowAreasAsync();
+
     private async void EditSelectedFixture_Click(object sender, RoutedEventArgs e)
     {
         var id = await PickFixtureAsync("Edit fixture", "Which light do you want to rename or re-address?", byType: false);

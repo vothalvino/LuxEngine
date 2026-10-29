@@ -61,7 +61,7 @@ public sealed class Programmer
         _values.Keys.Select(k => k.FixtureId).Concat(_effects.SelectMany(e => e.FixtureIds)).ToHashSet();
 
     public ProgrammerSnapshot Snapshot() =>
-        new(new Dictionary<ChannelKey, byte>(_values), _effects.Select(e => e.Clone()).ToList());
+        new(new Dictionary<ChannelKey, byte>(_values), _effects.Select(e => e.Copy()).ToList());
 
     public void Restore(ProgrammerSnapshot snapshot)
     {

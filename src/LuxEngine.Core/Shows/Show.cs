@@ -64,6 +64,12 @@ public sealed class Show
     public PresetFolder PresetRoot { get; set; } = new() { Name = "Presets" };
     public CueList CueList { get; set; } = new();
     public ButtonPage ButtonPage { get; set; } = new();
+
+    /// <summary>Movement figures drawn by the user.</summary>
+    public List<Effects.MovementShape> Shapes { get; set; } = new();
+
+    /// <summary>Places such as "Wall" with a pan/tilt box per moving head.</summary>
+    public List<Effects.MovementArea> Areas { get; set; } = new();
     public List<OutputConfig> Outputs { get; set; } = new();
     public List<MidiMapping> MidiMappings { get; set; } = new();
 

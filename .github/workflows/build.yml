@@ -182,9 +182,23 @@ jobs:
               (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::ListItem)))
             $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond).GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
             Start-Sleep 1
-            Click "∞ Figure 8"; Start-Sleep 2
+            Click "Start movement"; Start-Sleep 2
             Shot "9-movement"
           } catch { Write-Host "Movement check failed: $_" }
+          try {
+            Click "Shapes…"; Start-Sleep 2
+            MouseClick "New"; Start-Sleep 1
+            MouseClick "Figure 8"; Start-Sleep 2
+            Shot "10-shapes"
+            Click "Done"; Start-Sleep 1
+          } catch { Write-Host "Shapes check failed: $_" }
+          try {
+            Click "Areas…"; Start-Sleep 2
+            Click "New area"; Start-Sleep 1
+            Click "Aim → corner 1"; Start-Sleep 1
+            Shot "11-areas"
+            Click "Done"; Start-Sleep 1
+          } catch { Write-Host "Areas check failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }
