@@ -35,7 +35,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <MenuBar Grid.Column="0">
+            <MenuBar Grid.Column="0" x:Name="TopMenu">
                 <MenuBarItem Title="File">
                     <MenuFlyoutItem Text="New show" Click="New_Click">
                         <MenuFlyoutItem.Icon><SymbolIcon Symbol="Document" /></MenuFlyoutItem.Icon>

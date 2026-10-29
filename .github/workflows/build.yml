@@ -164,6 +164,15 @@ jobs:
             MouseClick "Edit fixture type (channels, ranges)…"; Start-Sleep 3
             Shot "7-edit-fixture-type"
             Click "Cancel"; Start-Sleep 1
+            # After using a menu, shortcuts must not drop it again (Ctrl+Up/Down master, arrows, Enter).
+            Add-Type -Namespace Lux -Name MenuKeys -MemberDefinition '[DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, int flags, int extra);'
+            foreach ($k in @(@(0x11,0x26), @(0x11,0x28), @(0x28), @(0x0D))) {
+              foreach ($v in $k) { [Lux.MenuKeys]::keybd_event($v, 0, 0, 0) }
+              foreach ($v in $k) { [Lux.MenuKeys]::keybd_event($v, 0, 2, 0) }
+              Start-Sleep -Milliseconds 300
+            }
+            Start-Sleep 1
+            Shot "7b-no-menu-after-keys"
           } catch { Write-Host "Edit fixture type check failed: $_" }
           try {
             $cond = New-Object System.Windows.Automation.AndCondition(
