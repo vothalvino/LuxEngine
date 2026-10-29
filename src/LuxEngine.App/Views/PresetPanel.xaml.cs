@@ -42,6 +42,7 @@ public sealed class PresetNode : ObservableObject
 
 public sealed partial class PresetPanel : UserControl
 {
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _saveTimer;
     public const string DragPrefix = "lux-preset:";
 
     private readonly HashSet<Guid> _collapsed = new();
@@ -53,10 +54,11 @@ public sealed partial class PresetPanel : UserControl
     public PresetPanel()
     {
         InitializeComponent();
-        var saveTimer = DispatcherQueue.CreateTimer();
-        saveTimer.Interval = TimeSpan.FromMilliseconds(200);
-        saveTimer.Tick += (_, _) => ControlView.UpdateSaveButton(RecordButton);
-        saveTimer.Start();
+        // Kept in a field: a timer only referenced locally can be garbage collected and stop ticking.
+        _saveTimer = DispatcherQueue.CreateTimer();
+        _saveTimer.Interval = TimeSpan.FromMilliseconds(200);
+        _saveTimer.Tick += (_, _) => ControlView.UpdateSaveButton(RecordButton);
+        _saveTimer.Start();
         AppServices.Document.Changed += change =>
         {
             if (change.HasFlag(ShowChange.Presets) || change.HasFlag(ShowChange.Patch)) Refresh();
