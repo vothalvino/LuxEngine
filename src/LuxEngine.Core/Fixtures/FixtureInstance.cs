@@ -15,6 +15,12 @@ public sealed class FixtureInstance
     public int Address { get; set; } = 1;
 
     /// <summary>Position on the stage view, 0–1 in both directions.</summary>
+    /// <summary>Flips pan in the DMX output (for heads hung or facing the other way); controls keep working normally.</summary>
+    public bool InvertPan { get; set; }
+
+    /// <summary>Flips tilt in the DMX output.</summary>
+    public bool InvertTilt { get; set; }
+
     public double StageX { get; set; } = 0.5;
     public double StageY { get; set; } = 0.5;
 }

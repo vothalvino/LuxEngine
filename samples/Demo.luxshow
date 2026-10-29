@@ -418,6 +418,36 @@
         }
       ],
       "displayName": "Chauvet DJ Intimidator Spot 110"
+    },
+    "generic/ww-cw-panel": {
+      "id": "generic/ww-cw-panel",
+      "manufacturer": "Generic",
+      "model": "Warm/Cold White Panel",
+      "category": "Color Changer",
+      "isUserDefined": false,
+      "channels": [
+        {
+          "name": "Warm white",
+          "type": "warmWhite",
+          "default": 0,
+          "capabilities": []
+        },
+        {
+          "name": "Cold white",
+          "type": "coldWhite",
+          "default": 0,
+          "capabilities": []
+        }
+      ],
+      "modes": [
+        {
+          "name": "2-channel",
+          "channels": [
+            "Warm white",
+            "Cold white"
+          ]
+        }
+      ]
     }
   },
   "fixtures": [
@@ -519,6 +549,16 @@
       "universe": 1,
       "address": 113,
       "stageX": 0.7,
+      "stageY": 0.6
+    },
+    {
+      "id": "5b0b6c3e-6a43-4c41-9f31-2a7f3e1c9d10",
+      "name": "Panel",
+      "definitionId": "generic/ww-cw-panel",
+      "modeName": "2-channel",
+      "universe": 1,
+      "address": 125,
+      "stageX": 0.5,
       "stageY": 0.6
     }
   ],

@@ -29,11 +29,26 @@ public static class FixturePropertiesDialog
         numbers.Children.Add(universe);
         numbers.Children.Add(address);
 
+        bool moves = def?.Channels.Any(c => c.Type is Core.Fixtures.ChannelType.Pan or Core.Fixtures.ChannelType.Tilt) == true;
+        var invertPan = new CheckBox { Content = "Invert pan (left ↔ right)", IsChecked = fixture.InvertPan };
+        var invertTilt = new CheckBox { Content = "Invert tilt (up ↔ down)", IsChecked = fixture.InvertTilt };
+
         var panel = new StackPanel { Spacing = 12, Width = 380 };
         panel.Children.Add(new TextBlock { Text = def?.DisplayName ?? "Unknown fixture type", Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"] });
         panel.Children.Add(name);
         panel.Children.Add(mode);
         panel.Children.Add(numbers);
+        if (moves)
+        {
+            panel.Children.Add(new TextBlock
+            {
+                Text = "For heads hung upside down or facing the other way. Only the signal to the light is flipped; the controls keep working the normal way.",
+                TextWrapping = TextWrapping.Wrap,
+                Style = (Style)Application.Current.Resources["CaptionTextBlockStyle"],
+            });
+            panel.Children.Add(invertPan);
+            panel.Children.Add(invertTilt);
+        }
 
         var dialog = new ContentDialog
         {
@@ -58,6 +73,8 @@ public static class FixturePropertiesDialog
             if (mode.SelectedItem is string m) fixture.ModeName = m;
             if (!double.IsNaN(universe.Value)) fixture.Universe = (int)universe.Value;
             if (!double.IsNaN(address.Value)) fixture.Address = (int)address.Value;
+            fixture.InvertPan = invertPan.IsChecked == true;
+            fixture.InvertTilt = invertTilt.IsChecked == true;
         });
     }
 }

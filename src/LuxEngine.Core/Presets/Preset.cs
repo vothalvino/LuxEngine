@@ -11,6 +11,9 @@ public sealed class Preset
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "New preset";
 
+    /// <summary>True while the name is the automatic one; it then follows the preset's contents when they change.</summary>
+    public bool AutoName { get; set; }
+
     /// <summary>Accent color shown in the preset panel, as "#RRGGBB".</summary>
     public string? Color { get; set; }
 

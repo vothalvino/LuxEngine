@@ -189,6 +189,21 @@ public sealed class LightingEngine
         lock (_sync) Programmer.Release(fixtureId, channel);
     }
 
+    /// <summary>Changes a running effect in the programmer (speed, size, shape, area, …).</summary>
+    public void UpdateEffect(Guid effectId, Action<Effect> change)
+    {
+        lock (_sync)
+        {
+            var effect = Programmer.Effects.FirstOrDefault(e => e.Id == effectId);
+            if (effect is not null) change(effect);
+        }
+    }
+
+    public void RestoreProgrammer(ProgrammerSnapshot snapshot)
+    {
+        lock (_sync) Programmer.Restore(snapshot);
+    }
+
     public void RemoveEffect(Guid effectId)
     {
         lock (_sync) Programmer.RemoveEffect(effectId);
@@ -429,12 +444,12 @@ public sealed class LightingEngine
             var overCueList = ControlledFixtures(Programmer.Values.Keys.Concat(_buttonValues.Keys));
             foreach (var effect in CuePlayer.ActiveEffects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness,
-                    overCueList.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
+                    overCueList.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show);
             foreach (var effect in buttonEffects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness,
-                    handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
+                    handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show);
             foreach (var effect in Programmer.Effects)
-                EffectEngine.Apply(effect, now, _fixtures, values, brightness);
+                EffectEngine.Apply(effect, now, _fixtures, values, brightness, show: _show);
 
             double master = Blackout ? 0 : GrandMaster;
             if (SoundToLightAmount > 0)
@@ -455,7 +470,12 @@ public sealed class LightingEngine
                     v = Math.Clamp(v, 0, 255);
                     values[key] = v;
                     if (ch.Address is >= 1 and <= PatchHelper.UniverseSize)
-                        data[ch.Address - 1] = (byte)Math.Round(v);
+                    {
+                        // Inverting only changes what is sent, so the stage view and presets keep normal directions.
+                        bool invert = (fixture.Instance.InvertPan && type is ChannelType.Pan or ChannelType.PanFine)
+                                   || (fixture.Instance.InvertTilt && type is ChannelType.Tilt or ChannelType.TiltFine);
+                        data[ch.Address - 1] = (byte)Math.Round(invert ? 255 - v : v);
+                    }
                 }
             }
 
@@ -550,6 +570,15 @@ public sealed class LightingEngine
             r = 1 - Get(ChannelType.Cyan, 0);
             g = 1 - Get(ChannelType.Magenta, 0);
             b = 1 - Get(ChannelType.Yellow, 0);
+        }
+        else if (fixture.Channels.Any(c => c.Channel.Type.IsAdditiveColor()))
+        {
+            // White-only lights: warm white looks orange-ish, cold white blue-ish.
+            double warm = Get(ChannelType.WarmWhite, 0), cold = Get(ChannelType.ColdWhite, 0);
+            double w = Get(ChannelType.White, 0), amber = Get(ChannelType.Amber, 0);
+            r = Math.Min(1, warm + cold * 0.8 + w + amber);
+            g = Math.Min(1, warm * 0.75 + cold * 0.88 + w + amber * 0.6);
+            b = Math.Min(1, warm * 0.45 + cold + w);
         }
 
         double intensity = fixture.HasDimmer ? Get(ChannelType.Intensity, 0) : Math.Max(r, Math.Max(g, b));

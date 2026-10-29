@@ -40,8 +40,13 @@ public sealed partial class ControlView : UserControl
         AppServices.Document.Changed += change =>
         {
             if (change.HasFlag(ShowChange.Patch)) SyncFromSelection();
+            if (change == ShowChange.All) FillMovementLists();
         };
-        Loaded += (_, _) => SyncFromSelection();
+        Loaded += (_, _) =>
+        {
+            FillMovementLists();
+            SyncFromSelection();
+        };
         AppServices.PresetEditor.Changed += OnPresetEditChanged;
         AppServices.Document.Changed += change =>
         {
@@ -86,12 +91,20 @@ public sealed partial class ControlView : UserControl
             _ => $"{fixtures.Count} lights selected: " + string.Join(", ", fixtures.Take(4).Select(f => f.Instance.Name)) + (fixtures.Count > 4 ? "…" : ""),
         };
 
-        bool hasColor = fixtures.Any(f => f.Channels.Any(c => c.Channel.Type.IsColorMix()));
+        // The color wheel only makes sense for lights that can mix colors (RGB or CMY).
+        // Warm/cold white lights get plain sliders under "More controls" instead.
+        bool hasColor = fixtures.Any(MixesColor);
         bool hasWhite = fixtures.Any(f => f.Has(ChannelType.White));
         bool hasPosition = fixtures.Any(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt));
-        ColorCard.Visibility = hasColor || fixtures.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ColorCard.Visibility = hasColor ? Visibility.Visible : Visibility.Collapsed;
+        // White-only lights have their main controls in "More controls", so put that card next to the dimmer.
+        // Moving heads keep Position and Movement first.
+        Cards.Children.Remove(ChannelsCard);
+        bool whiteOnly = !hasColor && !hasPosition && fixtures.Count > 0;
+        Cards.Children.Insert(whiteOnly ? Cards.Children.IndexOf(ColorCard) : Cards.Children.Count, ChannelsCard);
         WhiteSlider.Visibility = WhiteLabel.Visibility = hasWhite ? Visibility.Visible : Visibility.Collapsed;
         PositionCard.Visibility = hasPosition ? Visibility.Visible : Visibility.Collapsed;
+        MovementCard.Visibility = hasPosition ? Visibility.Visible : Visibility.Collapsed;
 
         _syncing = true;
         try
@@ -112,8 +125,12 @@ public sealed partial class ControlView : UserControl
             _syncing = false;
         }
 
-        BuildChannelRows(fixtures);
+        BuildChannelRows(fixtures, colorCardShown: hasColor);
     }
+
+    private static bool MixesColor(PatchedFixture f) =>
+        f.Has(ChannelType.Red) || f.Has(ChannelType.Green) || f.Has(ChannelType.Blue) ||
+        f.Has(ChannelType.Cyan) || f.Has(ChannelType.Magenta) || f.Has(ChannelType.Yellow);
 
     private static double? Read(PatchedFixture fixture, ChannelType type)
     {
@@ -121,6 +138,12 @@ public sealed partial class ControlView : UserControl
         if (ch.Channel is null) return null;
         return AppServices.Engine.GetPlaybackValue(fixture.Instance.Id, ch.Channel.Name);
     }
+
+    /// <summary>How bright a light without a dimmer is set to: its strongest color channel, before the master and effects.</summary>
+    private static double ColorBrightness(PatchedFixture fixture) =>
+        fixture.Channels.Where(c => c.Channel.Type.IsAdditiveColor())
+            .Select(c => AppServices.Engine.GetPlaybackValue(fixture.Instance.Id, c.Channel.Name) ?? 0)
+            .DefaultIfEmpty(0).Max() / 255;
 
     private double ReadDimmer(PatchedFixture fixture)
     {
@@ -147,11 +170,32 @@ public sealed partial class ControlView : UserControl
             {
                 AppServices.Engine.SetValue(new[] { fixture.Instance.Id }, ChannelType.Intensity, (byte)Math.Round(level * 255));
             }
+            else if (!MixesColor(fixture) && fixture.Channels.Any(c => c.Channel.Type.IsAdditiveColor()))
+            {
+                ScaleWhites(fixture, level);
+                RefreshChannelSliders();
+            }
             else if (fixture.Channels.Any(c => c.Channel.Type.IsColorMix()))
             {
                 var color = _baseColors.TryGetValue(fixture.Instance.Id, out var c) ? c : Colors.White;
                 ColorMixer.Apply(AppServices.Engine, fixture, color, level);
             }
+        }
+    }
+
+    /// <summary>
+    /// Brightness for white-only lights without a dimmer (e.g. warm/cold white): scales their channels
+    /// together so the warm/cold balance stays the same. From dark, all channels come up equally.
+    /// </summary>
+    private static void ScaleWhites(PatchedFixture fixture, double level)
+    {
+        var channels = fixture.Channels.Where(c => c.Channel.Type.IsAdditiveColor()).ToList();
+        var current = channels.Select(c => AppServices.Engine.GetPlaybackValue(fixture.Instance.Id, c.Channel.Name) ?? 0).ToList();
+        double max = current.DefaultIfEmpty(0).Max();
+        for (int i = 0; i < channels.Count; i++)
+        {
+            double share = max > 0 ? current[i] / max : 1;
+            AppServices.Engine.SetValue(fixture.Instance.Id, channels[i].Channel.Name, (byte)Math.Round(Math.Clamp(share * level, 0, 1) * 255));
         }
     }
 
@@ -196,36 +240,13 @@ public sealed partial class ControlView : UserControl
             _syncing = false;
         }
 
-        double level = DimmerSlider.Value / 100;
         foreach (var fixture in SelectedFixtures())
         {
             _baseColors[fixture.Instance.Id] = color;
-            if (fixture.HasDimmer)
-            {
-                ColorMixer.Apply(AppServices.Engine, fixture, color);
-                // Take the dimmer under hand control too, so cue effects don't hide the new color.
-                // A dark light is turned on so the color is visible.
-                double dimmer = Read(fixture, ChannelType.Intensity) ?? 0;
-                if (dimmer == 0)
-                {
-                    dimmer = 255;
-                    _syncing = true;
-                    DimmerSlider.Value = 100;
-                    _syncing = false;
-                }
-                AppServices.Engine.SetValue(new[] { fixture.Instance.Id }, ChannelType.Intensity, (byte)Math.Round(dimmer));
-            }
-            else
-            {
-                if (level == 0)
-                {
-                    level = 1;
-                    _syncing = true;
-                    DimmerSlider.Value = 100;
-                    _syncing = false;
-                }
-                ColorMixer.Apply(AppServices.Engine, fixture, color, level);
-            }
+            // Only the color channels change; the dimmer stays where it is, so a dark light stays dark.
+            // Lights without a dimmer mix the color at their current brightness.
+            if (fixture.HasDimmer) ColorMixer.Apply(AppServices.Engine, fixture, color);
+            else ColorMixer.Apply(AppServices.Engine, fixture, color, ColorBrightness(fixture));
         }
     }
 
@@ -316,13 +337,124 @@ public sealed partial class ControlView : UserControl
         var selected = Selected.ToHashSet();
         lock (AppServices.Engine.SyncRoot)
         {
-            foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => ef.FixtureIds.Any(selected.Contains)))
+            foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => !ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)))
             {
                 effect.Speed = effect.Type == EffectType.Strobe ? Math.Max(SpeedSlider.Value * 4, 2) : SpeedSlider.Value;
                 effect.Size = SizeSlider.Value;
                 effect.Spread = SpreadSlider.Value;
             }
         }
+    }
+
+    // ------------------------------------------------------------------ movement
+
+    private static List<PatchedFixture> SelectedMovers() =>
+        SelectedFixtures().Where(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt)).ToList();
+
+    /// <summary>One entry in the shape list: a built-in movement or a shape from the show's library.</summary>
+    private sealed record ShapeChoice(string Label, EffectType Type, Guid? ShapeId)
+    {
+        public override string ToString() => Label;
+    }
+
+    private sealed record AreaChoice(string Label, Guid? AreaId)
+    {
+        public override string ToString() => Label;
+    }
+
+    private bool _fillingMoveLists;
+
+    /// <summary>Refills the shape and area lists from the show, keeping the current choice.</summary>
+    private void FillMovementLists()
+    {
+        var show = AppServices.Engine.Show;
+        var shape = ShapeBox.SelectedItem as ShapeChoice;
+        var area = AreaBox.SelectedItem as AreaChoice;
+        _fillingMoveLists = true;
+        try
+        {
+            ShapeBox.Items.Clear();
+            foreach (var type in new[] { EffectType.Circle, EffectType.Figure8, EffectType.PanSweep, EffectType.TiltSweep })
+                ShapeBox.Items.Add(new ShapeChoice(type.DisplayName(), type, null));
+            foreach (var s in show.Shapes) ShapeBox.Items.Add(new ShapeChoice($"★ {s.Name}", EffectType.Shape, s.Id));
+            ShapeBox.SelectedItem = ShapeBox.Items.OfType<ShapeChoice>().FirstOrDefault(c => c.Type == shape?.Type && c.ShapeId == shape?.ShapeId)
+                                    ?? ShapeBox.Items[0];
+
+            AreaBox.Items.Clear();
+            AreaBox.Items.Add(new AreaChoice("No area (free)", null));
+            foreach (var a in show.Areas) AreaBox.Items.Add(new AreaChoice(a.Name, a.Id));
+            AreaBox.SelectedItem = AreaBox.Items.OfType<AreaChoice>().FirstOrDefault(c => c.AreaId == area?.AreaId) ?? AreaBox.Items[0];
+        }
+        finally
+        {
+            _fillingMoveLists = false;
+        }
+    }
+
+    /// <summary>Copies the Movement card's settings into an effect.</summary>
+    private void ApplyMoveSettings(Effect effect)
+    {
+        if (ShapeBox.SelectedItem is ShapeChoice shape)
+        {
+            effect.Type = shape.Type;
+            effect.ShapeId = shape.ShapeId;
+        }
+        effect.AreaId = (AreaBox.SelectedItem as AreaChoice)?.AreaId;
+        effect.Speed = MoveSpeedSlider.Value;
+        effect.Size = MoveSizeSlider.Value;
+        effect.Width = MoveWidthSlider.Value;
+        effect.Height = MoveHeightSlider.Value;
+        effect.Spread = MoveSpreadSlider.Value;
+        effect.Reverse = MoveReverseBox.IsChecked == true;
+    }
+
+    private void Movement_Click(object sender, RoutedEventArgs e)
+    {
+        var movers = SelectedMovers();
+        if (movers.Count == 0) return;
+        var effect = new Effect { FixtureIds = movers.Select(f => f.Instance.Id).ToList() };
+        ApplyMoveSettings(effect);
+        AppServices.Engine.AddEffect(effect);
+    }
+
+    private void StopMovement_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = Selected.ToHashSet();
+        lock (AppServices.Engine.SyncRoot)
+        {
+            foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)).ToList())
+                AppServices.Engine.Programmer.RemoveEffect(effect.Id);
+        }
+    }
+
+    /// <summary>Changes to the Movement card apply straight away to movements running on the selected lights.</summary>
+    private void UpdateRunningMovement()
+    {
+        if (_fillingMoveLists || MoveReverseBox is null || MoveSpreadSlider is null || ShapeBox is null || AreaBox is null) return;
+        var selected = Selected.ToHashSet();
+        lock (AppServices.Engine.SyncRoot)
+        {
+            foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)))
+                ApplyMoveSettings(effect);
+        }
+    }
+
+    private void MoveParam_ValueChanged(object sender, RangeBaseValueChangedEventArgs e) => UpdateRunningMovement();
+
+    private void MoveSetting_Changed(object sender, RoutedEventArgs e) => UpdateRunningMovement();
+
+    private void MoveChoice_Changed(object sender, SelectionChangedEventArgs e) => UpdateRunningMovement();
+
+    private async void Shapes_Click(object sender, RoutedEventArgs e)
+    {
+        await Dialogs.ShapeLibraryDialog.ShowLibraryAsync();
+        FillMovementLists();
+    }
+
+    private async void Areas_Click(object sender, RoutedEventArgs e)
+    {
+        await Dialogs.AreaDialog.ShowAreasAsync();
+        FillMovementLists();
     }
 
     // ------------------------------------------------------------------ sound to light
@@ -369,14 +501,32 @@ public sealed partial class ControlView : UserControl
     private static readonly HashSet<ChannelType> HandledElsewhere = new()
     {
         ChannelType.Intensity, ChannelType.Pan, ChannelType.Tilt, ChannelType.PanFine, ChannelType.TiltFine,
-        ChannelType.Red, ChannelType.Green, ChannelType.Blue, ChannelType.White,
+        ChannelType.Red, ChannelType.Green, ChannelType.Blue,
     };
 
-    private void BuildChannelRows(List<PatchedFixture> fixtures)
+    private readonly Dictionary<ChannelType, (Slider Slider, PatchedFixture Owner)> _channelSliders = new();
+
+    /// <summary>Moves the "More controls" sliders to the current values, e.g. after the dimmer changed them.</summary>
+    private void RefreshChannelSliders()
+    {
+        _syncing = true;
+        try
+        {
+            foreach (var (type, (slider, owner)) in _channelSliders)
+                if (Read(owner, type) is double v && slider.Value != v) slider.Value = v;
+        }
+        finally
+        {
+            _syncing = false;
+        }
+    }
+
+    private void BuildChannelRows(List<PatchedFixture> fixtures, bool colorCardShown)
     {
         ChannelRows.Children.Clear();
+        _channelSliders.Clear();
         var types = fixtures.SelectMany(f => f.Channels.Select(c => c.Channel.Type))
-            .Where(t => !HandledElsewhere.Contains(t))
+            .Where(t => !HandledElsewhere.Contains(t) && !(t == ChannelType.White && colorCardShown))
             .Distinct()
             .OrderBy(t => t.Group())
             .ThenBy(t => t)
@@ -384,8 +534,21 @@ public sealed partial class ControlView : UserControl
 
         ChannelsCard.Visibility = types.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
+        string? group = null;
         foreach (var type in types)
         {
+            // A small heading whenever the group changes (Color, Beam, Shutter, …).
+            if (type.Group() != group)
+            {
+                group = type.Group();
+                ChannelRows.Children.Add(new TextBlock
+                {
+                    Text = group == "Color" ? "Color & white" : group,
+                    Style = (Style)Application.Current.Resources["CaptionTextBlockStyle"],
+                    Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                    Margin = new Thickness(0, ChannelRows.Children.Count == 0 ? 0 : 8, 0, 2),
+                });
+            }
             var owner = fixtures.First(f => f.Has(type));
             var channel = owner.Channels.First(c => c.Channel.Type == type).Channel;
 
@@ -404,6 +567,7 @@ public sealed partial class ControlView : UserControl
             Grid.SetColumn(slider, 1);
             row.Children.Add(label);
             row.Children.Add(slider);
+            _channelSliders[type] = (slider, owner);
 
             if (channel.Capabilities.Count > 1)
             {
@@ -630,15 +794,25 @@ public sealed partial class ControlView : UserControl
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 row.Children.Add(new TextBlock
                 {
-                    Text = $"Effect: {effect.Type} (speed {effect.Speed:0.##}, on {effect.FixtureIds.Count} light{(effect.FixtureIds.Count == 1 ? "" : "s")})",
+                    Text = $"Effect: {Core.Presets.PresetNamer.EffectName(AppServices.Engine.Show, effect)} (speed {effect.Speed:0.##}, on {effect.FixtureIds.Count} light{(effect.FixtureIds.Count == 1 ? "" : "s")})",
                     VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis,
                 });
                 var remove = new Button { Content = new FontIcon { Glyph = "\uE711", FontSize = 11 }, Padding = new Thickness(6, 4, 6, 4) };
                 ToolTipService.SetToolTip(remove, "Take this effect out of the preset (for all its lights)");
                 var effectId = effect.Id;
                 remove.Click += (_, _) => AppServices.Engine.RemoveEffect(effectId);
-                Grid.SetColumn(remove, 1);
-                row.Children.Add(remove);
+                var edit = new Button { Content = "Edit…", Padding = new Thickness(8, 4, 8, 4) };
+                ToolTipService.SetToolTip(edit, "Change speed, size, spread and, for movement, shape, area and direction");
+                edit.Click += async (_, _) =>
+                {
+                    await Dialogs.EffectEditDialog.EditAsync(effectId);
+                    UpdatePresetValues(rebuild: true);
+                };
+                var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
+                buttons.Children.Add(edit);
+                buttons.Children.Add(remove);
+                Grid.SetColumn(buttons, 1);
+                row.Children.Add(buttons);
                 PresetValueRows.Children.Add(row);
             }
         }

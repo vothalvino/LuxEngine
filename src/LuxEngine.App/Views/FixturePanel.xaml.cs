@@ -164,6 +164,38 @@ public sealed partial class FixturePanel : UserControl
             menu.Items.Add(removeFromPreset);
         }
 
+        var chosen = AppServices.Selection.Contains(row.Id) && AppServices.Selection.Count > 1
+            ? AppServices.Selection.Ids.Select(show.FindFixture).OfType<Core.Fixtures.FixtureInstance>().ToList()
+            : new List<Core.Fixtures.FixtureInstance> { fixture };
+        bool HasChannel(Core.Fixtures.FixtureInstance f, Core.Fixtures.ChannelType type) =>
+            show.DefinitionOf(f)?.Channels.Any(c => c.Type == type) == true;
+        var panTargets = chosen.Where(f => HasChannel(f, Core.Fixtures.ChannelType.Pan)).ToList();
+        var tiltTargets = chosen.Where(f => HasChannel(f, Core.Fixtures.ChannelType.Tilt)).ToList();
+        if (panTargets.Count + tiltTargets.Count > 0)
+        {
+            menu.Items.Add(new MenuFlyoutSeparator());
+            string suffix = chosen.Count > 1 ? $" ({chosen.Count} lights)" : "";
+            if (panTargets.Count > 0)
+            {
+                var invertPan = new ToggleMenuFlyoutItem { Text = "Invert pan" + suffix, IsChecked = panTargets.All(f => f.InvertPan) };
+                invertPan.Click += (_, _) => AppServices.Document.Edit(ShowChange.None, _ =>
+                {
+                    foreach (var f in panTargets) f.InvertPan = invertPan.IsChecked;
+                });
+                menu.Items.Add(invertPan);
+            }
+            if (tiltTargets.Count > 0)
+            {
+                var invertTilt = new ToggleMenuFlyoutItem { Text = "Invert tilt" + suffix, IsChecked = tiltTargets.All(f => f.InvertTilt) };
+                invertTilt.Click += (_, _) => AppServices.Document.Edit(ShowChange.None, _ =>
+                {
+                    foreach (var f in tiltTargets) f.InvertTilt = invertTilt.IsChecked;
+                });
+                menu.Items.Add(invertTilt);
+            }
+            menu.Items.Add(new MenuFlyoutSeparator());
+        }
+
         var sameType = new MenuFlyoutItem { Text = "Select all of this type", Icon = new FontIcon { Glyph = "" } };
         sameType.Click += (_, _) => AppServices.Selection.Set(show.Fixtures.Where(f => f.DefinitionId == fixture.DefinitionId).Select(f => f.Id));
         menu.Items.Add(sameType);

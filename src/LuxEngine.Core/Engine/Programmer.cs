@@ -37,9 +37,11 @@ public sealed class Programmer
         }
     }
 
+    /// <summary>Starts an effect. It replaces an effect of the same type on the same lights; a movement replaces any other movement.</summary>
     public void AddEffect(Effect effect)
     {
-        _effects.RemoveAll(e => e.Type == effect.Type && e.FixtureIds.Intersect(effect.FixtureIds).Any());
+        _effects.RemoveAll(e => (e.Type == effect.Type || (e.Type.IsMovement() && effect.Type.IsMovement()))
+                                && e.FixtureIds.Intersect(effect.FixtureIds).Any());
         _effects.Add(effect);
     }
 
@@ -59,7 +61,7 @@ public sealed class Programmer
         _values.Keys.Select(k => k.FixtureId).Concat(_effects.SelectMany(e => e.FixtureIds)).ToHashSet();
 
     public ProgrammerSnapshot Snapshot() =>
-        new(new Dictionary<ChannelKey, byte>(_values), _effects.Select(e => e.Clone()).ToList());
+        new(new Dictionary<ChannelKey, byte>(_values), _effects.Select(e => e.Copy()).ToList());
 
     public void Restore(ProgrammerSnapshot snapshot)
     {
