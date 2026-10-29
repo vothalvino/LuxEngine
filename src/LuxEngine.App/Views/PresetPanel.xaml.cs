@@ -130,7 +130,7 @@ public sealed partial class PresetPanel : UserControl
         {
             Name = preset.Name,
             AccentBrush = new SolidColorBrush(ColorMixer.Parse(preset.Color, Colors.LightGray)),
-            Badge = preset.Effects.Count > 0 ? "FX" : "",
+            Badge = string.Join("  ", new[] { preset.Effects.Count > 0 ? "FX" : "", preset.Key is null ? "" : $"[{KeyNames.Display(preset.Key)}]" }.Where(b => b.Length > 0)),
             Detail = detail,
         };
     }
@@ -230,6 +230,11 @@ public sealed partial class PresetPanel : UserControl
             .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
 
     /// <summary>Double-clicking a preset opens it for editing.</summary>
+    public void FocusSearch() => SearchBox.Focus(FocusState.Keyboard);
+
+    /// <summary>Used by keyboard keys: shows the preset, or adds it on top (Ctrl).</summary>
+    public static void UsePreset(Guid id, bool layer) => ApplyPreset(id, layer);
+
     private void Tree_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
         if ((e.OriginalSource as FrameworkElement)?.DataContext is PresetNode { IsFolder: false } node)
@@ -300,6 +305,7 @@ public sealed partial class PresetPanel : UserControl
                 preset.Name = PresetNamer.Suggest(show, preset);
                 preset.AutoName = true;
             }));
+            Add("Set keyboard key…", "\uE92E", async () => await SetKeyAsync(node.Id));
             Add("Duplicate", "", () => DuplicatePreset(node.Id));
         }
 
@@ -330,6 +336,39 @@ public sealed partial class PresetPanel : UserControl
 
         menu.ShowAt((FrameworkElement)e.OriginalSource, e.GetPosition((FrameworkElement)e.OriginalSource));
         e.Handled = true;
+    }
+
+    /// <summary>Gives a preset its own key: pressing it shows the preset (Ctrl+key adds it on top).</summary>
+    private static async Task SetKeyAsync(Guid id)
+    {
+        var show = AppServices.Engine.Show;
+        var preset = show.PresetRoot.FindPreset(id);
+        if (preset is null) return;
+        var box = new KeyCaptureBox { Key = preset.Key, Width = 260 };
+        var error = new TextBlock { Foreground = (Brush)Application.Current.Resources["LuxDangerBrush"], TextWrapping = TextWrapping.Wrap, Width = 320 };
+        box.Changed += () => error.Text = box.Error ?? "";
+        var panel = new StackPanel { Spacing = 10, Width = 340 };
+        panel.Children.Add(new TextBlock { Text = "Pressing the key shows this preset, like clicking it. Ctrl + the key adds it on top of the current look.", TextWrapping = TextWrapping.Wrap });
+        panel.Children.Add(box);
+        panel.Children.Add(error);
+        var dialog = new ContentDialog
+        {
+            Title = $"Key for \"{preset.Name}\"",
+            Content = panel,
+            PrimaryButtonText = "Save",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+        };
+        dialog.PrimaryButtonClick += (_, args) =>
+        {
+            if (box.Key is not null && KeyNames.UsedBy(show, box.Key, preset) is { } user)
+            {
+                error.Text = $"{KeyNames.Display(box.Key)} is already used by {user}.";
+                args.Cancel = true;
+            }
+        };
+        if (await DialogHelper.ShowAsync(dialog) != ContentDialogResult.Primary) return;
+        AppServices.Document.Edit(ShowChange.Presets, _ => preset.Key = box.Key);
     }
 
     private async void UpdatePreset(Guid id)

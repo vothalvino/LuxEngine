@@ -86,6 +86,36 @@ public sealed partial class ControlView : UserControl
 
     // ------------------------------------------------------------------ selection → controls
 
+    /// <summary>Dimmer of the selected lights in percent, as the Dimmer slider shows it. Setting it moves the slider, which dims the lights.</summary>
+    public double DimmerPercent
+    {
+        get => DimmerSlider.Value;
+        set => DimmerSlider.Value = Math.Clamp(value, 0, 100);
+    }
+
+    /// <summary>Moves the controls to the current values after something else (e.g. the keyboard) changed them.</summary>
+    public void RefreshValues()
+    {
+        var first = SelectedFixtures().FirstOrDefault();
+        _syncing = true;
+        try
+        {
+            if (first is not null)
+            {
+                DimmerSlider.Value = Math.Round(ReadDimmer(first) * 100);
+                DimmerText.Text = $"{DimmerSlider.Value:0}%";
+                WhiteSlider.Value = Read(first, ChannelType.White) ?? 0;
+                MoveDot((Read(first, ChannelType.Pan) ?? 128) / 255, (Read(first, ChannelType.Tilt) ?? 128) / 255);
+            }
+        }
+        finally
+        {
+            _syncing = false;
+        }
+        RefreshChannelSliders();
+        if (AppServices.PresetEditor.IsEditing) UpdatePresetValues();
+    }
+
     private void SyncFromSelection()
     {
         var fixtures = SelectedFixtures();

@@ -23,6 +23,9 @@ public sealed class CueButton
     public int Column { get; set; }
     public CueButtonMode Mode { get; set; } = CueButtonMode.Toggle;
 
+    /// <summary>Keyboard key that works this button (a VirtualKey name such as "Number1" or "Q"), or null.</summary>
+    public string? Key { get; set; }
+
     /// <summary>Seconds to fade in when switched on.</summary>
     public double FadeIn { get; set; } = 0.5;
 

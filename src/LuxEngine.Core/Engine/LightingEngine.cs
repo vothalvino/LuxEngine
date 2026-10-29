@@ -28,7 +28,7 @@ public readonly record struct FixtureLook(double Red, double Green, double Blue,
 /// <c>defaults → cue → programmer → effects → grand master → DMX</c>.
 /// All public members are thread-safe; the output thread calls <see cref="ComputeFrame()"/>.
 /// </summary>
-public sealed class LightingEngine
+public sealed partial class LightingEngine
 {
     private readonly object _sync = new();
     private readonly Func<double> _clock;
@@ -487,6 +487,8 @@ public sealed class LightingEngine
                     handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show);
             foreach (var effect in Programmer.Effects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness, show: _show);
+
+            ApplyHighlight(values, brightness);
 
             double master = Blackout ? 0 : GrandMaster;
             if (SoundToLightAmount > 0)

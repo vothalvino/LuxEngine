@@ -335,6 +335,21 @@ public sealed class ButtonPageView : UserControl
         Grid.SetRow(level, 1);
         content.Children.Add(stack);
         content.Children.Add(level);
+        if (button.Key is not null)
+        {
+            // The keyboard key that works this button, in the top-right corner.
+            content.Children.Add(new Border
+            {
+                Child = new TextBlock { Text = KeyNames.Display(button.Key), FontSize = 11, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold },
+                Padding = new Thickness(5, 0, 5, 1),
+                CornerRadius = new CornerRadius(4),
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush(color),
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, -2, -4, 0),
+            });
+        }
 
         var face = new Border
         {
@@ -527,10 +542,16 @@ public sealed class ButtonPageView : UserControl
         fades.Children.Add(fadeIn);
         fades.Children.Add(fadeOut);
 
+        var keyBox = new KeyCaptureBox { Key = button.Key };
+        var keyError = new TextBlock { Foreground = (Brush)Application.Current.Resources["LuxDangerBrush"], TextWrapping = TextWrapping.Wrap };
+        keyBox.Changed += () => keyError.Text = keyBox.Error ?? "";
+
         var layout = new StackPanel { Spacing = 12, Width = 420 };
         layout.Children.Add(name);
         layout.Children.Add(mode);
         layout.Children.Add(fades);
+        layout.Children.Add(keyBox);
+        layout.Children.Add(keyError);
         layout.Children.Add(new TextBlock { Text = "Color", Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"] });
         layout.Children.Add(swatches);
         layout.Children.Add(new TextBlock { Text = "Presets on this button", Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"] });
@@ -545,6 +566,14 @@ public sealed class ButtonPageView : UserControl
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
         };
+        dialog.PrimaryButtonClick += (_, args) =>
+        {
+            if (keyBox.Key is not null && KeyNames.UsedBy(show, keyBox.Key, button) is { } user)
+            {
+                keyError.Text = $"{KeyNames.Display(keyBox.Key)} is already used by {user}.";
+                args.Cancel = true;
+            }
+        };
         if (await DialogHelper.ShowAsync(dialog) != ContentDialogResult.Primary) return;
 
         static double Safe(double v) => double.IsNaN(v) ? 0 : v;
@@ -558,6 +587,7 @@ public sealed class ButtonPageView : UserControl
             button.FadeOut = Safe(fadeOut.Value);
             button.Color = color;
             button.PresetIds = presetIds;
+            button.Key = keyBox.Key;
         });
     }
 
