@@ -30,12 +30,30 @@ public sealed class CueButton
     public double FadeOut { get; set; } = 0.5;
 }
 
-/// <summary>The grid of cue buttons.</summary>
+/// <summary>The grid of cue buttons. It has no fixed size: buttons can sit at any row and column, even negative ones.</summary>
 public sealed class ButtonPage
 {
+    /// <summary>Empty squares shown around the outermost buttons, so there is always room to grow.</summary>
+    public const int Margin = 2;
+
+    /// <summary>The smallest area shown, starting at row 0 / column 0, even when there are few buttons.</summary>
     public int Rows { get; set; } = 4;
     public int Columns { get; set; } = 8;
     public List<CueButton> Buttons { get; set; } = new();
+
+    /// <summary>The rows and columns to show (inclusive): the minimum area plus a margin around every button.</summary>
+    public (int RowFrom, int RowTo, int ColumnFrom, int ColumnTo) Extent()
+    {
+        int rowFrom = 0, rowTo = Rows - 1, colFrom = 0, colTo = Columns - 1;
+        foreach (var b in Buttons)
+        {
+            rowFrom = Math.Min(rowFrom, b.Row - Margin);
+            rowTo = Math.Max(rowTo, b.Row + Margin);
+            colFrom = Math.Min(colFrom, b.Column - Margin);
+            colTo = Math.Max(colTo, b.Column + Margin);
+        }
+        return (rowFrom, rowTo, colFrom, colTo);
+    }
 
     public CueButton? At(int row, int column) => Buttons.FirstOrDefault(b => b.Row == row && b.Column == column);
 

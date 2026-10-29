@@ -103,4 +103,15 @@ public class CueButtonTests
         Assert.Equal(255, u[0]);   // Par1 still follows the chase
         Assert.Equal(255, u[4]);   // Par2 belongs to the button now
     }
+
+    [Fact]
+    public void Grid_is_not_limited_and_keeps_room_around_buttons()
+    {
+        var t = new TestShow();
+        Assert.Equal((0, 3, 0, 7), t.Show.ButtonPage.Extent());   // empty page shows the starting 8 x 4
+
+        AddButton(t, 10, 20);
+        AddButton(t, -3, 1);
+        Assert.Equal((-5, 12, -1, 22), t.Show.ButtonPage.Extent());
+    }
 }

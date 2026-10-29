@@ -44,6 +44,7 @@ public sealed class ButtonPageView : UserControl
     private Windows.Foundation.Point? _panStart;
     private (double X, double Y) _panOffset;
     private bool _fitted;
+    private int _rowFrom, _columnFrom;
     private readonly Dictionary<Guid, (Border Face, Rectangle Level)> _faces = new();
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _timer;
 
@@ -54,7 +55,7 @@ public sealed class ButtonPageView : UserControl
         var hint = new TextBlock
         {
             Text = "Click a button to switch it on or off. Buttons that touch each other are linked: only one of them can be on. "
-                 + "Drag presets onto a button or an empty square; drag a button to move it. Drag the background to move around; Ctrl + wheel zooms.",
+                 + "Drag presets onto a button or an empty square; drag a button to move it. The grid grows as you add buttons at its edges. Drag the background to move around; Ctrl + wheel zooms.",
             TextWrapping = TextWrapping.Wrap,
             VerticalAlignment = VerticalAlignment.Center,
             Foreground = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
@@ -114,8 +115,12 @@ public sealed class ButtonPageView : UserControl
         _grid.ColumnDefinitions.Clear();
         _faces.Clear();
         var page = Page;
-        for (int r = 0; r < page.Rows; r++) _grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(CellHeight) });
-        for (int c = 0; c < page.Columns; c++) _grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(CellWidth) });
+        var (rowFrom, rowTo, columnFrom, columnTo) = page.Extent();
+        int grewUp = _rowFrom - rowFrom, grewLeft = _columnFrom - columnFrom;
+        _rowFrom = rowFrom;
+        _columnFrom = columnFrom;
+        for (int r = rowFrom; r <= rowTo; r++) _grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(CellHeight) });
+        for (int c = columnFrom; c <= columnTo; c++) _grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(CellWidth) });
 
         // Connectors first so they sit behind the buttons and show which buttons are linked.
         foreach (var b in page.Buttons)
@@ -124,15 +129,20 @@ public sealed class ButtonPageView : UserControl
             if (page.At(b.Row + 1, b.Column) is not null) AddConnector(b.Row, b.Column, horizontal: false);
         }
 
-        for (int r = 0; r < page.Rows; r++)
-        for (int c = 0; c < page.Columns; c++)
+        for (int r = rowFrom; r <= rowTo; r++)
+        for (int c = columnFrom; c <= columnTo; c++)
         {
             var button = page.At(r, c);
             var cell = button is null ? EmptyCell(r, c) : ButtonCell(button);
-            Grid.SetRow(cell, r);
-            Grid.SetColumn(cell, c);
+            Grid.SetRow(cell, r - rowFrom);
+            Grid.SetColumn(cell, c - columnFrom);
             _grid.Children.Add(cell);
         }
+
+        // When the grid grows up or left, keep the same buttons in view instead of jumping.
+        if (grewUp != 0 || grewLeft != 0)
+            _viewer.ChangeView(_viewer.HorizontalOffset + grewLeft * CellWidth * _viewer.ZoomFactor,
+                               _viewer.VerticalOffset + grewUp * CellHeight * _viewer.ZoomFactor, null, true);
         UpdateLevels();
     }
 
@@ -153,7 +163,7 @@ public sealed class ButtonPageView : UserControl
         panel.Children.Add(Icon("\uE71F", "Zoom out (Ctrl + mouse wheel)", () => ZoomBy(1 / 1.25)));
         panel.Children.Add(_zoomText);
         panel.Children.Add(Icon("\uE8A3", "Zoom in (Ctrl + mouse wheel)", () => ZoomBy(1.25)));
-        panel.Children.Add(Icon("\uE9A6", "Fit all buttons", Fit));
+        panel.Children.Add(Icon("\uE9A6", "Show all buttons", Fit));
         _zoomText.Text = "100%";
         return panel;
     }
@@ -171,7 +181,8 @@ public sealed class ButtonPageView : UserControl
     /// <summary>Zooms so the whole grid fits in the visible area.</summary>
     private void Fit()
     {
-        double width = Page.Columns * CellWidth + 16, height = Page.Rows * CellHeight + 16;
+        var (rowFrom, rowTo, columnFrom, columnTo) = Page.Extent();
+        double width = (columnTo - columnFrom + 1) * CellWidth + 16, height = (rowTo - rowFrom + 1) * CellHeight + 16;
         if (_viewer.ActualWidth <= 0 || _viewer.ActualHeight <= 0) return;
         float zoom = (float)Math.Clamp(Math.Min(_viewer.ActualWidth / width, _viewer.ActualHeight / height), _viewer.MinZoomFactor, 1.5);
         _viewer.ChangeView(0, 0, zoom);
@@ -222,8 +233,8 @@ public sealed class ButtonPageView : UserControl
             IsHitTestVisible = false,
         };
         Canvas.SetZIndex(link, 1);
-        Grid.SetRow(link, row);
-        Grid.SetColumn(link, column);
+        Grid.SetRow(link, row - _rowFrom);
+        Grid.SetColumn(link, column - _columnFrom);
         _grid.Children.Add(link);
     }
 
