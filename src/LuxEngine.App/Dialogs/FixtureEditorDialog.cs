@@ -8,7 +8,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace LuxEngine.App.Dialogs;
 
-/// <summary>Create a fixture type by hand: name it and list its channels in DMX order.</summary>
+/// <summary>Create or edit a fixture type by hand: name it and list its channels in DMX order.</summary>
 public sealed class FixtureEditorDialog : ContentDialog
 {
     private static readonly string[] Categories =
@@ -21,12 +21,17 @@ public sealed class FixtureEditorDialog : ContentDialog
     private readonly ComboBox _category = new() { Header = "Type of light", HorizontalAlignment = HorizontalAlignment.Stretch };
     private readonly TextBox _modeName = new() { Header = "Mode name", PlaceholderText = "e.g. 7-channel" };
     private readonly StackPanel _rows = new() { Spacing = 6 };
+    private readonly CheckBox _saveToLibrary = new() { Content = "Also update it in my fixture library, for future shows", IsChecked = true };
+    private readonly FixtureDefinition? _existing;
+    private readonly string? _existingMode;
     private readonly TextBlock _error = new() { Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["LuxDangerBrush"], TextWrapping = TextWrapping.Wrap };
 
-    private FixtureEditorDialog()
+    private FixtureEditorDialog(FixtureDefinition? existing = null, string? modeName = null)
     {
-        Title = "Create a fixture type";
-        PrimaryButtonText = "Save fixture";
+        _existing = existing;
+        _existingMode = modeName;
+        Title = existing is null ? "Create a fixture type" : "Edit fixture type";
+        PrimaryButtonText = existing is null ? "Save fixture" : "Save changes";
         CloseButtonText = "Cancel";
         DefaultButton = ContentDialogButton.Primary;
 
@@ -85,13 +90,37 @@ public sealed class FixtureEditorDialog : ContentDialog
         layout.Children.Add(columns);
         layout.Children.Add(new ScrollViewer { Content = _rows, MaxHeight = 400 });
         layout.Children.Add(buttons);
+        if (existing is not null) layout.Children.Add(_saveToLibrary);
         layout.Children.Add(_error);
         Content = layout;
 
-        AddRow(ChannelType.Intensity);
-        AddRow(ChannelType.Red);
-        AddRow(ChannelType.Green);
-        AddRow(ChannelType.Blue);
+        if (existing is null)
+        {
+            AddRow(ChannelType.Intensity);
+            AddRow(ChannelType.Red);
+            AddRow(ChannelType.Green);
+            AddRow(ChannelType.Blue);
+        }
+        else
+        {
+            _manufacturer.Text = existing.Manufacturer;
+            _model.Text = existing.Model;
+            if (!_category.Items.Contains(existing.Category)) _category.Items.Add(existing.Category);
+            _category.SelectedItem = existing.Category;
+            var mode = existing.Modes.FirstOrDefault(m => m.Name == modeName);
+            _modeName.Text = mode?.Name ?? "";
+            if (existing.Modes.Count > 1)
+                layout.Children.Insert(2, new InfoBar
+                {
+                    IsOpen = true, IsClosable = false, Severity = InfoBarSeverity.Informational,
+                    Message = $"This light has {existing.Modes.Count} modes. You are editing the \"{mode?.Name}\" mode used by your fixture; the other modes stay as they are.",
+                });
+            foreach (var name in mode?.Channels ?? new())
+            {
+                var channel = existing.Channels.FirstOrDefault(c => c.Name == name);
+                if (channel is not null) AddRow(channel.Type, channel);
+            }
+        }
 
         PrimaryButtonClick += (_, args) =>
         {
@@ -104,6 +133,8 @@ public sealed class FixtureEditorDialog : ContentDialog
     /// <summary>The controls for one channel: its type, name, default value and optional value ranges.</summary>
     private sealed class ChannelRow
     {
+        /// <summary>The channel this row was loaded from when editing, or null for a new channel.</summary>
+        public string? OriginalName { get; init; }
         public StackPanel Root { get; init; } = null!;
         public TextBlock Number { get; init; } = null!;
         public ComboBox TypeBox { get; init; } = null!;
@@ -140,14 +171,14 @@ public sealed class FixtureEditorDialog : ContentDialog
         return box;
     }
 
-    private void AddRow(ChannelType type)
+    private void AddRow(ChannelType type, ChannelDefinition? existing = null)
     {
         var number = new TextBlock { Width = 28, VerticalAlignment = VerticalAlignment.Center };
         var typeBox = new ComboBox { Width = 170 };
         foreach (var t in Enum.GetValues<ChannelType>()) typeBox.Items.Add(new ComboBoxItem { Content = Pretty(t), Tag = t });
         typeBox.SelectedIndex = (int)type;
-        var name = new TextBox { Width = 190, PlaceholderText = "Channel name", Text = Pretty(type) };
-        var defaultBox = ByteBox(type is ChannelType.Pan or ChannelType.Tilt ? 128 : 0, tip: "Default value (used when nothing controls this channel)");
+        var name = new TextBox { Width = 190, PlaceholderText = "Channel name", Text = existing?.Name ?? Pretty(type) };
+        var defaultBox = ByteBox(existing?.Default ?? (type is ChannelType.Pan or ChannelType.Tilt ? 128 : 0), tip: "Default value (used when nothing controls this channel)");
         typeBox.SelectionChanged += (_, _) =>
         {
             // Keep the name in sync until the user types their own.
@@ -186,7 +217,7 @@ public sealed class FixtureEditorDialog : ContentDialog
         var row = new ChannelRow
         {
             Root = root, Number = number, TypeBox = typeBox, NameBox = name, DefaultBox = defaultBox,
-            Ranges = ranges, RangesToggle = rangesToggle,
+            Ranges = ranges, RangesToggle = rangesToggle, OriginalName = existing?.Name,
         };
         void UpdateToggle()
         {
@@ -210,6 +241,8 @@ public sealed class FixtureEditorDialog : ContentDialog
             _channelRows.Remove(row);
             Renumber();
         };
+        foreach (var cap in existing?.Capabilities ?? new())
+            AddRange(ranges, cap.From, cap.To, cap.Label, UpdateToggle);
         _channelRows.Add(row);
         _rows.Children.Add(root);
         Renumber();
@@ -284,6 +317,16 @@ public sealed class FixtureEditorDialog : ContentDialog
         return null;
     }
 
+    /// <summary>The new channel list, each row remembering the channel it was loaded from.</summary>
+    private List<EditedChannel> EditedChannels() =>
+        _channelRows.Select(row => new EditedChannel(row.OriginalName, new ChannelDefinition
+        {
+            Name = row.Name,
+            Type = row.Type,
+            Default = (byte)Math.Clamp(ToByte(row.DefaultBox.Value), 0, 255),
+            Capabilities = row.Capabilities().OrderBy(c => c.From).ToList(),
+        })).ToList();
+
     private FixtureDefinition Build()
     {
         var manufacturer = string.IsNullOrWhiteSpace(_manufacturer.Text) ? "My fixtures" : _manufacturer.Text.Trim();
@@ -302,16 +345,10 @@ public sealed class FixtureEditorDialog : ContentDialog
         {
             Name = string.IsNullOrWhiteSpace(_modeName.Text) ? $"{_channelRows.Count}-channel" : _modeName.Text.Trim(),
         };
-        foreach (var row in _channelRows)
+        foreach (var channel in EditedChannels().Select(c => c.Channel))
         {
-            def.Channels.Add(new ChannelDefinition
-            {
-                Name = row.Name,
-                Type = row.Type,
-                Default = (byte)Math.Clamp(ToByte(row.DefaultBox.Value), 0, 255),
-                Capabilities = row.Capabilities().OrderBy(c => c.From).ToList(),
-            });
-            mode.Channels.Add(row.Name);
+            def.Channels.Add(channel);
+            mode.Channels.Add(channel.Name);
         }
         def.Modes.Add(mode);
         return def;
@@ -338,5 +375,46 @@ public sealed class FixtureEditorDialog : ContentDialog
         if (await DialogHelper.ConfirmAsync("Fixture saved",
                 $"\"{def.DisplayName}\" is now in your library (saved in Documents\\LuxEngine\\Fixtures). Add it to the show now?", "Add now"))
             await AddFixtureDialog.ShowAndAddAsync();
+    }
+
+    /// <summary>
+    /// Edits the type of a fixture in the show. Every fixture of that type and mode changes with it,
+    /// and presets follow renamed channels.
+    /// </summary>
+    public static async Task EditAsync(Guid fixtureId)
+    {
+        var show = AppServices.Engine.Show;
+        var fixture = show.FindFixture(fixtureId);
+        var original = fixture is null ? null : show.DefinitionOf(fixture);
+        if (fixture is null || original is null) return;
+
+        var dialog = new FixtureEditorDialog(original, fixture.ModeName);
+        if (await DialogHelper.ShowAsync(dialog) != ContentDialogResult.Primary) return;
+
+        var newModeName = string.IsNullOrWhiteSpace(dialog._modeName.Text) ? $"{dialog._channelRows.Count}-channel" : dialog._modeName.Text.Trim();
+        var (def, renames) = FixtureTypeEditing.EditMode(original, fixture.ModeName, newModeName, dialog.EditedChannels(),
+            string.IsNullOrWhiteSpace(dialog._manufacturer.Text) ? original.Manufacturer : dialog._manufacturer.Text.Trim(),
+            dialog._model.Text.Trim(), dialog._category.SelectedItem as string ?? original.Category);
+
+        int conflictsBefore = Core.Shows.PatchHelper.FindConflicts(show).Count;
+        AppServices.Document.Edit(ShowChange.Patch | ShowChange.Presets, s => s.UpdateDefinition(def, fixture.ModeName, newModeName, renames));
+
+        if (dialog._saveToLibrary.IsChecked == true)
+        {
+            try
+            {
+                FixtureLibrary.SaveUserFixture(AppPaths.UserFixtures, def);
+                AppServices.Library.Add(def);
+            }
+            catch (IOException ex)
+            {
+                await DialogHelper.ShowMessageAsync("The show was updated, but the library copy could not be saved", ex.Message);
+            }
+        }
+
+        var conflicts = Core.Shows.PatchHelper.FindConflicts(AppServices.Engine.Show).Count;
+        if (conflicts > conflictsBefore)
+            await DialogHelper.ShowMessageAsync("Check your addresses",
+                $"The fixture now uses a different number of channels, so {conflicts} fixture(s) overlap. Change their start addresses with \"Edit name and address…\".");
     }
 }

@@ -40,10 +40,17 @@ public static class FixturePropertiesDialog
             Title = "Edit fixture",
             Content = panel,
             PrimaryButtonText = "Save",
+            SecondaryButtonText = "Edit fixture type…",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
         };
-        if (await DialogHelper.ShowAsync(dialog) != ContentDialogResult.Primary) return;
+        var result = await DialogHelper.ShowAsync(dialog);
+        if (result == ContentDialogResult.Secondary)
+        {
+            await FixtureEditorDialog.EditAsync(fixtureId);
+            return;
+        }
+        if (result != ContentDialogResult.Primary) return;
 
         AppServices.Document.Edit(ShowChange.Patch, _ =>
         {

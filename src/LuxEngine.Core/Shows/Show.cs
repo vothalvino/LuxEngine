@@ -93,6 +93,38 @@ public sealed class Show
         }
     }
 
+    /// <summary>
+    /// Replaces a fixture type after one of its modes was edited. Fixtures in <paramref name="oldModeName"/> move to
+    /// <paramref name="newModeName"/>, and their preset values follow channel renames: each entry in
+    /// <paramref name="channelRenames"/> maps an old channel name to its new name, or to null when the
+    /// channel was removed.
+    /// </summary>
+    public void UpdateDefinition(FixtureDefinition definition, string oldModeName, string newModeName,
+        IReadOnlyDictionary<string, string?> channelRenames)
+    {
+        FixtureDefinitions[definition.Id] = definition;
+        var affected = new HashSet<Guid>();
+        foreach (var fixture in Fixtures.Where(f => f.DefinitionId == definition.Id))
+        {
+            if (fixture.ModeName != oldModeName) continue;
+            fixture.ModeName = newModeName;
+            affected.Add(fixture.Id);
+        }
+
+        foreach (var preset in PresetRoot.AllPresets())
+        {
+            var values = new List<PresetValue>();
+            foreach (var v in preset.Values)
+            {
+                if (!affected.Contains(v.FixtureId) || !channelRenames.TryGetValue(v.Channel, out var renamed))
+                    values.Add(v);
+                else if (renamed is not null)
+                    values.Add(v with { Channel = renamed });
+            }
+            preset.Values = values;
+        }
+    }
+
     /// <summary>Removes a preset and any cue references to it.</summary>
     public void RemovePresetOrFolder(Guid id)
     {

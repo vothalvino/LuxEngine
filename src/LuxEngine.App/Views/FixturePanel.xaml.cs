@@ -147,6 +147,10 @@ public sealed partial class FixturePanel : UserControl
         edit.Click += async (_, _) => await FixturePropertiesDialog.EditAsync(row.Id);
         menu.Items.Add(edit);
 
+        var editType = new MenuFlyoutItem { Text = "Edit fixture type (channels, ranges)…", Icon = new FontIcon { Glyph = "\uE90F" } };
+        editType.Click += async (_, _) => await FixtureEditorDialog.EditAsync(row.Id);
+        menu.Items.Add(editType);
+
         var sameType = new MenuFlyoutItem { Text = "Select all of this type", Icon = new FontIcon { Glyph = "" } };
         sameType.Click += (_, _) => AppServices.Selection.Set(show.Fixtures.Where(f => f.DefinitionId == fixture.DefinitionId).Select(f => f.Id));
         menu.Items.Add(sameType);
