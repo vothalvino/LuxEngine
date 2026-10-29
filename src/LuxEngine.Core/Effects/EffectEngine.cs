@@ -12,7 +12,12 @@ public static class EffectEngine
     public static void Apply(Effect effect, double time, IReadOnlyDictionary<Guid, PatchedFixture> fixtures,
         Dictionary<ChannelKey, double> values, Dictionary<Guid, double> brightness, IReadOnlySet<Guid>? exclude = null)
     {
-        var ids = effect.FixtureIds.Where(fixtures.ContainsKey).ToList();
+        // Effects run across the stage as the lights stand: left to right, then top to bottom,
+        // no matter in which order the lights were selected.
+        var ids = effect.FixtureIds.Where(fixtures.ContainsKey)
+            .OrderBy(id => Math.Round(fixtures[id].Instance.StageX, 3))
+            .ThenBy(id => Math.Round(fixtures[id].Instance.StageY, 3))
+            .ToList();
         int n = ids.Count;
         if (n == 0) return;
         double size = Math.Clamp(effect.Size, 0, 1);

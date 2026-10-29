@@ -222,3 +222,25 @@ public class WhiteOnlyLookTests
         Assert.True(look.Blue > look.Red);
     }
 }
+
+public class EffectOrderTests
+{
+    [Fact]
+    public void Chase_runs_left_to_right_on_stage_not_in_selection_order()
+    {
+        var t = new TestShow();
+        t.Par1.StageX = 0.9;   // Par 1 stands on the right,
+        t.Par2.StageX = 0.1;   // Par 2 on the left
+        var engine = new LightingEngine(t.Show);
+        engine.SetValue(t.Par1.Id, "Intensity", 255);
+        engine.SetValue(t.Par2.Id, "Intensity", 255);
+        engine.AddEffect(new Effect { Type = EffectType.Chase, Speed = 1, Size = 1, FixtureIds = { t.Par1.Id, t.Par2.Id } });
+
+        var first = engine.ComputeFrame(0.1).Universe(1);
+        Assert.Equal(0, first[0]);     // Par 1 (right) waits
+        Assert.Equal(255, first[4]);   // Par 2 (left) goes first
+        var second = engine.ComputeFrame(0.6).Universe(1);
+        Assert.Equal(255, second[0]);
+        Assert.Equal(0, second[4]);
+    }
+}
