@@ -149,6 +149,46 @@ public sealed class LightingEngine
         lock (_sync) Programmer.Clear();
     }
 
+    /// <summary>
+    /// Starts editing a preset: remembers the programmer, then loads only the preset into it so the
+    /// controls show exactly the preset's values.
+    /// </summary>
+    public ProgrammerSnapshot BeginPresetEdit(Preset preset)
+    {
+        lock (_sync)
+        {
+            var before = Programmer.Snapshot();
+            Programmer.Clear();
+            Programmer.Apply(preset);
+            return before;
+        }
+    }
+
+    /// <summary>Ends a preset edit; with <paramref name="save"/> the programmer contents become the preset.</summary>
+    public void EndPresetEdit(Preset preset, ProgrammerSnapshot before, bool save)
+    {
+        lock (_sync)
+        {
+            if (save)
+            {
+                var recorded = Programmer.ToPreset(preset.Name);
+                preset.Values = recorded.Values;
+                preset.Effects = recorded.Effects;
+            }
+            Programmer.Restore(before);
+        }
+    }
+
+    public HashSet<Guid> ProgrammerFixtures()
+    {
+        lock (_sync) return Programmer.FixtureIds();
+    }
+
+    public void ReleaseFixture(Guid fixtureId)
+    {
+        lock (_sync) Programmer.ReleaseFixture(fixtureId);
+    }
+
     public Preset RecordPreset(string name, IReadOnlyCollection<Guid>? fixtureIds = null)
     {
         lock (_sync) return Programmer.ToPreset(name, fixtureIds);

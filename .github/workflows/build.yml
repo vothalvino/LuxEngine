@@ -143,6 +143,14 @@ jobs:
             Click "Blue"; Start-Sleep 2
             Shot "5-control"
           } catch { Write-Host "Control check failed: $_" }
+          try {
+            $r = (Find "Deep blue").Current.BoundingRectangle
+            [Lux.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+            foreach ($i in 1..2) { [Lux.Mouse]::mouse_event(2, 0, 0, 0, 0); [Lux.Mouse]::mouse_event(4, 0, 0, 0, 0); Start-Sleep -Milliseconds 60 }
+            Start-Sleep 2
+            Shot "6-editing-preset"
+            Click "Save preset changes"; Start-Sleep 1
+          } catch { Write-Host "Preset edit check failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }

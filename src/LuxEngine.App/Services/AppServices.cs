@@ -16,6 +16,7 @@ public static class AppServices
     public static OutputEngine Output { get; } = new(Engine);
     public static ShowDocument Document { get; } = new(Engine);
     public static FixtureSelection Selection { get; } = new();
+    public static PresetEditor PresetEditor { get; } = new();
     public static MidiController Midi { get; } = new(Engine);
     public static SoundToLight Sound { get; } = new(Engine);
     public static MainWindow? MainWindow { get; set; }

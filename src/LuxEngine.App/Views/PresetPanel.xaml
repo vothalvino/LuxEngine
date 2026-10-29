@@ -34,7 +34,7 @@
 
         <TreeView Grid.Row="2" x:Name="Tree" ItemsSource="{x:Bind Nodes}" SelectionMode="Single"
                   CanDragItems="True" CanReorderItems="True" AllowDrop="True"
-                  ItemInvoked="Tree_ItemInvoked" DragItemsStarting="Tree_DragItemsStarting"
+                  ItemInvoked="Tree_ItemInvoked" DoubleTapped="Tree_DoubleTapped" DragItemsStarting="Tree_DragItemsStarting"
                   DragItemsCompleted="Tree_DragItemsCompleted" RightTapped="Tree_RightTapped"
                   Expanding="Tree_Expanding" Collapsed="Tree_Collapsed">
             <TreeView.ItemTemplate>

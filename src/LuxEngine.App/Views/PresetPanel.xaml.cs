@@ -215,6 +215,13 @@ public sealed partial class PresetPanel : UserControl
         ApplyPreset(node.Id);
     }
 
+    /// <summary>Double-clicking a preset opens it for editing.</summary>
+    private void Tree_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        if ((e.OriginalSource as FrameworkElement)?.DataContext is PresetNode { IsFolder: false } node)
+            AppServices.PresetEditor.Begin(node.Id);
+    }
+
     private static void ApplyPreset(Guid id)
     {
         var show = AppServices.Engine.Show;
@@ -255,6 +262,7 @@ public sealed partial class PresetPanel : UserControl
         }
         else
         {
+            Add("Edit preset…", "\uE70F", () => AppServices.PresetEditor.Begin(node.Id));
             Add("Use now", "", () => ApplyPreset(node.Id));
             Add("Add to selected cue", "", () => AppServices.MainWindow?.Cues.AddPresetToSelectedCue(node.Id));
             Add("Update with current look", "", () => UpdatePreset(node.Id));
