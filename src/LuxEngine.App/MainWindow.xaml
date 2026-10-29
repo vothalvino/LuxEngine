@@ -92,9 +92,10 @@
                     </MenuFlyoutItem>
                 </MenuBarItem>
                 <MenuBarItem Title="View">
-                    <RadioMenuFlyoutItem x:Name="ThemeDefault" Text="Use Windows theme" GroupName="Theme" Click="Theme_Click" Tag="Default" />
-                    <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark" GroupName="Theme" Click="Theme_Click" Tag="Dark" />
-                    <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light" GroupName="Theme" Click="Theme_Click" Tag="Light" />
+                    <!-- Plain items with a tick drawn by the app (radio items stopped responding after the first change) -->
+                    <MenuFlyoutItem x:Name="ThemeDefault" Text="Use Windows theme" Click="Theme_Click" Tag="Default" />
+                    <MenuFlyoutItem x:Name="ThemeDark" Text="Dark" Click="Theme_Click" Tag="Dark" />
+                    <MenuFlyoutItem x:Name="ThemeLight" Text="Light" Click="Theme_Click" Tag="Light" />
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem Text="Full screen" Click="FullScreen_Click">
                         <MenuFlyoutItem.KeyboardAccelerators><KeyboardAccelerator Key="F11" /></MenuFlyoutItem.KeyboardAccelerators>

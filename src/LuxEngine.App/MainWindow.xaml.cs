@@ -448,9 +448,11 @@ public sealed partial class MainWindow : Window
         };
         // Parts of the window built in code pick their colours again for the new theme.
         DispatcherQueue.TryEnqueue(Ui.RaiseThemeChanged);
-        ThemeDefault.IsChecked = theme is not ("Dark" or "Light");
-        ThemeDark.IsChecked = theme == "Dark";
-        ThemeLight.IsChecked = theme == "Light";
+        // A tick in front of the theme in use.
+        FontIcon? Tick(bool on) => on ? new FontIcon { Glyph = "\uE73E" } : null;
+        ThemeDefault.Icon = Tick(theme is not ("Dark" or "Light"));
+        ThemeDark.Icon = Tick(theme == "Dark");
+        ThemeLight.Icon = Tick(theme == "Light");
 
         // Keep the minimize/maximize/close buttons readable on the custom title bar.
         bool dark = Root.ActualTheme == ElementTheme.Dark;
