@@ -372,7 +372,6 @@ public sealed class ButtonPageView : UserControl
                     new GradientStop { Color = Color.FromArgb(24, color.R, color.G, color.B), Offset = 1 },
                 },
             },
-            Shadow = new ThemeShadow(),
             Child = content,
             AllowDrop = true,
             CanDrag = true,
@@ -447,13 +446,12 @@ public sealed class ButtonPageView : UserControl
                 g.GradientStops[0].Color = Color.FromArgb(top, c.R, c.G, c.B);
                 g.GradientStops[1].Color = Color.FromArgb(bottom, c.R, c.G, c.B);
             }
-            // A button that is on lifts off the page (shadow) and gets a bright edge.
-            float lift = on ? 14 : 0;
-            if (face.Translation.Z != lift)
+            // A button that is on gets a bright, thicker edge.
+            double edge = on ? 2.5 : 1.5;
+            if (face.BorderThickness.Left != edge)
             {
-                face.Translation = new System.Numerics.Vector3(0, 0, lift);
                 face.BorderBrush = new SolidColorBrush(on ? Color.FromArgb(255, c.R, c.G, c.B) : Color.FromArgb(160, c.R, c.G, c.B));
-                face.BorderThickness = new Thickness(on ? 2.5 : 1.5);
+                face.BorderThickness = new Thickness(edge);
             }
             bar.Width = Math.Max(0, (face.ActualWidth - 24) * level);
             bar.Opacity = on ? 1 : 0.5;
