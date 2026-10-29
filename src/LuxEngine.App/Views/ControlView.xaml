@@ -94,7 +94,7 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Dimmer" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock Text="Dimmer" Style="{StaticResource SectionTitleStyle}" ToolTipService.ToolTip="Keyboard: Shift+D, then ↑↓ or type a number" />
                         <Slider Grid.Row="1" x:Name="DimmerSlider" Orientation="Vertical" Minimum="0" Maximum="100"
                                 HorizontalAlignment="Center" ValueChanged="DimmerSlider_ValueChanged" MinHeight="140" />
                         <StackPanel Grid.Row="2" Spacing="4">
@@ -135,7 +135,7 @@
                 <Border Style="{StaticResource CardStyle}" x:Name="PositionCard">
                     <StackPanel Spacing="6">
                         <Grid>
-                            <TextBlock Text="Position" Style="{StaticResource SectionTitleStyle}" />
+                            <TextBlock Text="Position" Style="{StaticResource SectionTitleStyle}" ToolTipService.ToolTip="Keyboard: Shift+P, then the arrow keys" />
                             <Button Content="Center" Click="CenterPosition_Click" HorizontalAlignment="Right" Padding="8,2" />
                         </Grid>
                         <Border x:Name="XYPad" Width="190" Height="190" CornerRadius="6" Background="{StaticResource LuxStageBrush}"

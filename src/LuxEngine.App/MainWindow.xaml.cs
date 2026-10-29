@@ -27,6 +27,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        SetUpKeyboard();
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -192,34 +193,6 @@ public sealed partial class MainWindow : Window
     public void ShowCueTab() => ModeSelector.SelectedItem = CueTab;
 
     public void ShowControlTab() => ModeSelector.SelectedItem = ControlTab;
-
-    private void Root_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
-    {
-        var focused = FocusManager.GetFocusedElement(Content.XamlRoot);
-        if (focused is TextBox or PasswordBox or AutoSuggestBox or RichEditBox or NumberBox) return;
-
-        switch (e.Key)
-        {
-            case VirtualKey.Space:
-                if (IsShiftDown()) AppServices.Engine.Back();
-                else CueView.Go();
-                e.Handled = true;
-                break;
-            case VirtualKey.B:
-                AppServices.Engine.Blackout = !AppServices.Engine.Blackout;
-                SyncLiveControls();
-                e.Handled = true;
-                break;
-            case VirtualKey.Escape:
-                AppServices.Selection.Clear();
-                e.Handled = true;
-                break;
-        }
-    }
-
-    private static bool IsShiftDown() =>
-        Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift)
-            .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
 
     // ------------------------------------------------------------------ file menu
 
@@ -436,11 +409,7 @@ public sealed partial class MainWindow : Window
 
     private async void QuickStart_Click(object sender, RoutedEventArgs e) => await QuickStartDialog.ShowAsync();
 
-    private async void Shortcuts_Click(object sender, RoutedEventArgs e) =>
-        await DialogHelper.ShowMessageAsync("Keyboard shortcuts",
-            "Space — GO (next cue)\nShift+Space — Back\nB — Blackout on/off\nEsc — Deselect all fixtures\n" +
-            "Ctrl+N / Ctrl+O / Ctrl+S — New / Open / Save show\nF11 — Full screen\n\n" +
-            "In the stage view: click to select, Ctrl+click to add, drag on empty space to select an area.");
+    private async void Shortcuts_Click(object sender, RoutedEventArgs e) => await ShortcutsDialog.ShowAsync(this);
 
     private void GitHub_Click(object sender, RoutedEventArgs e) =>
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/vothalvino/LuxEngine") { UseShellExecute = true });

@@ -199,6 +199,40 @@ jobs:
             Shot "11-areas"
             Click "Done"; Start-Sleep 1
           } catch { Write-Host "Areas check failed: $_" }
+          try {
+            Add-Type -Namespace Lux -Name Keys -MemberDefinition '[DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, int flags, int extra);'
+            function Press([byte[]]$keys) {
+              foreach ($k in $keys) { [Lux.Keys]::keybd_event($k, 0, 0, 0) }
+              [array]::Reverse($keys)
+              foreach ($k in $keys) { [Lux.Keys]::keybd_event($k, 0, 2, 0) }
+              Start-Sleep -Milliseconds 150
+            }
+            function SelectLight($name) {
+              $cond = New-Object System.Windows.Automation.AndCondition(
+                (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, $name)),
+                (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::ListItem)))
+              $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond).GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+              Start-Sleep 1
+            }
+            MouseClick "Panel"   # focus the app window (stage label) without changing much
+            SelectLight "Par 1"
+            Press 0x10,0x44; Press 0x35; Press 0x30; Press 0x0D; Start-Sleep 1    # Shift+D, 5, 0, Enter
+            Shot "12-parameter-bar"
+            Press 0x10,0x5A; Start-Sleep 1                                          # Shift+Z on a par: no zoom
+            Shot "12b-no-zoom"
+            Press 0x1B; Start-Sleep 1; Press 0x1B; Start-Sleep 1                    # Esc: close, then deselect
+            Press 0x10,0x44; Start-Sleep 1                                          # Shift+D with nothing selected
+            Shot "12c-nothing-selected"
+            SelectLight "Spot 1"
+            Press 0x48; Start-Sleep 2                                               # H: highlight
+            Shot "13-highlight"
+            Press 0x48; Start-Sleep 1
+            Press 0x73; Start-Sleep 1; Press 0x31; Start-Sleep 2                    # F4 buttons, then key 1
+            Shot "14-key-button"
+            Press 0x70; Start-Sleep 2                                               # F1: shortcut sheet
+            Shot "15-shortcuts"
+            Click "Close"; Start-Sleep 1
+          } catch { Write-Host "Keyboard check failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }

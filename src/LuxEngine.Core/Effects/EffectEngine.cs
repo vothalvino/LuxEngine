@@ -18,8 +18,7 @@ public static class EffectEngine
         // Effects run across the stage as the lights stand: left to right, then top to bottom,
         // no matter in which order the lights were selected.
         var ids = effect.FixtureIds.Where(fixtures.ContainsKey)
-            .OrderBy(id => Math.Round(fixtures[id].Instance.StageX, 3))
-            .ThenBy(id => Math.Round(fixtures[id].Instance.StageY, 3))
+            .OrderByStage(id => fixtures[id].Instance)
             .ToList();
         int n = ids.Count;
         if (n == 0) return;

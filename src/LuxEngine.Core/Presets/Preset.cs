@@ -17,6 +17,9 @@ public sealed class Preset
     /// <summary>Accent color shown in the preset panel, as "#RRGGBB".</summary>
     public string? Color { get; set; }
 
+    /// <summary>Keyboard key that shows this preset (a VirtualKey name such as "Number1" or "Q"), or null.</summary>
+    public string? Key { get; set; }
+
     public List<PresetValue> Values { get; set; } = new();
     public List<Effect> Effects { get; set; } = new();
 

@@ -10,7 +10,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid x:Name="Root" PreviewKeyDown="Root_PreviewKeyDown">
+    <Grid x:Name="Root" PreviewKeyDown="Root_PreviewKeyDown" PreviewKeyUp="Root_PreviewKeyUp">
         <Grid.RowDefinitions>
             <RowDefinition Height="36" />
             <RowDefinition Height="Auto" />
@@ -168,6 +168,9 @@
                 <Border Grid.Row="0" Style="{StaticResource CardStyle}" Padding="0">
                     <views:StageView x:Name="Stage" />
                 </Border>
+                <!-- Opens with Shift + a letter (e.g. Shift+D) while lights are selected -->
+                <views:ParameterBar Grid.Row="0" x:Name="ParamBar" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                    Margin="12,0,12,14" MaxWidth="760" />
 
                 <Grid Grid.Row="1">
                     <SelectorBar x:Name="ModeSelector" SelectionChanged="ModeSelector_SelectionChanged" HorizontalAlignment="Left">

@@ -127,6 +127,8 @@ public sealed partial class CueView : UserControl
 
     public void ShowButtons() => PageSelector.SelectedItem = ButtonsTab;
 
+    public void ShowCueList() => PageSelector.SelectedItem = CueListTab;
+
     private void CueList_SelectionChanged(object sender, SelectionChangedEventArgs e) => LoadEditor();
 
     /// <summary>Double-clicking a cue jumps straight to it.</summary>
