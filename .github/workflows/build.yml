@@ -251,8 +251,8 @@ jobs:
             Press 0x1B; Start-Sleep 1                                               # Esc closes the sheet
           } catch { Write-Host "Keyboard check failed: $_" }
           try {
-            # The same screens in both themes, for checking the look.
-            foreach ($theme in @("Dark", "Light")) {
+            # The same screens in the dark theme (the runner uses Windows light, so the other screenshots show light).
+            foreach ($theme in @("Dark")) {
               MouseClick "View"; Start-Sleep 1
               # The opened menu is its own pop-up window, so look for the item anywhere in this app.
               $items = $A::RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants,
@@ -284,22 +284,6 @@ jobs:
               Shot "23-$theme-buttons"
               Press 0x31; Start-Sleep 1
             }
-            # Switching back with the mouse, like a user: move onto the item, pause, then click.
-            MouseClick "View"; Start-Sleep 2
-            Shot "24a-view-menu-open"
-            $items = $A::RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants,
-              (New-Object System.Windows.Automation.AndCondition(
-                (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Use Windows theme")),
-                (New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $app.Id)))))
-            $item = $items | Where-Object { -not $_.Current.IsOffscreen -and $_.Current.BoundingRectangle.Width -gt 0 } | Select-Object -Last 1
-            Write-Host "Theme items found: $($items.Count)"
-            $r = $item.Current.BoundingRectangle
-            Write-Host "Clicking 'Use Windows theme' at $($r.X),$($r.Y) size $($r.Width)x$($r.Height)"
-            [Lux.Mouse]::SetCursorPos([int]($r.X + 20), [int]($r.Y + $r.Height / 2)); Start-Sleep -Milliseconds 400
-            [Lux.Mouse]::SetCursorPos([int]($r.X + 30), [int]($r.Y + $r.Height / 2)); Start-Sleep -Milliseconds 400
-            [Lux.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 150; [Lux.Mouse]::mouse_event(4, 0, 0, 0, 0)
-            Start-Sleep 2
-            Shot "24b-after-switch-back"
           } catch { Write-Host "Theme screenshots failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
@@ -342,6 +326,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         shell: pwsh
-        run: >
-          gh release create "${{ github.ref_name }}" installer/Output/LuxEngine-Setup.exe
-          --title "LuxEngine ${{ steps.version.outputs.version }}" --generate-notes
+        run: |
+          # Tags like v1.5.0-preview.1 become a pre-release: not "latest", so normal downloads are unaffected.
+          $extra = @()
+          if ("${{ github.ref_name }}" -like "*-preview*") { $extra = @("--prerelease", "--notes", "Preview build for testing. Not the current release.") } else { $extra = @("--generate-notes") }
+          gh release create "${{ github.ref_name }}" installer/Output/LuxEngine-Setup.exe --title "LuxEngine ${{ steps.version.outputs.version }}" @extra
