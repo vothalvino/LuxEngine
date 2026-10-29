@@ -117,6 +117,16 @@ public sealed partial class CueView : UserControl
             Cues[i].ActiveVisibility = i == player.CurrentIndex ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    /// <summary>Switches between the cue list and the cue buttons.</summary>
+    private void PageSelector_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
+    {
+        bool buttons = sender.SelectedItem == ButtonsTab;
+        ButtonsPage.Visibility = buttons ? Visibility.Visible : Visibility.Collapsed;
+        CueListPage.Visibility = buttons ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    public void ShowButtons() => PageSelector.SelectedItem = ButtonsTab;
+
     private void CueList_SelectionChanged(object sender, SelectionChangedEventArgs e) => LoadEditor();
 
     /// <summary>Double-clicking a cue jumps straight to it.</summary>

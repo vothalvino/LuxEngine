@@ -140,7 +140,7 @@
             {
               "from": 16,
               "to": 131,
-              "label": "Shutter Strobe Strobe 0Hz \u2192 23Hz"
+              "label": "Shutter Strobe Strobe 0Hz → 23Hz"
             },
             {
               "from": 132,
@@ -150,7 +150,7 @@
             {
               "from": 140,
               "to": 181,
-              "label": "Shutter Strobe RampUp 0Hz \u2192 23Hz"
+              "label": "Shutter Strobe RampUp 0Hz → 23Hz"
             },
             {
               "from": 182,
@@ -160,7 +160,7 @@
             {
               "from": 190,
               "to": 231,
-              "label": "Shutter Strobe RampDown 0Hz \u2192 23Hz"
+              "label": "Shutter Strobe RampDown 0Hz → 23Hz"
             },
             {
               "from": 232,
@@ -1568,7 +1568,7 @@
     "cues": [
       {
         "id": "1a2ac487-705d-4f3e-aa4c-35118f272dfa",
-        "name": "Preshow \u2013 blue wash",
+        "name": "Preshow – blue wash",
         "presetIds": [
           "21aa2436-e160-4e2d-b0a1-cd3fb2aa6831",
           "5f838ca5-923e-4f43-9ffe-104beb8e8522"
@@ -1581,7 +1581,7 @@
       },
       {
         "id": "79621be1-8cda-4287-b7dc-a91fa9e4e99e",
-        "name": "Band on \u2013 warm \u002B spots",
+        "name": "Band on – warm + spots",
         "presetIds": [
           "4709b7ec-c1fe-4ae5-ba78-52586ba46f55",
           "d8765a31-8a70-4f59-b139-12aa8176e3b9",
@@ -1595,7 +1595,7 @@
       },
       {
         "id": "b6b6236b-5d24-4b72-bcb5-b84e42d1d9e2",
-        "name": "Chorus \u2013 red chase",
+        "name": "Chorus – red chase",
         "presetIds": [
           "0787f937-4591-4531-a6ce-8ad4a9f04014",
           "d8765a31-8a70-4f59-b139-12aa8176e3b9",
@@ -1610,7 +1610,7 @@
       },
       {
         "id": "fe9d849c-989e-4960-9602-32a4a3b4f144",
-        "name": "Bridge \u2013 rainbow \u002B circle",
+        "name": "Bridge – rainbow + circle",
         "presetIds": [
           "d8765a31-8a70-4f59-b139-12aa8176e3b9",
           "6f56cd75-96c2-4189-a095-96683a8069f3",
@@ -1624,7 +1624,7 @@
       },
       {
         "id": "bc93151e-5d66-4044-ba57-675aeb846a0c",
-        "name": "Ending \u2013 magenta",
+        "name": "Ending – magenta",
         "presetIds": [
           "ccd0eef2-32eb-44c8-ad5d-8e86f85ff0c4",
           "5f838ca5-923e-4f43-9ffe-104beb8e8522"
@@ -1649,5 +1649,106 @@
       "localAddress": ""
     }
   ],
-  "midiMappings": []
+  "midiMappings": [],
+  "buttonPage": {
+    "rows": 4,
+    "columns": 8,
+    "buttons": [
+      {
+        "id": "5b046fa6-a547-478a-be0b-8a1746f7ebec",
+        "name": "Deep blue",
+        "color": "#3B82F6",
+        "presetIds": [
+          "21aa2436-e160-4e2d-b0a1-cd3fb2aa6831",
+          "d8765a31-8a70-4f59-b139-12aa8176e3b9"
+        ],
+        "row": 0,
+        "column": 0,
+        "mode": "toggle",
+        "fadeIn": 0.5,
+        "fadeOut": 0.5
+      },
+      {
+        "id": "c651c195-7529-49d7-8603-7ae105c907f9",
+        "name": "Red",
+        "color": "#EF4444",
+        "presetIds": [
+          "0787f937-4591-4531-a6ce-8ad4a9f04014",
+          "d8765a31-8a70-4f59-b139-12aa8176e3b9"
+        ],
+        "row": 0,
+        "column": 1,
+        "mode": "toggle",
+        "fadeIn": 0.5,
+        "fadeOut": 0.5
+      },
+      {
+        "id": "7013072e-6c7c-4e42-8f3a-54a61466c1d9",
+        "name": "Magenta",
+        "color": "#EC4899",
+        "presetIds": [
+          "ccd0eef2-32eb-44c8-ad5d-8e86f85ff0c4",
+          "d8765a31-8a70-4f59-b139-12aa8176e3b9"
+        ],
+        "row": 0,
+        "column": 2,
+        "mode": "toggle",
+        "fadeIn": 0.5,
+        "fadeOut": 0.5
+      },
+      {
+        "id": "f1d9a344-04dd-437f-8a65-e0632bf58baf",
+        "name": "Rainbow",
+        "color": "#A855F7",
+        "presetIds": [
+          "6f56cd75-96c2-4189-a095-96683a8069f3"
+        ],
+        "row": 0,
+        "column": 4,
+        "mode": "toggle",
+        "fadeIn": 1,
+        "fadeOut": 1
+      },
+      {
+        "id": "a036c41e-8c6d-43bc-960f-d5e2e76c3af0",
+        "name": "Spots center",
+        "color": "#14B8A6",
+        "presetIds": [
+          "5478bd7a-d281-4779-b1ea-7b60d70c714d"
+        ],
+        "row": 2,
+        "column": 0,
+        "mode": "toggle",
+        "fadeIn": 0.5,
+        "fadeOut": 0.5
+      },
+      {
+        "id": "24d6fcae-7485-4678-8c2c-f5321b26a631",
+        "name": "Spots audience",
+        "color": "#22C55E",
+        "presetIds": [
+          "a4e2a203-32bf-494d-b085-05f36c505689"
+        ],
+        "row": 3,
+        "column": 0,
+        "mode": "toggle",
+        "fadeIn": 0.5,
+        "fadeOut": 0.5
+      },
+      {
+        "id": "dfb383e7-c38b-407e-a923-14d3fa7dc2aa",
+        "name": "Flash white",
+        "color": "#94A3B8",
+        "presetIds": [
+          "4709b7ec-c1fe-4ae5-ba78-52586ba46f55",
+          "d8765a31-8a70-4f59-b139-12aa8176e3b9"
+        ],
+        "row": 2,
+        "column": 3,
+        "mode": "flash",
+        "fadeIn": 0,
+        "fadeOut": 0.3
+      }
+    ]
+  }
 }

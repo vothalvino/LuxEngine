@@ -28,7 +28,7 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $version = "1.0.0"
+          $version = "1.1.0"
           if ("${{ github.ref }}" -like "refs/tags/v*") { $version = "${{ github.ref_name }}".TrimStart("v") }
           "version=$version" >> $env:GITHUB_OUTPUT
 
@@ -74,8 +74,12 @@ jobs:
             (New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $app.Id)))
           if (-not $win) { throw "Main window not found" }
           function Find($name) {
-            $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
-              (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, $name)))
+            foreach ($try in 1..3) {
+              $el = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+                (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, $name)))
+              if ($el) { return $el }
+              Start-Sleep 1
+            }
           }
           function Click($name) {
             $el = Find $name
@@ -91,6 +95,32 @@ jobs:
             Start-Sleep 2
             Shot "3-cue-tab"
           } catch { Write-Host "Could not switch to the Cue tab: $_" }
+          try {
+            Add-Type -Namespace Lux -Name Mouse -MemberDefinition ('[DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y); ' + '[DllImport("user32.dll")] public static extern void mouse_event(int f, int x, int y, int d, int e);')
+            function MouseClick($name) {
+              $el = Find $name
+              if (-not $el) { throw "UI element '$name' not found" }
+              $r = $el.Current.BoundingRectangle
+              [Lux.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+              [Lux.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Lux.Mouse]::mouse_event(4, 0, 0, 0, 0)
+            }
+            (Find "Buttons").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            Start-Sleep 2
+            Shot "3b-buttons"
+            MouseClick "Deep blue button"; Start-Sleep 1
+            MouseClick "Red button"; Start-Sleep 1        # touches Deep blue, so Deep blue turns off
+            MouseClick "Spots center button"; Start-Sleep 2
+            Shot "3c-buttons-on"
+            Click "Zoom in (Ctrl + mouse wheel)"; Click "Zoom in (Ctrl + mouse wheel)"; Start-Sleep 1
+            $r = (Find "Red button").Current.BoundingRectangle
+            $x = [int]($r.X + $r.Width / 2); $y = [int]($r.Y + $r.Height / 2)
+            [Lux.Mouse]::SetCursorPos($x, $y); [Lux.Mouse]::mouse_event(0x20, 0, 0, 0, 0)    # middle button down
+            foreach ($i in 1..10) { [Lux.Mouse]::SetCursorPos($x - 15 * $i, $y - 6 * $i); Start-Sleep -Milliseconds 30 }
+            [Lux.Mouse]::mouse_event(0x40, 0, 0, 0, 0); Start-Sleep 1
+            Shot "3d-zoomed-and-panned"
+            Click "Show all buttons"; Start-Sleep 1
+            (Find "Cue list").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+          } catch { Write-Host "Buttons check failed: $_" }
           foreach ($dialog in @("Add fixtures", "DMX outputs")) {
             try {
               Click $dialog; Start-Sleep 3

@@ -4,6 +4,7 @@ using LuxEngine.App.Services;
 using LuxEngine.Core.Fixtures;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace LuxEngine.App.Dialogs;
 
@@ -53,6 +54,7 @@ public sealed class FixtureEditorDialog : ContentDialog
             item.Click += (_, _) =>
             {
                 _rows.Children.Clear();
+                _channelRows.Clear();
                 foreach (var t in channels) AddRow(t);
             };
             menu.Items.Add(item);
@@ -68,7 +70,7 @@ public sealed class FixtureEditorDialog : ContentDialog
         buttons.Children.Add(addButton);
         buttons.Children.Add(templates);
 
-        var layout = new StackPanel { Spacing = 12, Width = 640 };
+        var layout = new StackPanel { Spacing = 12, Width = 720 };
         layout.Children.Add(header);
         layout.Children.Add(_modeName);
         layout.Children.Add(new TextBlock
@@ -77,7 +79,11 @@ public sealed class FixtureEditorDialog : ContentDialog
             TextWrapping = TextWrapping.Wrap,
             Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"],
         });
-        layout.Children.Add(new ScrollViewer { Content = _rows, MaxHeight = 360 });
+        var columns = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Opacity = 0.7 };
+        foreach (var (text, width) in new[] { ("#", 28.0), ("Type", 170.0), ("Name", 190.0), ("Default", 72.0), ("Value ranges", 120.0) })
+            columns.Children.Add(new TextBlock { Text = text, Width = width });
+        layout.Children.Add(columns);
+        layout.Children.Add(new ScrollViewer { Content = _rows, MaxHeight = 400 });
         layout.Children.Add(buttons);
         layout.Children.Add(_error);
         Content = layout;
@@ -95,53 +101,167 @@ public sealed class FixtureEditorDialog : ContentDialog
         };
     }
 
+    /// <summary>The controls for one channel: its type, name, default value and optional value ranges.</summary>
+    private sealed class ChannelRow
+    {
+        public StackPanel Root { get; init; } = null!;
+        public TextBlock Number { get; init; } = null!;
+        public ComboBox TypeBox { get; init; } = null!;
+        public TextBox NameBox { get; init; } = null!;
+        public NumberBox DefaultBox { get; init; } = null!;
+        public StackPanel Ranges { get; init; } = null!;
+        public ToggleButton RangesToggle { get; init; } = null!;
+
+        public ChannelType Type => (TypeBox.SelectedItem as ComboBoxItem)?.Tag is ChannelType t ? t : ChannelType.Generic;
+        public string Name => NameBox.Text.Trim().Length == 0 ? Pretty(Type) : NameBox.Text.Trim();
+
+        public List<ChannelCapability> Capabilities() =>
+            Ranges.Children.OfType<Grid>().Select(g => new ChannelCapability
+            {
+                From = ToByte(((NumberBox)g.Children[0]).Value),
+                To = ToByte(((NumberBox)g.Children[1]).Value),
+                Label = ((TextBox)g.Children[2]).Text.Trim(),
+            }).ToList();
+    }
+
+    private readonly List<ChannelRow> _channelRows = new();
+
+    private static int ToByte(double value) => double.IsNaN(value) ? 0 : (int)Math.Round(value);
+
+    private static NumberBox ByteBox(double value, string? header = null, string? tip = null)
+    {
+        var box = new NumberBox
+        {
+            Minimum = 0, Maximum = 255, Value = value, Width = 72, Header = header,
+            SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Hidden,
+            ValidationMode = NumberBoxValidationMode.InvalidInputOverwritten,
+        };
+        if (tip is not null) ToolTipService.SetToolTip(box, tip);
+        return box;
+    }
+
     private void AddRow(ChannelType type)
     {
         var number = new TextBlock { Width = 28, VerticalAlignment = VerticalAlignment.Center };
-        var typeBox = new ComboBox { Width = 190 };
+        var typeBox = new ComboBox { Width = 170 };
         foreach (var t in Enum.GetValues<ChannelType>()) typeBox.Items.Add(new ComboBoxItem { Content = Pretty(t), Tag = t });
         typeBox.SelectedIndex = (int)type;
-        var name = new TextBox { Width = 230, PlaceholderText = "Channel name", Text = Pretty(type) };
+        var name = new TextBox { Width = 190, PlaceholderText = "Channel name", Text = Pretty(type) };
+        var defaultBox = ByteBox(type is ChannelType.Pan or ChannelType.Tilt ? 128 : 0, tip: "Default value (used when nothing controls this channel)");
         typeBox.SelectionChanged += (_, _) =>
         {
             // Keep the name in sync until the user types their own.
             if (typeBox.SelectedItem is ComboBoxItem { Tag: ChannelType t } && (name.Text.Length == 0 || Enum.GetValues<ChannelType>().Any(x => Pretty(x) == name.Text)))
                 name.Text = Pretty(t);
         };
-        var remove = new Button { Content = new FontIcon { Glyph = "", FontSize = 13 }, Padding = new Thickness(8, 6, 8, 6) };
+        var rangesToggle = new ToggleButton { Content = "Ranges" };
+        ToolTipService.SetToolTip(rangesToggle, "Describe what each DMX value range does, e.g. 0–9 Off, 10–255 Strobe slow → fast");
+        var remove = new Button { Content = new FontIcon { Glyph = "\uE711", FontSize = 13 }, Padding = new Thickness(8, 6, 8, 6) };
+        ToolTipService.SetToolTip(remove, "Remove channel");
 
-        var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
-        row.Children.Add(number);
-        row.Children.Add(typeBox);
-        row.Children.Add(name);
-        row.Children.Add(remove);
+        var header = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+        header.Children.Add(number);
+        header.Children.Add(typeBox);
+        header.Children.Add(name);
+        header.Children.Add(defaultBox);
+        header.Children.Add(rangesToggle);
+        header.Children.Add(remove);
+
+        var ranges = new StackPanel { Spacing = 4 };
+        var addRange = new Button { Content = "+ Add range" };
+        var rangesPanel = new StackPanel { Spacing = 6, Margin = new Thickness(36, 2, 0, 8), Visibility = Visibility.Collapsed };
+        rangesPanel.Children.Add(new TextBlock
+        {
+            Text = "Value ranges from the light's manual. They appear in the Control tab so you can pick a setting by name.",
+            TextWrapping = TextWrapping.Wrap,
+            Opacity = 0.7,
+        });
+        rangesPanel.Children.Add(ranges);
+        rangesPanel.Children.Add(addRange);
+
+        var root = new StackPanel();
+        root.Children.Add(header);
+        root.Children.Add(rangesPanel);
+
+        var row = new ChannelRow
+        {
+            Root = root, Number = number, TypeBox = typeBox, NameBox = name, DefaultBox = defaultBox,
+            Ranges = ranges, RangesToggle = rangesToggle,
+        };
+        void UpdateToggle()
+        {
+            int count = ranges.Children.Count;
+            rangesToggle.Content = count == 0 ? "Ranges" : $"Ranges ({count})";
+        }
+        rangesToggle.Click += (_, _) =>
+        {
+            rangesPanel.Visibility = rangesToggle.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            if (rangesToggle.IsChecked == true && ranges.Children.Count == 0) AddRange(ranges, 0, 255, "", UpdateToggle);
+        };
+        addRange.Click += (_, _) =>
+        {
+            // Continue where the last range ended.
+            int from = row.Capabilities().Select(c => c.To + 1).DefaultIfEmpty(0).Max();
+            AddRange(ranges, Math.Min(from, 255), 255, "", UpdateToggle);
+        };
         remove.Click += (_, _) =>
         {
-            _rows.Children.Remove(row);
+            _rows.Children.Remove(root);
+            _channelRows.Remove(row);
             Renumber();
         };
-        _rows.Children.Add(row);
+        _channelRows.Add(row);
+        _rows.Children.Add(root);
         Renumber();
+    }
+
+    private static void AddRange(StackPanel ranges, int from, int to, string label, Action changed)
+    {
+        var grid = new Grid { ColumnSpacing = 8 };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        var fromBox = ByteBox(from, ranges.Children.Count == 0 ? "From" : null);
+        var toBox = ByteBox(to, ranges.Children.Count == 0 ? "To" : null);
+        var text = new TextBox
+        {
+            Text = label, PlaceholderText = "What it does, e.g. Gobo 3 or Strobe slow → fast",
+            Header = ranges.Children.Count == 0 ? "Description" : null,
+        };
+        var remove = new Button
+        {
+            Content = new FontIcon { Glyph = "\uE711", FontSize = 12 }, Padding = new Thickness(6, 5, 6, 5),
+            VerticalAlignment = VerticalAlignment.Bottom,
+        };
+        Grid.SetColumn(toBox, 1);
+        Grid.SetColumn(text, 2);
+        Grid.SetColumn(remove, 3);
+        grid.Children.Add(fromBox);
+        grid.Children.Add(toBox);
+        grid.Children.Add(text);
+        grid.Children.Add(remove);
+        remove.Click += (_, _) =>
+        {
+            ranges.Children.Remove(grid);
+            changed();
+        };
+        ranges.Children.Add(grid);
+        changed();
     }
 
     private void Renumber()
     {
         int i = 1;
-        foreach (var row in _rows.Children.OfType<StackPanel>())
-            ((TextBlock)row.Children[0]).Text = $"{i++}.";
-        _modeName.PlaceholderText = $"{_rows.Children.Count}-channel";
+        foreach (var row in _channelRows) row.Number.Text = $"{i++}.";
+        _modeName.PlaceholderText = $"{_channelRows.Count}-channel";
     }
 
     private static string Pretty(ChannelType type) =>
         type == ChannelType.UV ? "UV" : Regex.Replace(type.ToString(), "(?<!^)([A-Z])", " $1");
 
-    private IEnumerable<(ChannelType Type, string Name)> Channels() =>
-        _rows.Children.OfType<StackPanel>().Select(row =>
-        {
-            var type = ((row.Children[1] as ComboBox)?.SelectedItem as ComboBoxItem)?.Tag is ChannelType t ? t : ChannelType.Generic;
-            var name = ((TextBox)row.Children[2]).Text.Trim();
-            return (type, name.Length == 0 ? Pretty(type) : name);
-        });
+    private IEnumerable<(ChannelType Type, string Name)> Channels() => _channelRows.Select(r => (r.Type, r.Name));
 
     private string? Validate()
     {
@@ -151,6 +271,16 @@ public sealed class FixtureEditorDialog : ContentDialog
         if (channels.Count > 512) return "A fixture can't use more than 512 channels.";
         var duplicate = channels.GroupBy(c => c.Name, StringComparer.OrdinalIgnoreCase).FirstOrDefault(g => g.Count() > 1);
         if (duplicate is not null) return $"Two channels are called \"{duplicate.Key}\". Give each channel its own name.";
+        foreach (var row in _channelRows)
+        {
+            var problem = ChannelCapability.Validate(row.Capabilities());
+            if (problem is not null)
+            {
+                row.RangesToggle.IsChecked = true;
+                ((FrameworkElement)row.Root.Children[1]).Visibility = Visibility.Visible;
+                return $"Channel {row.Number.Text} {row.Name}: {problem}";
+            }
+        }
         return null;
     }
 
@@ -168,20 +298,20 @@ public sealed class FixtureEditorDialog : ContentDialog
             Category = _category.SelectedItem as string ?? "Other",
             IsUserDefined = true,
         };
-        var channels = Channels().ToList();
         var mode = new FixtureMode
         {
-            Name = string.IsNullOrWhiteSpace(_modeName.Text) ? $"{channels.Count}-channel" : _modeName.Text.Trim(),
+            Name = string.IsNullOrWhiteSpace(_modeName.Text) ? $"{_channelRows.Count}-channel" : _modeName.Text.Trim(),
         };
-        foreach (var (type, name) in channels)
+        foreach (var row in _channelRows)
         {
             def.Channels.Add(new ChannelDefinition
             {
-                Name = name,
-                Type = type,
-                Default = type is ChannelType.Pan or ChannelType.Tilt ? (byte)128 : (byte)0,
+                Name = row.Name,
+                Type = row.Type,
+                Default = (byte)Math.Clamp(ToByte(row.DefaultBox.Value), 0, 255),
+                Capabilities = row.Capabilities().OrderBy(c => c.From).ToList(),
             });
-            mode.Channels.Add(name);
+            mode.Channels.Add(row.Name);
         }
         def.Modes.Add(mode);
         return def;

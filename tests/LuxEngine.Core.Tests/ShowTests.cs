@@ -97,3 +97,20 @@ public class ShowTests
         Assert.Single(lib.Search(null, "Moving Head"));
     }
 }
+
+public class CapabilityTests
+{
+    private static ChannelCapability Cap(int from, int to, string label = "x") => new() { From = from, To = to, Label = label };
+
+    [Fact]
+    public void Valid_ranges_pass() =>
+        Assert.Null(ChannelCapability.Validate(new[] { Cap(0, 9, "Off"), Cap(10, 255, "Strobe") }));
+
+    [Fact]
+    public void Overlapping_reversed_and_unnamed_ranges_are_rejected()
+    {
+        Assert.Contains("overlap", ChannelCapability.Validate(new[] { Cap(10, 255, "B"), Cap(0, 10, "A") }));
+        Assert.Contains("starts after", ChannelCapability.Validate(new[] { Cap(20, 10) }));
+        Assert.Contains("description", ChannelCapability.Validate(new[] { Cap(0, 10, " ") }));
+    }
+}

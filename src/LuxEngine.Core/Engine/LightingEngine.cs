@@ -37,6 +37,7 @@ public sealed class LightingEngine
     private Dictionary<Guid, PatchedFixture> _fixtures = new();
     private Dictionary<ChannelKey, PatchedChannel> _channels = new();
     private Dictionary<ChannelKey, double> _lastValues = new();
+    private Dictionary<ChannelKey, double> _buttonValues = new();
     private double _grandMaster = 1;
 
     /// <param name="clock">Time source in seconds; defaults to a real monotonic clock.</param>
@@ -57,6 +58,7 @@ public sealed class LightingEngine
     public Show Show { get { lock (_sync) return _show; } }
     public Programmer Programmer { get; } = new();
     public CuePlayer CuePlayer { get; } = new();
+    public ButtonPlayer Buttons { get; } = new();
 
     /// <summary>Overall brightness, 0–1.</summary>
     public double GrandMaster
@@ -86,6 +88,8 @@ public sealed class LightingEngine
             _show = show;
             Programmer.Clear();
             CuePlayer.Reset();
+            Buttons.Reset();
+            _buttonValues = new();
             _patchDirty = true;
         }
     }
@@ -161,6 +165,7 @@ public sealed class LightingEngine
             EnsurePatch();
             var key = new ChannelKey(fixtureId, channel);
             if (Programmer.Values.TryGetValue(key, out var programmed)) return programmed;
+            if (_buttonValues.TryGetValue(key, out var button)) return button;
             if (CuePlayer.Current.TryGetValue(key, out var cue)) return cue;
             return _channels.TryGetValue(key, out var ch) ? ch.Channel.Default : null;
         }
@@ -230,6 +235,73 @@ public sealed class LightingEngine
         }
     }
 
+    // ---------------------------------------------------------------- Cue buttons
+
+    public bool IsButtonOn(Guid id)
+    {
+        lock (_sync) return Buttons.IsOn(id);
+    }
+
+    public double ButtonLevel(Guid id)
+    {
+        lock (_sync) return Buttons.Level(id);
+    }
+
+    /// <summary>Switches a cue button; switching one on turns off the buttons that touch it.</summary>
+    public void SetButton(Guid id, bool on)
+    {
+        lock (_sync)
+        {
+            var page = _show.ButtonPage;
+            var button = page.Find(id);
+            if (button is null) return;
+            Buttons.Tick(Now, page.Find);
+            if (on)
+                foreach (var other in page.GroupOf(button))
+                    if (other.Id != id) Buttons.Set(other.Id, false);
+            Buttons.Set(id, on);
+        }
+    }
+
+    public void ToggleButton(Guid id)
+    {
+        lock (_sync) SetButton(id, !Buttons.IsOn(id));
+    }
+
+    public void ReleaseButtons()
+    {
+        lock (_sync) Buttons.ReleaseAll();
+    }
+
+    /// <summary>
+    /// Lays the active buttons over the cue list values. Dimmers take the highest value (scaled by the
+    /// button's level); other channels crossfade toward the button's value, the newest button winning.
+    /// </summary>
+    private List<Effect> ApplyButtons(Dictionary<ChannelKey, double> values)
+    {
+        var effects = new List<Effect>();
+        var changed = new Dictionary<ChannelKey, double>();
+        var page = _show.ButtonPage;
+        foreach (var (id, level) in Buttons.Active)
+        {
+            var button = page.Find(id);
+            if (button is null) continue;
+            var presets = button.PresetIds.Select(_show.PresetRoot.FindPreset).OfType<Preset>().ToList();
+            foreach (var (key, target) in BuildCueTarget(new Dictionary<ChannelKey, double>(), presets))
+            {
+                if (!values.TryGetValue(key, out var below)) continue;
+                var type = _channels[key].Channel.Type;
+                double v = type.IsIntensity() ? Math.Max(below, target * level)
+                    : type.Snaps() ? target
+                    : below + (target - below) * level;
+                values[key] = changed[key] = v;
+            }
+            effects.AddRange(presets.SelectMany(p => p.Effects));
+        }
+        _buttonValues = changed;
+        return effects;
+    }
+
     private void GoToLocked(int index)
     {
         EnsurePatch();
@@ -282,20 +354,27 @@ public sealed class LightingEngine
         {
             EnsurePatch();
             CuePlayer.Tick(now);
+            Buttons.Tick(now, _show.ButtonPage.Find);
             HandleAutoFollow();
 
             var values = new Dictionary<ChannelKey, double>(_channels.Count);
             foreach (var (key, ch) in _channels) values[key] = ch.Channel.Default;
             foreach (var (key, v) in CuePlayer.Current)
                 if (values.ContainsKey(key)) values[key] = v;
+            var buttonEffects = ApplyButtons(values);
             foreach (var (key, v) in Programmer.Values)
                 if (values.ContainsKey(key)) values[key] = v;
 
             // Effects from the running cue leave alone whatever you are controlling by hand;
             // effects you start yourself always apply.
             var brightness = new Dictionary<Guid, double>();
-            var handControlled = HandControlledFixtures();
+            // Cue list effects also leave alone what a cue button controls.
+            var handControlled = ControlledFixtures(Programmer.Values.Keys);
+            var overCueList = ControlledFixtures(Programmer.Values.Keys.Concat(_buttonValues.Keys));
             foreach (var effect in CuePlayer.ActiveEffects)
+                EffectEngine.Apply(effect, now, _fixtures, values, brightness,
+                    overCueList.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
+            foreach (var effect in buttonEffects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness,
                     handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)));
             foreach (var effect in Programmer.Effects)
@@ -329,11 +408,11 @@ public sealed class LightingEngine
         }
     }
 
-    /// <summary>Fixtures with programmer values, grouped by what effects would change ("Dimmer", "Color", "Position").</summary>
-    private Dictionary<string, HashSet<Guid>> HandControlledFixtures()
+    /// <summary>Fixtures that have any of the given channels set, grouped by what effects would change ("Dimmer", "Color", "Position").</summary>
+    private Dictionary<string, HashSet<Guid>> ControlledFixtures(IEnumerable<ChannelKey> keys)
     {
         var result = new Dictionary<string, HashSet<Guid>>();
-        foreach (var key in Programmer.Values.Keys)
+        foreach (var key in keys)
         {
             if (!_channels.TryGetValue(key, out var ch) || !_fixtures.TryGetValue(key.FixtureId, out var fixture)) continue;
             var type = ch.Channel.Type;
