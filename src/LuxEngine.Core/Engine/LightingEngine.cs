@@ -134,9 +134,20 @@ public sealed class LightingEngine
         }
     }
 
+    /// <summary>Adds a preset on top of what is already set by hand.</summary>
     public void ApplyPreset(Preset preset)
     {
         lock (_sync) Programmer.Apply(preset);
+    }
+
+    /// <summary>Shows only this preset: earlier presets, hand changes and effects are cleared first.</summary>
+    public void ShowPreset(Preset preset)
+    {
+        lock (_sync)
+        {
+            Programmer.Clear();
+            Programmer.Apply(preset);
+        }
     }
 
     public void AddEffect(Effect effect)

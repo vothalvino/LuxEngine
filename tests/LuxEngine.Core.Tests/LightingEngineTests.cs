@@ -244,3 +244,23 @@ public class EffectOrderTests
         Assert.Equal(0, second[4]);
     }
 }
+
+public class ShowPresetTests
+{
+    [Fact]
+    public void Showing_a_preset_drops_the_previous_one_while_applying_layers()
+    {
+        var t = new TestShow();
+        var red = t.AddPreset("Red", (t.Par1, "Red", 255), (t.Par1, "Intensity", 255));
+        var blue = t.AddPreset("Blue", (t.Par2, "Blue", 255));
+        var engine = new LightingEngine(t.Show);
+
+        engine.ShowPreset(red);
+        engine.AddEffect(new Effect { Type = EffectType.Rainbow, FixtureIds = { t.Par1.Id } });
+        engine.ShowPreset(blue);
+        Assert.Equal(new[] { t.Par2.Id }, engine.ProgrammerFixtures());   // red, its dimmer and the effect are gone
+
+        engine.ApplyPreset(red);
+        Assert.Equal(2, engine.ProgrammerFixtures().Count);              // layering keeps both
+    }
+}

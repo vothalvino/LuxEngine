@@ -222,8 +222,12 @@ public sealed partial class PresetPanel : UserControl
             _currentFolder = node.Id;
             return;
         }
-        ApplyPreset(node.Id);
+        ApplyPreset(node.Id, layer: CtrlDown());
     }
+
+    private static bool CtrlDown() =>
+        Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control)
+            .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
 
     /// <summary>Double-clicking a preset opens it for editing.</summary>
     private void Tree_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
@@ -232,13 +236,25 @@ public sealed partial class PresetPanel : UserControl
             AppServices.PresetEditor.Begin(node.Id);
     }
 
-    private static void ApplyPreset(Guid id)
+    /// <summary>
+    /// Clicking a preset shows just that preset, so you see exactly what it does. Ctrl+click adds it on
+    /// top of the current look instead, and while editing a preset clicks always add to it.
+    /// </summary>
+    private static void ApplyPreset(Guid id, bool layer = false)
     {
         var show = AppServices.Engine.Show;
         var preset = show.PresetRoot.FindPreset(id);
         if (preset is null) return;
-        AppServices.Engine.ApplyPreset(preset);
-        AppServices.Selection.Set(preset.FixtureIds);
+        if (layer || AppServices.PresetEditor.IsEditing)
+        {
+            AppServices.Engine.ApplyPreset(preset);
+            AppServices.Selection.Set(AppServices.Selection.Ids.Concat(preset.FixtureIds));
+        }
+        else
+        {
+            AppServices.Engine.ShowPreset(preset);
+            AppServices.Selection.Set(preset.FixtureIds);
+        }
         AppServices.SelectPreset(id);
     }
 
@@ -273,6 +289,7 @@ public sealed partial class PresetPanel : UserControl
         else
         {
             Add("Edit preset…", "\uE70F", () => AppServices.PresetEditor.Begin(node.Id));
+            Add("Add on top of the current look", "\uE710", () => ApplyPreset(node.Id, layer: true));
             Add("Use now", "", () => ApplyPreset(node.Id));
             Add("Add to selected cue", "", () => AppServices.MainWindow?.Cues.AddPresetToSelectedCue(node.Id));
             Add("Update with current look", "", () => UpdatePreset(node.Id));
