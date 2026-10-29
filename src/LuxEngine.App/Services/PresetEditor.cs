@@ -34,10 +34,11 @@ public sealed class PresetEditor
     public void Save(string? color = null)
     {
         if (Editing is not { } preset || _before is null) return;
-        AppServices.Document.Edit(ShowChange.Presets, _ =>
+        AppServices.Document.Edit(ShowChange.Presets | ShowChange.Cues, show =>
         {
             if (color is not null) preset.Color = color;
             AppServices.Engine.EndPresetEdit(preset, _before, save: true);
+            if (preset.AutoName) preset.Name = PresetNamer.Suggest(show, preset);
         });
         Finish();
     }

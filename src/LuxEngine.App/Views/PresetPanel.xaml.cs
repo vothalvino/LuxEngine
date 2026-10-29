@@ -185,12 +185,16 @@ public sealed partial class PresetPanel : UserControl
         }
 
         var target = TargetFolder();
+        var selected = AppServices.Selection.Ids;
+        var preset = engine.RecordPreset("", selected.Count > 0 ? selected : null);
+        var suggestion = PresetNamer.Suggest(engine.Show, preset);
         var name = await DialogHelper.PromptAsync("Save preset",
-            $"Preset name (saved in \"{target.Name}\")", $"Preset {AppServices.Engine.Show.PresetRoot.AllPresets().Count() + 1}", "Save");
+            $"Preset name (saved in \"{target.Name}\"). The suggested name describes what it contains; keep it and it updates when you change the preset.",
+            suggestion, "Save");
         if (name is null) return;
 
-        var selected = AppServices.Selection.Ids;
-        var preset = engine.RecordPreset(name, selected.Count > 0 ? selected : null);
+        preset.Name = name.Trim().Length == 0 ? suggestion : name.Trim();
+        preset.AutoName = preset.Name == suggestion;
         preset.Color = GuessColor(preset);
         AppServices.Document.Edit(ShowChange.Presets, _ => target.Presets.Add(preset));
         AppServices.SelectPreset(preset.Id);
@@ -270,6 +274,13 @@ public sealed partial class PresetPanel : UserControl
             Add("Use now", "", () => ApplyPreset(node.Id));
             Add("Add to selected cue", "", () => AppServices.MainWindow?.Cues.AddPresetToSelectedCue(node.Id));
             Add("Update with current look", "", () => UpdatePreset(node.Id));
+            Add("Use automatic name", "\uE8AC", () => AppServices.Document.Edit(ShowChange.Presets | ShowChange.Cues, show =>
+            {
+                var preset = show.PresetRoot.FindPreset(node.Id);
+                if (preset is null) return;
+                preset.Name = PresetNamer.Suggest(show, preset);
+                preset.AutoName = true;
+            }));
             Add("Duplicate", "", () => DuplicatePreset(node.Id));
         }
 
@@ -280,7 +291,11 @@ public sealed partial class PresetPanel : UserControl
             AppServices.Document.Edit(ShowChange.Presets | ShowChange.Cues, show =>
             {
                 var preset = show.PresetRoot.FindPreset(node.Id);
-                if (preset is not null) preset.Name = name;
+                if (preset is not null)
+                {
+                    preset.Name = name;
+                    preset.AutoName = false;   // the user's own name is kept from now on
+                }
                 var folder = show.PresetRoot.AllFolders().FirstOrDefault(f => f.Id == node.Id);
                 if (folder is not null) folder.Name = name;
             });
@@ -315,6 +330,7 @@ public sealed partial class PresetPanel : UserControl
             preset.Values = recorded.Values;
             preset.Effects = recorded.Effects;
             preset.Color = GuessColor(preset) ?? preset.Color;
+            if (preset.AutoName) preset.Name = PresetNamer.Suggest(engine.Show, preset);
         });
     }
 

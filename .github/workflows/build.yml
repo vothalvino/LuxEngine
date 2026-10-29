@@ -142,6 +142,9 @@ jobs:
             Start-Sleep 1
             Click "Blue"; Start-Sleep 2
             Shot "5-control"
+            Click "New preset"; Start-Sleep 2
+            Shot "5b-preset-auto-name"
+            Click "Save"; Start-Sleep 1
           } catch { Write-Host "Control check failed: $_" }
           try {
             $r = (Find "Deep blue").Current.BoundingRectangle
