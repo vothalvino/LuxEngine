@@ -18,9 +18,9 @@ jobs:
       DOTNET_NOLOGO: 1
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
 
@@ -156,7 +156,7 @@ jobs:
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }
           Stop-Process -Id $app.Id
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: screenshots
@@ -178,7 +178,7 @@ jobs:
           & $iscc /DAppVersion=${{ steps.version.outputs.version }} /DSourceDir=..\publish installer\LuxEngine.iss
           if ($LASTEXITCODE -ne 0) { throw "Installer build failed" }
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: LuxEngine-Setup
           path: installer/Output/LuxEngine-Setup.exe

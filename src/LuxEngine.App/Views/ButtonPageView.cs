@@ -205,7 +205,7 @@ public sealed class ButtonPageView : UserControl
     private void Pan_Pressed(object sender, PointerRoutedEventArgs e)
     {
         var point = e.GetCurrentPoint(_viewer);
-        bool background = e.OriginalSource == _canvas || e.OriginalSource == _grid;
+        bool background = ReferenceEquals(e.OriginalSource, _canvas) || ReferenceEquals(e.OriginalSource, _grid);
         if (!point.Properties.IsMiddleButtonPressed && !(background && point.Properties.IsLeftButtonPressed)) return;
         if (e.Pointer.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Touch) return; // touch pans by itself
         _panStart = point.Position;
