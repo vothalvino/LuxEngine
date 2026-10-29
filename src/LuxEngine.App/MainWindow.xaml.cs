@@ -331,6 +331,63 @@ public sealed partial class MainWindow : Window
 
     private async void NewFixtureType_Click(object sender, RoutedEventArgs e) => await FixtureEditorDialog.CreateAsync();
 
+    private async void EditSelectedFixture_Click(object sender, RoutedEventArgs e)
+    {
+        var id = await PickFixtureAsync("Edit fixture", "Which light do you want to rename or re-address?", byType: false);
+        if (id is Guid fixtureId) await FixturePropertiesDialog.EditAsync(fixtureId);
+    }
+
+    private async void EditFixtureType_Click(object sender, RoutedEventArgs e)
+    {
+        var id = await PickFixtureAsync("Edit fixture type", "Which type of light do you want to change? All lights of that type change with it.", byType: true);
+        if (id is Guid fixtureId) await FixtureEditorDialog.EditAsync(fixtureId);
+    }
+
+    /// <summary>
+    /// Uses the selected light when exactly one is selected (or all selected lights share a type);
+    /// otherwise asks which light, or which type and mode, to edit.
+    /// </summary>
+    private static async Task<Guid?> PickFixtureAsync(string title, string question, bool byType)
+    {
+        var show = AppServices.Engine.Show;
+        if (show.Fixtures.Count == 0)
+        {
+            await DialogHelper.ShowMessageAsync(title, "There are no lights in this show yet. Add some with \"Add fixture from library…\" first.");
+            return null;
+        }
+
+        var selected = AppServices.Selection.Ids.Select(show.FindFixture).OfType<Core.Fixtures.FixtureInstance>().ToList();
+        if (selected.Count == 1) return selected[0].Id;
+        if (byType && selected.Count > 1 && selected.Select(f => (f.DefinitionId, f.ModeName)).Distinct().Count() == 1) return selected[0].Id;
+
+        var choices = byType
+            ? show.Fixtures.GroupBy(f => (f.DefinitionId, f.ModeName)).Select(g =>
+              {
+                  var def = show.DefinitionOf(g.First());
+                  return (Id: g.First().Id, Text: $"{def?.DisplayName ?? g.Key.DefinitionId} · {g.Key.ModeName}  ({g.Count()} light{(g.Count() == 1 ? "" : "s")})");
+              }).ToList()
+            : show.Fixtures.Select(f => (Id: f.Id, Text: $"{f.Name}  ·  universe {f.Universe}, address {f.Address}")).ToList();
+
+        var list = new ListView { SelectionMode = ListViewSelectionMode.Single, MaxHeight = 360 };
+        foreach (var c in choices) list.Items.Add(c.Text);
+        list.SelectedIndex = 0;
+        var panel = new StackPanel { Spacing = 10, Width = 420 };
+        panel.Children.Add(new TextBlock { Text = question, TextWrapping = TextWrapping.Wrap });
+        panel.Children.Add(list);
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = panel,
+            PrimaryButtonText = "Edit",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+        };
+        list.DoubleTapped += (_, _) => { dialog.Hide(); list.Tag = "go"; };
+        var result = await DialogHelper.ShowAsync(dialog);
+        if ((result != ContentDialogResult.Primary && list.Tag as string != "go") || list.SelectedIndex < 0) return null;
+        return choices[list.SelectedIndex].Id;
+    }
+
     private async void ImportFixture_Click(object sender, RoutedEventArgs e)
     {
         var path = await DialogHelper.PickOpenFileAsync(".json");

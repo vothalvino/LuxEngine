@@ -3,6 +3,7 @@ using LuxEngine.App.Helpers;
 using LuxEngine.App.Services;
 using LuxEngine.Control;
 using LuxEngine.Core.Effects;
+using LuxEngine.Core.Engine;
 using LuxEngine.Core.Fixtures;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
@@ -58,6 +59,7 @@ public sealed partial class ControlView : UserControl
         {
             SoundMeter.Value = AppServices.Sound.Level;
             UpdatePresetEditInfo();
+            UpdatePresetValues();
             UpdateSaveButton(SavePresetButton);
         };
         _meterTimer.Start();
@@ -76,7 +78,7 @@ public sealed partial class ControlView : UserControl
     private void SyncFromSelection()
     {
         var fixtures = SelectedFixtures();
-        NothingSelected.Visibility = fixtures.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        NothingSelected.Visibility = fixtures.Count == 0 && !AppServices.PresetEditor.IsEditing ? Visibility.Visible : Visibility.Collapsed;
         SelectionText.Text = fixtures.Count switch
         {
             0 => "No lights selected",
@@ -465,6 +467,7 @@ public sealed partial class ControlView : UserControl
     {
         var preset = AppServices.PresetEditor.Editing;
         PresetEditBar.Visibility = preset is null ? Visibility.Collapsed : Visibility.Visible;
+        UpdatePresetValues(rebuild: true);
         _baseColors.Clear();
         SyncFromSelection();
         if (preset is null) return;
@@ -489,6 +492,159 @@ public sealed partial class ControlView : UserControl
         ToolTipService.SetToolTip(button, editing ? "Finish editing the preset first"
             : enabled ? "Save the current look as a new preset"
             : "Nothing to save yet: select lights and set a color, dimmer or position first");
+    }
+
+    private readonly Dictionary<ChannelKey, (Slider Slider, NumberBox Box, TextBlock Meaning, ChannelDefinition Channel)> _presetRows = new();
+    private string _presetSignature = "";
+
+    /// <summary>
+    /// Keeps the "In this preset" card in step with the programmer: rebuilt when channels or effects are
+    /// added or removed, otherwise only the numbers are refreshed (except the one being typed in).
+    /// </summary>
+    private void UpdatePresetValues(bool rebuild = false)
+    {
+        bool editing = AppServices.PresetEditor.IsEditing;
+        PresetValuesCard.Visibility = editing ? Visibility.Visible : Visibility.Collapsed;
+        if (!editing)
+        {
+            if (_presetRows.Count > 0 || _presetSignature.Length > 0) { PresetValueRows.Children.Clear(); _presetRows.Clear(); _presetSignature = ""; }
+            return;
+        }
+
+        var snapshot = AppServices.Engine.ProgrammerSnapshot();
+        var signature = string.Join("|", snapshot.Values.Keys.Select(k => $"{k.FixtureId}/{k.Channel}").Order()) + "#" +
+                        string.Join("|", snapshot.Effects.Select(e => $"{e.Id}:{e.FixtureIds.Count}"));
+        if (rebuild || signature != _presetSignature)
+        {
+            _presetSignature = signature;
+            BuildPresetValues(snapshot);
+            return;
+        }
+
+        _syncing = true;
+        try
+        {
+            foreach (var (key, row) in _presetRows)
+            {
+                if (!snapshot.Values.TryGetValue(key, out var value)) continue;
+                if (row.Slider.Value != value) row.Slider.Value = value;
+                if (row.Box.FocusState == FocusState.Unfocused && row.Box.Value != value) row.Box.Value = value;
+                row.Meaning.Text = Meaning(row.Channel, value);
+            }
+        }
+        finally
+        {
+            _syncing = false;
+        }
+    }
+
+    private static string Meaning(ChannelDefinition channel, byte value)
+    {
+        var cap = channel.Capabilities.FirstOrDefault(c => value >= c.From && value <= c.To);
+        return cap is not null ? cap.Label : $"{Math.Round(value / 2.55)}%";
+    }
+
+    private void BuildPresetValues(ProgrammerSnapshot snapshot)
+    {
+        PresetValueRows.Children.Clear();
+        _presetRows.Clear();
+        var fixtures = AppServices.Engine.Fixtures;
+        var secondary = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"];
+
+        foreach (var fixture in AppServices.Engine.Show.Fixtures)
+        {
+            if (!fixtures.TryGetValue(fixture.Id, out var patched)) continue;
+            var channels = patched.Channels.Where(c => snapshot.Values.ContainsKey(new ChannelKey(fixture.Id, c.Channel.Name))).ToList();
+            var effects = snapshot.Effects.Where(e => e.FixtureIds.Contains(fixture.Id)).ToList();
+            if (channels.Count == 0 && effects.Count == 0) continue;
+
+            var header = new HyperlinkButton
+            {
+                Content = $"{fixture.Name}  ·  {patched.Definition.DisplayName}",
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                Padding = new Thickness(0, 6, 0, 2),
+            };
+            var id = fixture.Id;
+            header.Click += (_, _) => AppServices.Selection.Set(new[] { id });
+            ToolTipService.SetToolTip(header, "Select only this light");
+            PresetValueRows.Children.Add(header);
+
+            foreach (var ch in channels)
+            {
+                var key = new ChannelKey(fixture.Id, ch.Channel.Name);
+                byte value = snapshot.Values[key];
+                var row = new Grid { ColumnSpacing = 6 };
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(96) });
+                row.ColumnDefinitions.Add(new ColumnDefinition());
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(64) });
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                var label = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+                label.Children.Add(new TextBlock { Text = ch.Channel.Name, TextTrimming = TextTrimming.CharacterEllipsis });
+                var meaning = new TextBlock { Text = Meaning(ch.Channel, value), Style = (Style)Application.Current.Resources["CaptionTextBlockStyle"], Foreground = secondary, TextTrimming = TextTrimming.CharacterEllipsis };
+                label.Children.Add(meaning);
+                ToolTipService.SetToolTip(label, ch.Channel.Name);
+
+                var slider = new Slider { Minimum = 0, Maximum = 255, Value = value, VerticalAlignment = VerticalAlignment.Center };
+                var box = new NumberBox
+                {
+                    Minimum = 0, Maximum = 255, Value = value, VerticalAlignment = VerticalAlignment.Center,
+                    SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Hidden,
+                    ValidationMode = NumberBoxValidationMode.InvalidInputOverwritten,
+                };
+                Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(box, $"{fixture.Name} {ch.Channel.Name}");
+                var remove = new Button { Content = new FontIcon { Glyph = "\uE711", FontSize = 11 }, Padding = new Thickness(6, 4, 6, 4), VerticalAlignment = VerticalAlignment.Center };
+                ToolTipService.SetToolTip(remove, "Take this setting out of the preset");
+                var channelName = ch.Channel.Name;
+                remove.Click += (_, _) => AppServices.Engine.ReleaseChannel(id, channelName);
+
+                void Set(double v)
+                {
+                    if (_syncing || double.IsNaN(v)) return;
+                    var b = (byte)Math.Clamp(Math.Round(v), 0, 255);
+                    AppServices.Engine.SetValue(id, channelName, b);
+                    _syncing = true;
+                    slider.Value = b;
+                    box.Value = b;
+                    meaning.Text = Meaning(ch.Channel, b);
+                    _syncing = false;
+                }
+                slider.ValueChanged += (_, e) => Set(e.NewValue);
+                box.ValueChanged += (_, e) => Set(e.NewValue);
+
+                Grid.SetColumn(slider, 1);
+                Grid.SetColumn(box, 2);
+                Grid.SetColumn(remove, 3);
+                row.Children.Add(label);
+                row.Children.Add(slider);
+                row.Children.Add(box);
+                row.Children.Add(remove);
+                PresetValueRows.Children.Add(row);
+                _presetRows[key] = (slider, box, meaning, ch.Channel);
+            }
+
+            foreach (var effect in effects)
+            {
+                var row = new Grid { ColumnSpacing = 6 };
+                row.ColumnDefinitions.Add(new ColumnDefinition());
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                row.Children.Add(new TextBlock
+                {
+                    Text = $"Effect: {effect.Type} (speed {effect.Speed:0.##}, on {effect.FixtureIds.Count} light{(effect.FixtureIds.Count == 1 ? "" : "s")})",
+                    VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis,
+                });
+                var remove = new Button { Content = new FontIcon { Glyph = "\uE711", FontSize = 11 }, Padding = new Thickness(6, 4, 6, 4) };
+                ToolTipService.SetToolTip(remove, "Take this effect out of the preset (for all its lights)");
+                var effectId = effect.Id;
+                remove.Click += (_, _) => AppServices.Engine.RemoveEffect(effectId);
+                Grid.SetColumn(remove, 1);
+                row.Children.Add(remove);
+                PresetValueRows.Children.Add(row);
+            }
+        }
+
+        if (PresetValueRows.Children.Count == 0)
+            PresetValueRows.Children.Add(new TextBlock { Text = "This preset is empty. Set some lights with the controls to add them.", TextWrapping = TextWrapping.Wrap, Foreground = secondary });
     }
 
     private void PresetEditSave_Click(object sender, RoutedEventArgs e) => AppServices.PresetEditor.Save();
