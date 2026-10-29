@@ -35,7 +35,16 @@ public sealed class PresetNode : ObservableObject
 
     public string Name { get => _name; set => SetProperty(ref _name, value); }
     public bool IsExpanded { get => _isExpanded; set => SetProperty(ref _isExpanded, value); }
-    public string Badge { get => _badge; set => SetProperty(ref _badge, value); }
+    public string Badge
+    {
+        get => _badge;
+        set
+        {
+            if (SetProperty(ref _badge, value)) OnPropertyChanged(nameof(BadgeVisibility));
+        }
+    }
+
+    public Visibility BadgeVisibility => string.IsNullOrEmpty(_badge) ? Visibility.Collapsed : Visibility.Visible;
     public string Detail { get => _detail; set => SetProperty(ref _detail, value); }
     public Brush AccentBrush { get => _accentBrush; set => SetProperty(ref _accentBrush, value); }
 }

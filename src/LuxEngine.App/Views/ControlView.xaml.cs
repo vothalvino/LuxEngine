@@ -35,6 +35,7 @@ public sealed partial class ControlView : UserControl
     public ControlView()
     {
         InitializeComponent();
+        DimmerSlider.ValueChanged += DimmerSlider_ValueChanged;
         BuildSwatches();
         AppServices.Selection.Changed += SyncFromSelection;
         AppServices.Document.Changed += change =>
@@ -77,6 +78,8 @@ public sealed partial class ControlView : UserControl
             UpdatePresetEditInfo();
             UpdatePresetValues();
             UpdateSaveButton(SavePresetButton);
+            UpdateLiveDot();
+            UpdateColorChip();
         };
         _meterTimer.Start();
     }
@@ -108,7 +111,6 @@ public sealed partial class ControlView : UserControl
             if (first is not null)
             {
                 DimmerSlider.Value = Math.Round(ReadDimmer(first) * 100);
-                DimmerText.Text = $"{DimmerSlider.Value:0}%";
                 WhiteSlider.Value = Read(first, ChannelType.White) ?? 0;
                 MoveDot((Read(first, ChannelType.Pan) ?? 128) / 255, (Read(first, ChannelType.Tilt) ?? 128) / 255);
             }
@@ -159,7 +161,7 @@ public sealed partial class ControlView : UserControl
                 var tilt = Read(first, ChannelType.Tilt) ?? 128;
                 MoveDot(pan / 255, tilt / 255);
             }
-            DimmerText.Text = $"{DimmerSlider.Value:0}%";
+
         }
         finally
         {
@@ -195,12 +197,10 @@ public sealed partial class ControlView : UserControl
 
     // ------------------------------------------------------------------ dimmer
 
-    private void DimmerSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    private void DimmerSlider_ValueChanged(object? sender, double value)
     {
-        if (DimmerText is null) return;
-        DimmerText.Text = $"{e.NewValue:0}%";
         if (_syncing) return;
-        SetDimmer(e.NewValue / 100);
+        SetDimmer(value / 100);
     }
 
     private void SetDimmer(double level)
@@ -264,6 +264,17 @@ public sealed partial class ControlView : UserControl
             button.Click += (s, _) => ApplyColor((Color)((Button)s).Tag, fromSwatch: true);
             Swatches.Children.Add(button);
         }
+    }
+
+    /// <summary>Shows the colour of the first selected light in the chip next to the Colour title.</summary>
+    private void UpdateColorChip()
+    {
+        var first = SelectedFixtures().FirstOrDefault();
+        if (first is null) return;
+        var color = _baseColors.TryGetValue(first.Instance.Id, out var c) ? c : ColorMixer.FromLook(AppServices.Engine.GetLook(first.Instance.Id) with { Intensity = 1 });
+        if (ColorChip.Fill is SolidColorBrush b && b.Color == color) return;
+        ColorChip.Fill = new SolidColorBrush(color);
+        ColorHex.Text = ColorMixer.ToHex(color);
     }
 
     private void Picker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
@@ -335,7 +346,28 @@ public sealed partial class ControlView : UserControl
     {
         Canvas.SetLeft(XYDot, x * 190 - 9);
         Canvas.SetTop(XYDot, y * 190 - 9);
+        Canvas.SetLeft(XYGlow, x * 190 - 17);
+        Canvas.SetTop(XYGlow, y * 190 - 17);
+        XYCrossV.X1 = XYCrossV.X2 = x * 190;
+        XYCrossH.Y1 = XYCrossH.Y2 = y * 190;
         PanTiltText.Text = $"Pan {x:P0}  ·  Tilt {y:P0}";
+    }
+
+    /// <summary>Shows where the first selected head really points (output values), e.g. while a movement runs.</summary>
+    private void UpdateLiveDot()
+    {
+        if (PositionCard.Visibility != Visibility.Visible) return;
+        var first = SelectedFixtures().FirstOrDefault(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt));
+        string? ChannelName(ChannelType t) => first?.Channels.FirstOrDefault(c => c.Channel.Type == t).Channel?.Name;
+        double? pan = first is null || ChannelName(ChannelType.Pan) is not { } p ? null : AppServices.Engine.GetOutput(first.Instance.Id, p);
+        double? tilt = first is null || ChannelName(ChannelType.Tilt) is not { } t ? null : AppServices.Engine.GetOutput(first.Instance.Id, t);
+        double setPan = Canvas.GetLeft(XYDot) + 9, setTilt = Canvas.GetTop(XYDot) + 9;
+        double livePan = (pan ?? 128) / 255 * 190, liveTilt = (tilt ?? 128) / 255 * 190;
+        // Only worth showing when it differs from the set position (an effect is moving the head).
+        bool moving = first is not null && (Math.Abs(livePan - setPan) > 3 || Math.Abs(liveTilt - setTilt) > 3);
+        XYLiveDot.Visibility = moving ? Visibility.Visible : Visibility.Collapsed;
+        Canvas.SetLeft(XYLiveDot, livePan - 6);
+        Canvas.SetTop(XYLiveDot, liveTilt - 6);
     }
 
     private void CenterPosition_Click(object sender, RoutedEventArgs e) => SetPosition(0.5, 0.5);

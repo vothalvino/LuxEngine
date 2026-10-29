@@ -19,6 +19,10 @@ public sealed class CueRow : ObservableObject
     private string _presets = "";
     private string _timing = "";
     private Visibility _activeVisibility = Visibility.Collapsed;
+    private Visibility _nextVisibility = Visibility.Collapsed;
+    private double _progress;
+    private Brush? _badgeBrush;
+    private Brush? _badgeTextBrush;
 
     public CueRow(Guid id) => Id = id;
 
@@ -28,6 +32,12 @@ public sealed class CueRow : ObservableObject
     public string Presets { get => _presets; set => SetProperty(ref _presets, value); }
     public string Timing { get => _timing; set => SetProperty(ref _timing, value); }
     public Visibility ActiveVisibility { get => _activeVisibility; set => SetProperty(ref _activeVisibility, value); }
+    public Visibility NextVisibility { get => _nextVisibility; set => SetProperty(ref _nextVisibility, value); }
+
+    /// <summary>0–1: how far the fade into this cue has got (only while it is the running cue).</summary>
+    public double Progress { get => _progress; set => SetProperty(ref _progress, value); }
+    public Brush? BadgeBrush { get => _badgeBrush; set => SetProperty(ref _badgeBrush, value); }
+    public Brush? BadgeTextBrush { get => _badgeTextBrush; set => SetProperty(ref _badgeTextBrush, value); }
 }
 
 public sealed class CuePresetRow
@@ -55,6 +65,7 @@ public sealed partial class CueView : UserControl
             if (change.HasFlag(ShowChange.Cues) || change.HasFlag(ShowChange.Presets)) Refresh();
         };
         AppServices.SelectedPresetChanged += UpdateAddPresetButton;
+        Ui.ThemeChanged += () => _lastActive = -2;   // recolour the number badges
         Loaded += (_, _) => Refresh();
 
         _timer = DispatcherQueue.CreateTimer();
@@ -111,10 +122,26 @@ public sealed partial class CueView : UserControl
         PauseText.Text = player.IsPaused ? "Resume" : "Pause";
         PauseIcon.Glyph = player.IsPaused ? "" : "";
 
+        if (player.CurrentIndex >= 0 && player.CurrentIndex < Cues.Count)
+        {
+            double progress = player.CurrentCue is null ? 1 : player.Progress;
+            if (Math.Abs(Cues[player.CurrentIndex].Progress - progress) > 0.005) Cues[player.CurrentIndex].Progress = progress;
+        }
         if (player.CurrentIndex == _lastActive) return;
         _lastActive = player.CurrentIndex;
+        int next = player.CurrentIndex + 1 < Cues.Count ? player.CurrentIndex + 1 : (List.Loop ? 0 : -1);
+        var accent = Ui.Brush("LuxAccentBrush");
+        var pill = Ui.Brush("LuxPillBrush");
+        var onAccent = Ui.Brush("TextOnAccentFillColorPrimaryBrush");
+        var text = Ui.Brush("TextFillColorPrimaryBrush");
         for (int i = 0; i < Cues.Count; i++)
-            Cues[i].ActiveVisibility = i == player.CurrentIndex ? Visibility.Visible : Visibility.Collapsed;
+        {
+            bool active = i == player.CurrentIndex;
+            Cues[i].ActiveVisibility = active ? Visibility.Visible : Visibility.Collapsed;
+            Cues[i].NextVisibility = i == next ? Visibility.Visible : Visibility.Collapsed;
+            Cues[i].BadgeBrush = active ? accent : pill;
+            Cues[i].BadgeTextBrush = active ? onAccent : text;
+        }
     }
 
     /// <summary>Switches between the cue list and the cue buttons.</summary>

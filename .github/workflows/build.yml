@@ -250,6 +250,31 @@ jobs:
             Shot "15-shortcuts"
             Click "Close"; Start-Sleep 1
           } catch { Write-Host "Keyboard check failed: $_" }
+          try {
+            # The same screens in both themes, for checking the look.
+            foreach ($theme in @("Dark", "Light")) {
+              MouseClick "View"; Start-Sleep 1
+              MouseClick $theme; Start-Sleep 2
+              Press 0x71; Start-Sleep 1                                              # F2: Control tab
+              SelectLight "Par 1"
+              foreach ($n in 2..4) {
+                $cond = New-Object System.Windows.Automation.AndCondition(
+                  (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Par $n")),
+                  (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::ListItem)))
+                $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond).GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).AddToSelection()
+              }
+              Start-Sleep 2
+              Shot "20-$theme-control"
+              SelectLight "Spot 1"; Start-Sleep 2
+              Shot "21-$theme-moving-head"
+              Press 0x72; Start-Sleep 1                                              # F3: cue list
+              Press 0x20; Start-Sleep 1                                              # GO, shot mid-fade
+              Shot "22-$theme-cue-list"
+              Press 0x73; Start-Sleep 1; Press 0x31; Start-Sleep 2                   # F4 buttons, key 1
+              Shot "23-$theme-buttons"
+              Press 0x31; Start-Sleep 1
+            }
+          } catch { Write-Host "Theme screenshots failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }

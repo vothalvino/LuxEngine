@@ -100,21 +100,37 @@
                         <DataTemplate x:DataType="local:CueRow">
                             <Grid ColumnSpacing="12" Padding="0,6">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20" />
-                                    <ColumnDefinition Width="36" />
+                                    <ColumnDefinition Width="4" />
+                                    <ColumnDefinition Width="32" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{StaticResource LuxAccentBrush}"
-                                          Visibility="{x:Bind ActiveVisibility, Mode=OneWay}" />
-                                <TextBlock Grid.Column="1" Text="{x:Bind Number, Mode=OneWay}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                                <!-- The running cue: a soft fill that grows with the fade, and an accent bar -->
+                                <Rectangle Grid.ColumnSpan="4" Margin="-8,-6,-8,-6" RadiusX="4" RadiusY="4" Fill="{ThemeResource LuxAccentBrush}" Opacity="0.14"
+                                           RenderTransformOrigin="0,0.5" Visibility="{x:Bind ActiveVisibility, Mode=OneWay}">
+                                    <Rectangle.RenderTransform>
+                                        <ScaleTransform ScaleX="{x:Bind Progress, Mode=OneWay}" />
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                                <Rectangle Width="4" RadiusX="2" RadiusY="2" Fill="{ThemeResource LuxAccentBrush}" Margin="0,2"
+                                           Visibility="{x:Bind ActiveVisibility, Mode=OneWay}" />
+                                <Border Grid.Column="1" Width="30" Height="30" CornerRadius="15" Background="{x:Bind BadgeBrush, Mode=OneWay}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <TextBlock Text="{x:Bind Number, Mode=OneWay}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{x:Bind BadgeTextBrush, Mode=OneWay}" />
+                                </Border>
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextTrimming="CharacterEllipsis" FontWeight="SemiBold" />
                                     <TextBlock Text="{x:Bind Presets, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}"
                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
-                                <TextBlock Grid.Column="3" Text="{x:Bind Timing, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border Style="{StaticResource PillStyle}" Padding="8,1,8,2" Visibility="{x:Bind NextVisibility, Mode=OneWay}">
+                                        <TextBlock Text="Next" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource LuxAccentBrush}" />
+                                    </Border>
+                                    <TextBlock Text="{x:Bind Timing, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>

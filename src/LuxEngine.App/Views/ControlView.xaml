@@ -3,7 +3,8 @@
     x:Class="LuxEngine.App.Views.ControlView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:helpers="using:LuxEngine.App.Helpers">
+    xmlns:helpers="using:LuxEngine.App.Helpers"
+    xmlns:views="using:LuxEngine.App.Views">
 
     <Grid RowSpacing="8" Padding="12,10,12,12">
         <Grid.RowDefinitions>
@@ -89,18 +90,16 @@
                 </Border>
 
                 <!-- Dimmer -->
-                <Border Style="{StaticResource CardStyle}" Width="120">
-                    <Grid RowSpacing="6">
+                <Border Style="{StaticResource CardStyle}" Width="132">
+                    <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <StackPanel Style="{StaticResource CardHeaderStyle}" ToolTipService.ToolTip="Keyboard: Shift+D, then ↑↓ or type a number"><FontIcon Glyph="&#xE706;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Dimmer" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
-                        <Slider Grid.Row="1" x:Name="DimmerSlider" Orientation="Vertical" Minimum="0" Maximum="100"
-                                HorizontalAlignment="Center" ValueChanged="DimmerSlider_ValueChanged" MinHeight="140" />
+                        <views:LevelFader Grid.Row="1" x:Name="DimmerSlider" HorizontalAlignment="Center" />
                         <StackPanel Grid.Row="2" Spacing="4">
-                            <TextBlock x:Name="DimmerText" Text="0%" HorizontalAlignment="Center" FontSize="18" FontWeight="SemiBold" />
                             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                 <Button Content="Off" Click="DimmerOff_Click" Padding="10,4" />
                                 <Button Content="Full" Click="DimmerFull_Click" Padding="10,4" />
@@ -113,7 +112,17 @@
                 <Border Style="{StaticResource CardStyle}" x:Name="ColorCard">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <StackPanel>
-                            <StackPanel Style="{StaticResource CardHeaderStyle}"><FontIcon Glyph="&#xE790;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Color" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
+                            <Grid>
+                                <StackPanel Style="{StaticResource CardHeaderStyle}"><FontIcon Glyph="&#xE790;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Color" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
+                                <!-- The colour the selected lights have now -->
+                                <Border Style="{StaticResource PillStyle}" HorizontalAlignment="Right" Margin="0,0,0,10" Padding="4,3,10,3">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Ellipse x:Name="ColorChip" Width="16" Height="16" Stroke="{ThemeResource CardStrokeColorDefaultBrush}" StrokeThickness="1" />
+                                        <TextBlock x:Name="ColorHex" FontFamily="Consolas" FontSize="12" VerticalAlignment="Center"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
                             <!-- The picker has a large built-in size; the Viewbox scales it to fit so it never covers the quick colors. -->
                             <Viewbox Width="200" Height="200" Margin="0,6,0,0">
                                 <ColorPicker x:Name="Picker" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
@@ -127,8 +136,9 @@
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <VariableSizedWrapGrid x:Name="Swatches" Orientation="Horizontal" MaximumRowsOrColumns="3"
                                                    ItemWidth="40" ItemHeight="40" />
-                            <TextBlock x:Name="WhiteLabel" Text="White" Style="{StaticResource CaptionTextBlockStyle}" Margin="0,6,0,0" />
-                            <Slider x:Name="WhiteSlider" Minimum="0" Maximum="255" Width="120" ValueChanged="WhiteSlider_ValueChanged" />
+                            <TextBlock x:Name="WhiteLabel" Text="White LED" Style="{StaticResource CaptionTextBlockStyle}" Margin="0,6,0,0"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <Slider x:Name="WhiteSlider" Minimum="0" Maximum="255" Width="124" ValueChanged="WhiteSlider_ValueChanged" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -140,13 +150,25 @@
                             <StackPanel Style="{StaticResource CardHeaderStyle}" ToolTipService.ToolTip="Keyboard: Shift+P, then the arrow keys"><FontIcon Glyph="&#xE81E;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Position" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
                             <Button Content="Center" Click="CenterPosition_Click" HorizontalAlignment="Right" Padding="8,2" />
                         </Grid>
-                        <Border x:Name="XYPad" Width="190" Height="190" CornerRadius="6" Background="{StaticResource LuxStageBrush}"
+                        <Border x:Name="XYPad" Width="190" Height="190" CornerRadius="10" Background="{StaticResource LuxStageBrush}"
                                 PointerPressed="XYPad_PointerPressed" PointerMoved="XYPad_PointerMoved"
                                 PointerReleased="XYPad_PointerReleased">
                             <Canvas>
-                                <Line X1="95" Y1="0" X2="95" Y2="190" Stroke="#33FFFFFF" StrokeThickness="1" />
-                                <Line X1="0" Y1="95" X2="190" Y2="95" Stroke="#33FFFFFF" StrokeThickness="1" />
-                                <Ellipse x:Name="XYDot" Width="18" Height="18" Fill="{StaticResource LuxAccentBrush}"
+                                <!-- Quarter grid, centre lines, crosshair through the dot -->
+                                <Line X1="47.5" Y1="0" X2="47.5" Y2="190" Stroke="#14FFFFFF" StrokeThickness="1" StrokeDashArray="2,3" />
+                                <Line X1="142.5" Y1="0" X2="142.5" Y2="190" Stroke="#14FFFFFF" StrokeThickness="1" StrokeDashArray="2,3" />
+                                <Line X1="0" Y1="47.5" X2="190" Y2="47.5" Stroke="#14FFFFFF" StrokeThickness="1" StrokeDashArray="2,3" />
+                                <Line X1="0" Y1="142.5" X2="190" Y2="142.5" Stroke="#14FFFFFF" StrokeThickness="1" StrokeDashArray="2,3" />
+                                <Line X1="95" Y1="0" X2="95" Y2="190" Stroke="#26FFFFFF" StrokeThickness="1" />
+                                <Line X1="0" Y1="95" X2="190" Y2="95" Stroke="#26FFFFFF" StrokeThickness="1" />
+                                <Line x:Name="XYCrossV" Y1="0" Y2="190" X1="95" X2="95" Stroke="{ThemeResource LuxAccentBrush}" StrokeThickness="1" Opacity="0.45" />
+                                <Line x:Name="XYCrossH" X1="0" X2="190" Y1="95" Y2="95" Stroke="{ThemeResource LuxAccentBrush}" StrokeThickness="1" Opacity="0.45" />
+                                <TextBlock Text="PAN" FontSize="9" Foreground="#66FFFFFF" Canvas.Left="6" Canvas.Top="176" CharacterSpacing="80" />
+                                <TextBlock Text="TILT" FontSize="9" Foreground="#66FFFFFF" Canvas.Left="6" Canvas.Top="4" CharacterSpacing="80" />
+                                <!-- Where the head really points while a movement runs -->
+                                <Ellipse x:Name="XYLiveDot" Width="12" Height="12" Fill="#66FFFFFF" Visibility="Collapsed" IsHitTestVisible="False" />
+                                <Ellipse x:Name="XYGlow" Width="34" Height="34" Fill="{ThemeResource LuxAccentBrush}" Opacity="0.25" IsHitTestVisible="False" Canvas.Left="78" Canvas.Top="78" />
+                                <Ellipse x:Name="XYDot" Width="18" Height="18" Fill="{ThemeResource LuxAccentBrush}"
                                          Stroke="White" StrokeThickness="2" Canvas.Left="86" Canvas.Top="86" />
                             </Canvas>
                         </Border>

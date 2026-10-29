@@ -49,8 +49,10 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="{x:Bind Glyph}" FontSize="15" Foreground="{x:Bind AccentBrush, Mode=OneWay}" />
                             <TextBlock Grid.Column="1" Text="{x:Bind Name, Mode=OneWay}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                            <TextBlock Grid.Column="2" Text="{x:Bind Badge, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}"
-                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            <Border Grid.Column="2" Style="{StaticResource PillStyle}" Padding="7,0,7,1" Visibility="{x:Bind BadgeVisibility, Mode=OneWay}">
+                                <TextBlock Text="{x:Bind Badge, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </Border>
                         </Grid>
                     </TreeViewItem>
                 </DataTemplate>

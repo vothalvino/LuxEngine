@@ -342,10 +342,11 @@ public sealed class ButtonPageView : UserControl
             content.Children.Add(new Border
             {
                 Child = new TextBlock { Text = KeyNames.Display(button.Key), FontSize = 11, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold },
-                Padding = new Thickness(5, 0, 5, 1),
-                CornerRadius = new CornerRadius(4),
+                Padding = new Thickness(7, 0, 7, 1),
+                CornerRadius = new CornerRadius(9),
                 BorderThickness = new Thickness(1),
                 BorderBrush = new SolidColorBrush(color),
+                Background = Ui.Brush("LuxOverlayBrush"),
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness(0, -2, -4, 0),
@@ -357,10 +358,21 @@ public sealed class ButtonPageView : UserControl
             Margin = new Thickness(4),
             MinHeight = 56,
             Padding = new Thickness(10, 6, 10, 6),
-            CornerRadius = new CornerRadius(8),
-            BorderThickness = new Thickness(2),
-            BorderBrush = new SolidColorBrush(color),
-            Background = new SolidColorBrush(Color.FromArgb(40, color.R, color.G, color.B)),
+            CornerRadius = new CornerRadius(10),
+            BorderThickness = new Thickness(1.5),
+            BorderBrush = new SolidColorBrush(Color.FromArgb(160, color.R, color.G, color.B)),
+            // A soft top-to-bottom gradient in the button's colour; it gets stronger as the button fades in.
+            Background = new LinearGradientBrush
+            {
+                StartPoint = new Windows.Foundation.Point(0, 0),
+                EndPoint = new Windows.Foundation.Point(0, 1),
+                GradientStops =
+                {
+                    new GradientStop { Color = Color.FromArgb(56, color.R, color.G, color.B), Offset = 0 },
+                    new GradientStop { Color = Color.FromArgb(24, color.R, color.G, color.B), Offset = 1 },
+                },
+            },
+            Shadow = new ThemeShadow(),
             Child = content,
             AllowDrop = true,
             CanDrag = true,
@@ -429,9 +441,20 @@ public sealed class ButtonPageView : UserControl
             double level = AppServices.Engine.ButtonLevel(id);
             bool on = AppServices.Engine.IsButtonOn(id);
             var c = (Color)face.Tag;
-            byte alpha = (byte)(40 + 200 * level);
-            if (face.Background is SolidColorBrush brush && brush.Color.A != alpha)
-                brush.Color = Color.FromArgb(alpha, c.R, c.G, c.B);
+            byte top = (byte)(56 + 199 * level), bottom = (byte)(24 + 176 * level);
+            if (face.Background is LinearGradientBrush g && g.GradientStops[0].Color.A != top)
+            {
+                g.GradientStops[0].Color = Color.FromArgb(top, c.R, c.G, c.B);
+                g.GradientStops[1].Color = Color.FromArgb(bottom, c.R, c.G, c.B);
+            }
+            // A button that is on lifts off the page (shadow) and gets a bright edge.
+            float lift = on ? 14 : 0;
+            if (face.Translation.Z != lift)
+            {
+                face.Translation = new System.Numerics.Vector3(0, 0, lift);
+                face.BorderBrush = new SolidColorBrush(on ? Color.FromArgb(255, c.R, c.G, c.B) : Color.FromArgb(160, c.R, c.G, c.B));
+                face.BorderThickness = new Thickness(on ? 2.5 : 1.5);
+            }
             bar.Width = Math.Max(0, (face.ActualWidth - 24) * level);
             bar.Opacity = on ? 1 : 0.5;
         }
