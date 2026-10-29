@@ -157,6 +157,15 @@ jobs:
             Shot "7-edit-fixture-type"
             Click "Cancel"; Start-Sleep 1
           } catch { Write-Host "Edit fixture type check failed: $_" }
+          try {
+            $cond = New-Object System.Windows.Automation.AndCondition(
+              (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Panel")),
+              (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::ListItem)))
+            $item = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond)
+            $item.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            Start-Sleep 2
+            Shot "8-white-only-light"
+          } catch { Write-Host "White-only light check failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
           if ($app.HasExited) { throw "LuxEngine crashed while running cues (code $($app.ExitCode))" }

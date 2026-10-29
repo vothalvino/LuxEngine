@@ -207,7 +207,7 @@
                 <!-- Other channels (built in code) -->
                 <Border Style="{StaticResource CardStyle}" x:Name="ChannelsCard" MinWidth="260">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Beam &amp; more" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock Text="More controls" Style="{StaticResource SectionTitleStyle}" />
                         <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="250">
                             <StackPanel x:Name="ChannelRows" Spacing="2" />
                         </ScrollViewer>

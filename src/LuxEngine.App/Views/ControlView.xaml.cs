@@ -86,10 +86,12 @@ public sealed partial class ControlView : UserControl
             _ => $"{fixtures.Count} lights selected: " + string.Join(", ", fixtures.Take(4).Select(f => f.Instance.Name)) + (fixtures.Count > 4 ? "…" : ""),
         };
 
-        bool hasColor = fixtures.Any(f => f.Channels.Any(c => c.Channel.Type.IsColorMix()));
+        // The color wheel only makes sense for lights that can mix colors (RGB or CMY).
+        // Warm/cold white lights get plain sliders under "More controls" instead.
+        bool hasColor = fixtures.Any(MixesColor);
         bool hasWhite = fixtures.Any(f => f.Has(ChannelType.White));
         bool hasPosition = fixtures.Any(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt));
-        ColorCard.Visibility = hasColor || fixtures.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ColorCard.Visibility = hasColor ? Visibility.Visible : Visibility.Collapsed;
         WhiteSlider.Visibility = WhiteLabel.Visibility = hasWhite ? Visibility.Visible : Visibility.Collapsed;
         PositionCard.Visibility = hasPosition ? Visibility.Visible : Visibility.Collapsed;
 
@@ -112,8 +114,12 @@ public sealed partial class ControlView : UserControl
             _syncing = false;
         }
 
-        BuildChannelRows(fixtures);
+        BuildChannelRows(fixtures, colorCardShown: hasColor);
     }
+
+    private static bool MixesColor(PatchedFixture f) =>
+        f.Has(ChannelType.Red) || f.Has(ChannelType.Green) || f.Has(ChannelType.Blue) ||
+        f.Has(ChannelType.Cyan) || f.Has(ChannelType.Magenta) || f.Has(ChannelType.Yellow);
 
     private static double? Read(PatchedFixture fixture, ChannelType type)
     {
@@ -153,11 +159,31 @@ public sealed partial class ControlView : UserControl
             {
                 AppServices.Engine.SetValue(new[] { fixture.Instance.Id }, ChannelType.Intensity, (byte)Math.Round(level * 255));
             }
+            else if (!MixesColor(fixture) && fixture.Channels.Any(c => c.Channel.Type.IsAdditiveColor()))
+            {
+                ScaleWhites(fixture, level);
+            }
             else if (fixture.Channels.Any(c => c.Channel.Type.IsColorMix()))
             {
                 var color = _baseColors.TryGetValue(fixture.Instance.Id, out var c) ? c : Colors.White;
                 ColorMixer.Apply(AppServices.Engine, fixture, color, level);
             }
+        }
+    }
+
+    /// <summary>
+    /// Brightness for white-only lights without a dimmer (e.g. warm/cold white): scales their channels
+    /// together so the warm/cold balance stays the same. From dark, all channels come up equally.
+    /// </summary>
+    private static void ScaleWhites(PatchedFixture fixture, double level)
+    {
+        var channels = fixture.Channels.Where(c => c.Channel.Type.IsAdditiveColor()).ToList();
+        var current = channels.Select(c => AppServices.Engine.GetPlaybackValue(fixture.Instance.Id, c.Channel.Name) ?? 0).ToList();
+        double max = current.DefaultIfEmpty(0).Max();
+        for (int i = 0; i < channels.Count; i++)
+        {
+            double share = max > 0 ? current[i] / max : 1;
+            AppServices.Engine.SetValue(fixture.Instance.Id, channels[i].Channel.Name, (byte)Math.Round(Math.Clamp(share * level, 0, 1) * 255));
         }
     }
 
@@ -352,14 +378,14 @@ public sealed partial class ControlView : UserControl
     private static readonly HashSet<ChannelType> HandledElsewhere = new()
     {
         ChannelType.Intensity, ChannelType.Pan, ChannelType.Tilt, ChannelType.PanFine, ChannelType.TiltFine,
-        ChannelType.Red, ChannelType.Green, ChannelType.Blue, ChannelType.White,
+        ChannelType.Red, ChannelType.Green, ChannelType.Blue,
     };
 
-    private void BuildChannelRows(List<PatchedFixture> fixtures)
+    private void BuildChannelRows(List<PatchedFixture> fixtures, bool colorCardShown)
     {
         ChannelRows.Children.Clear();
         var types = fixtures.SelectMany(f => f.Channels.Select(c => c.Channel.Type))
-            .Where(t => !HandledElsewhere.Contains(t))
+            .Where(t => !HandledElsewhere.Contains(t) && !(t == ChannelType.White && colorCardShown))
             .Distinct()
             .OrderBy(t => t.Group())
             .ThenBy(t => t)
@@ -367,8 +393,21 @@ public sealed partial class ControlView : UserControl
 
         ChannelsCard.Visibility = types.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
+        string? group = null;
         foreach (var type in types)
         {
+            // A small heading whenever the group changes (Color, Beam, Shutter, …).
+            if (type.Group() != group)
+            {
+                group = type.Group();
+                ChannelRows.Children.Add(new TextBlock
+                {
+                    Text = group == "Color" ? "Color & white" : group,
+                    Style = (Style)Application.Current.Resources["CaptionTextBlockStyle"],
+                    Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                    Margin = new Thickness(0, ChannelRows.Children.Count == 0 ? 0 : 8, 0, 2),
+                });
+            }
             var owner = fixtures.First(f => f.Has(type));
             var channel = owner.Channels.First(c => c.Channel.Type == type).Channel;
 
