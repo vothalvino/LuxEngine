@@ -98,6 +98,13 @@ public sealed partial class MainWindow
     private void Root_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (TypingInTextBox()) return;
+
+        // Alt or F10 opens the menu bar on purpose; any other key while it holds the focus (e.g. after
+        // clicking a menu) would make it drop a menu, so give the focus back to the main area first.
+        if (e.Key is VirtualKey.Menu or VirtualKey.F10) _menuByKeyboard = true;
+        else if (!_menuByKeyboard && IsInMenuBar(FocusManager.GetFocusedElement(Content.XamlRoot)))
+            FocusMainArea();
+
         bool ctrl = IsDown(VirtualKey.Control), shift = IsDown(VirtualKey.Shift);
         bool repeat = e.KeyStatus.WasKeyDown;
 
@@ -206,8 +213,36 @@ public sealed partial class MainWindow
     }
 
     /// <summary>Connects the parameter bar to the Control tab and the highlight to the selection; called once from the constructor.</summary>
+    private bool _menuByKeyboard;
+
+    private static bool IsInMenuBar(object? element)
+    {
+        for (var e = element as DependencyObject; e is not null; e = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(e))
+            if (e is MenuBar) return true;
+        return false;
+    }
+
+    /// <summary>Puts the keyboard focus on the stage, so shortcuts never land on the menu bar.</summary>
+    private void FocusMainArea() => Stage.Focus(FocusState.Programmatic);
+
     private void SetUpKeyboard()
     {
+        // The stage takes the keyboard focus at start-up instead of the first menu ("File").
+        Stage.IsTabStop = true;
+        Stage.UseSystemFocusVisuals = false;
+        Root.Loaded += (_, _) => FocusMainArea();
+        TopMenu.LosingFocus += (_, args) =>
+        {
+            if (!IsInMenuBar(args.NewFocusedElement)) _menuByKeyboard = false;
+        };
+        // After a menu or a dialog opened from it closes, the focus comes back to the menu title. Hand it
+        // to the stage once nothing is open any more, so the next shortcut cannot drop a menu.
+        TopMenu.GotFocus += (_, _) => DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            if (_menuByKeyboard) return;
+            if (Microsoft.UI.Xaml.Media.VisualTreeHelper.GetOpenPopupsForXamlRoot(Content.XamlRoot).Count > 0) return;
+            if (IsInMenuBar(FocusManager.GetFocusedElement(Content.XamlRoot))) FocusMainArea();
+        });
         ParamBar.GetDimmerPercent = () => ControlView.DimmerPercent;
         ParamBar.SetDimmerPercent = v => ControlView.DimmerPercent = v;
         ParamBar.ValuesChanged += ControlView.RefreshValues;
