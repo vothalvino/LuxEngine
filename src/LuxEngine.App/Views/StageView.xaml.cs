@@ -1,5 +1,6 @@
 using LuxEngine.App.Helpers;
 using LuxEngine.App.Services;
+using LuxEngine.Core.Fixtures;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -151,9 +152,15 @@ public sealed partial class StageView : UserControl
             if (v.PresetRing.Visibility != visibility) v.PresetRing.Visibility = visibility;
         }
 
+        var engine = AppServices.Engine;
+        var fixtures = engine.Fixtures;
+        double now = engine.Now;
         foreach (var v in _visuals.Values)
         {
-            var look = AppServices.Engine.GetLook(v.Id);
+            var look = engine.GetLook(v.Id);
+            // A strobing light flickers on the stage at its strobe speed.
+            if (fixtures.TryGetValue(v.Id, out var patched) && StrobeOf(patched) is { } rate)
+                look = look with { Intensity = look.Intensity * Strobe.Flash(rate, now, v.Id) };
             var lit = ColorMixer.FromLook(look);
             ((SolidColorBrush)v.Body.Fill).Color = Color.FromArgb(255,
                 (byte)Math.Max(30, (int)lit.R), (byte)Math.Max(30, (int)lit.G), (byte)Math.Max(36, (int)lit.B));
@@ -170,6 +177,18 @@ public sealed partial class StageView : UserControl
                 v.Beam.Visibility = Visibility.Collapsed;
             }
         }
+    }
+
+    /// <summary>The flash rate of a light's strobe or shutter channel right now, or null when it is not strobing.</summary>
+    private static StrobeRate? StrobeOf(PatchedFixture fixture)
+    {
+        foreach (var ch in fixture.Channels)
+        {
+            if (ch.Channel.Type is not (ChannelType.Strobe or ChannelType.Shutter)) continue;
+            var value = AppServices.Engine.GetOutput(fixture.Instance.Id, ch.Channel.Name);
+            if (value is double v && Strobe.Rate(ch.Channel, v) is { } rate) return rate;
+        }
+        return null;
     }
 
     // ------------------------------------------------------------------ pointer handling
