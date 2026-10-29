@@ -61,7 +61,7 @@ public sealed class ShapeLibraryDialog : ContentDialog
         var duplicate = new Button { Content = "Duplicate" };
         duplicate.Click += (_, _) => { if (Selected is { } s) Add(s.Clone(UniqueName(s.Name + " copy"))); };
         var rename = new Button { Content = "Rename" };
-        rename.Click += async (_, _) => await RenameAsync();
+        rename.Click += (_, _) => Rename();
         var delete = new Button { Content = "Delete" };
         delete.Click += (_, _) => Delete();
 
@@ -148,7 +148,7 @@ public sealed class ShapeLibraryDialog : ContentDialog
         RefreshList(shape.Id);
     }
 
-    private Task RenameAsync()
+    private void Rename()
     {
         if (Selected is not { } shape) return;
         // A second dialog cannot open while this one is showing, so rename inline with a flyout.
@@ -166,7 +166,6 @@ public sealed class ShapeLibraryDialog : ContentDialog
             RefreshList(shape.Id);
         };
         flyout.ShowAt(_list);
-        return Task.CompletedTask;
     }
 
     private void Delete()
