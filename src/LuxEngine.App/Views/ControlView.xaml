@@ -154,10 +154,10 @@
                 </Border>
 
                 <!-- Movement effects for moving heads -->
-                <Border Style="{StaticResource CardStyle}" x:Name="MovementCard" Width="230">
+                <Border Style="{StaticResource CardStyle}" x:Name="MovementCard" Width="256">
                     <StackPanel Spacing="6">
                         <TextBlock Text="Movement" Style="{StaticResource SectionTitleStyle}" />
-                        <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="2" ItemWidth="101" ItemHeight="38">
+                        <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="2" ItemWidth="114" ItemHeight="38">
                             <Button Content="⭕ Circle" Tag="Circle" Click="Movement_Click" HorizontalAlignment="Stretch" Margin="2" />
                             <Button Content="∞ Figure 8" Tag="Figure8" Click="Movement_Click" HorizontalAlignment="Stretch" Margin="2" />
                             <Button Content="↔ Pan sweep" Tag="PanSweep" Click="Movement_Click" HorizontalAlignment="Stretch" Margin="2" />
