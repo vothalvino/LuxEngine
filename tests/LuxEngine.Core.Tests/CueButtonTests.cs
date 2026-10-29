@@ -58,6 +58,7 @@ public class CueButtonTests
         var buttonLook = t.AddPreset("Button", (t.Par1, "Intensity", 50), (t.Par1, "Blue", 200), (t.Par1, "Red", 0), (t.Par2, "Intensity", 200));
         t.AddCue(0, cueLook);
         var button = AddButton(t, 0, 0, buttonLook);
+        button.Mode = CueButtonMode.Flash;   // flash buttons play on top; toggle buttons take over (tested below)
         button.FadeIn = 2;
         double now = 0;
         var engine = new LightingEngine(t.Show, () => now);
@@ -94,6 +95,7 @@ public class CueButtonTests
         t.AddCue(0, chase);
         var full = t.AddPreset("Par 2 full", (t.Par2, "Intensity", 255));
         var button = AddButton(t, 0, 0, full);
+        button.Mode = CueButtonMode.Flash;
         var engine = new LightingEngine(t.Show);
         engine.Go();
 
@@ -113,5 +115,38 @@ public class CueButtonTests
         AddButton(t, 10, 20);
         AddButton(t, -3, 1);
         Assert.Equal((-5, 12, -1, 22), t.Show.ButtonPage.Extent());
+    }
+
+    [Fact]
+    public void Starting_a_cue_fades_buttons_out_and_a_toggle_button_fades_the_cue_out()
+    {
+        var t = new TestShow();
+        var cue1 = t.AddPreset("Cue 1", (t.Par1, "Intensity", 200));
+        var cue2 = t.AddPreset("Cue 2", (t.Par1, "Intensity", 100));
+        t.AddCue(0, cue1);
+        t.AddCue(0, cue2);
+        var look = t.AddPreset("Button", (t.Par2, "Intensity", 255));
+        var button = AddButton(t, 0, 0, look);
+        button.FadeIn = 2;
+        button.FadeOut = 1;
+        double now = 0;
+        var engine = new LightingEngine(t.Show, () => now);
+
+        engine.Go();
+        engine.ComputeFrame();
+        engine.SetButton(button.Id, true);                 // button takes over: cue 1 fades out over 2 s
+        now = 1;
+        Assert.InRange(engine.ComputeFrame().Universe(1)[0], 95, 105);
+        now = 2.5;
+        var u = engine.ComputeFrame().Universe(1);
+        Assert.Equal(0, u[0]);
+        Assert.Equal(255, u[4]);
+
+        engine.Go();                                         // continues with cue 2 and fades the button out
+        Assert.False(engine.IsButtonOn(button.Id));
+        now = 4;
+        u = engine.ComputeFrame().Universe(1);
+        Assert.Equal(100, u[0]);
+        Assert.Equal(0, u[4]);
     }
 }

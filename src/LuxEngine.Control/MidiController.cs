@@ -169,7 +169,7 @@ public sealed class MidiController : IDisposable
                     break;
                 case MidiActions.Preset when pressed && mapping.Target is Guid id:
                     var preset = show.PresetRoot.FindPreset(id);
-                    if (preset is not null) _engine.ApplyPreset(preset);
+                    if (preset is not null) _engine.ShowPreset(preset);
                     break;
                 case MidiActions.CueButton when mapping.Target is Guid buttonId:
                     var button = show.ButtonPage.Find(buttonId);

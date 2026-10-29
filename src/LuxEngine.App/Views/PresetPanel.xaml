@@ -59,6 +59,6 @@
 
         <TextBlock Grid.Row="3" x:Name="HintText" TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}"
                    Foreground="{ThemeResource TextFillColorTertiaryBrush}" Margin="4,0"
-                   Text="Click a preset to use it live. Drag presets into folders, or onto a cue in the Cue tab." />
+                   Text="Click a preset to try it (Ctrl+click adds it on top). Drag presets into folders, or onto a cue in the Cue tab." />
     </Grid>
 </UserControl>

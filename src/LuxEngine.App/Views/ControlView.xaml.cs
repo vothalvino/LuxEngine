@@ -48,6 +48,12 @@ public sealed partial class ControlView : UserControl
             SyncFromSelection();
         };
         AppServices.PresetEditor.Changed += OnPresetEditChanged;
+        // A clicked preset replaces the look, so the controls must show its values even if the selection stayed the same.
+        AppServices.SelectedPresetChanged += () =>
+        {
+            _baseColors.Clear();
+            SyncFromSelection();
+        };
         AppServices.Document.Changed += change =>
         {
             var editor = AppServices.PresetEditor;

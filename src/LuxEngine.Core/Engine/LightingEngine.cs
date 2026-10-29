@@ -134,9 +134,20 @@ public sealed class LightingEngine
         }
     }
 
+    /// <summary>Adds a preset on top of what is already set by hand.</summary>
     public void ApplyPreset(Preset preset)
     {
         lock (_sync) Programmer.Apply(preset);
+    }
+
+    /// <summary>Shows only this preset: earlier presets, hand changes and effects are cleared first.</summary>
+    public void ShowPreset(Preset preset)
+    {
+        lock (_sync)
+        {
+            Programmer.Clear();
+            Programmer.Apply(preset);
+        }
     }
 
     public void AddEffect(Effect effect)
@@ -330,6 +341,10 @@ public sealed class LightingEngine
             if (on)
                 foreach (var other in page.GroupOf(button))
                     if (other.Id != id) Buttons.Set(other.Id, false);
+            // A toggle button takes over from the cue list (crossfading with its fade-in time);
+            // flash buttons only hit on top for a moment.
+            if (on && !Buttons.IsOn(id) && button.Mode == CueButtonMode.Toggle)
+                FadeOutCueListLocked(button.FadeIn);
             Buttons.Set(id, on);
         }
     }
@@ -373,7 +388,7 @@ public sealed class LightingEngine
         return effects;
     }
 
-    private void GoToLocked(int index)
+    private void GoToLocked(int index, bool releaseButtons = true)
     {
         EnsurePatch();
         CuePlayer.Tick(Now);
@@ -382,6 +397,28 @@ public sealed class LightingEngine
         var target = BuildCueTarget(CuePlayer.Current, presets);
         var effects = presets.SelectMany(p => p.Effects).ToList();
         CuePlayer.Start(index, cue, cue, target, Describe, effects);
+
+        // A cue you start takes over from the buttons: they fade out with their own fade-out time.
+        // Auto-follow steps leave them alone.
+        if (!releaseButtons) return;
+        Buttons.Tick(Now, _show.ButtonPage.Find);
+        Buttons.ReleaseAll();
+    }
+
+    /// <summary>
+    /// Fades the cue list's lights out but remembers where it was, so the next GO continues from the
+    /// following cue. Used when a toggle button takes over.
+    /// </summary>
+    private void FadeOutCueListLocked(double fadeSeconds)
+    {
+        if (CuePlayer.CurrentIndex < 0) return;
+        EnsurePatch();
+        CuePlayer.Tick(Now);
+        var target = CuePlayer.Current.Keys
+            .Where(k => _channels.TryGetValue(k, out var c) && c.Channel.Type.IsIntensity())
+            .ToDictionary(k => k, _ => 0.0);
+        var timing = new Cue { FadeIn = fadeSeconds, FadeOut = fadeSeconds };
+        CuePlayer.Start(CuePlayer.CurrentIndex, null, timing, target, Describe, Array.Empty<Effect>());
     }
 
     /// <summary>
@@ -524,7 +561,7 @@ public sealed class LightingEngine
             if (!_show.CueList.Loop) return;
             next = 0;
         }
-        GoToLocked(next);
+        GoToLocked(next, releaseButtons: false);
     }
 
     private void EnsurePatch()
