@@ -255,10 +255,12 @@ jobs:
             foreach ($theme in @("Dark", "Light")) {
               MouseClick "View"; Start-Sleep 1
               # The opened menu is its own pop-up window, so look for the item anywhere in this app.
-              $item = $A::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+              $items = $A::RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants,
                 (New-Object System.Windows.Automation.AndCondition(
                   (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, $theme)),
                   (New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $app.Id)))))
+              # Menus opened earlier can leave hidden copies behind: use the one on screen.
+              $item = $items | Where-Object { -not $_.Current.IsOffscreen -and $_.Current.BoundingRectangle.Width -gt 0 } | Select-Object -Last 1
               $r = $item.Current.BoundingRectangle
               [Lux.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
               [Lux.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Lux.Mouse]::mouse_event(4, 0, 0, 0, 0)
