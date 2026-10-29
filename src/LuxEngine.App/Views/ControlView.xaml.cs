@@ -92,6 +92,9 @@ public sealed partial class ControlView : UserControl
         bool hasWhite = fixtures.Any(f => f.Has(ChannelType.White));
         bool hasPosition = fixtures.Any(f => f.Has(ChannelType.Pan) || f.Has(ChannelType.Tilt));
         ColorCard.Visibility = hasColor ? Visibility.Visible : Visibility.Collapsed;
+        // White-only lights have their main controls in "More controls", so put that card next to the dimmer.
+        Cards.Children.Remove(ChannelsCard);
+        Cards.Children.Insert(hasColor ? Cards.Children.Count : Cards.Children.IndexOf(ColorCard), ChannelsCard);
         WhiteSlider.Visibility = WhiteLabel.Visibility = hasWhite ? Visibility.Visible : Visibility.Collapsed;
         PositionCard.Visibility = hasPosition ? Visibility.Visible : Visibility.Collapsed;
 

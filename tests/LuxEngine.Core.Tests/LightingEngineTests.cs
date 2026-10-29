@@ -201,3 +201,24 @@ public class PresetEditTests
         Assert.Empty(engine.ProgrammerFixtures());
     }
 }
+
+public class WhiteOnlyLookTests
+{
+    [Fact]
+    public void Warm_cold_light_without_rgb_shows_its_real_level_and_tint()
+    {
+        var show = new Shows.Show();
+        var panel = Fixtures.FixtureLibrary.CreateGeneric("Panel", Fixtures.ChannelType.WarmWhite, Fixtures.ChannelType.ColdWhite);
+        var light = Shows.PatchHelper.AddFixtures(show, panel, panel.Modes[0].Name, 1, 1, 1)[0];
+        var engine = new LightingEngine(show);
+
+        engine.ComputeFrame(0);
+        Assert.Equal(0, engine.GetLook(light.Id).Intensity);   // off is off, not white
+
+        engine.SetValue(light.Id, panel.Channels[1].Name, 255);  // cold white full
+        engine.ComputeFrame(0);
+        var look = engine.GetLook(light.Id);
+        Assert.Equal(1, look.Intensity, 3);
+        Assert.True(look.Blue > look.Red);
+    }
+}

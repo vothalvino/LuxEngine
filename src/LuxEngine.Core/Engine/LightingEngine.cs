@@ -551,6 +551,15 @@ public sealed class LightingEngine
             g = 1 - Get(ChannelType.Magenta, 0);
             b = 1 - Get(ChannelType.Yellow, 0);
         }
+        else if (fixture.Channels.Any(c => c.Channel.Type.IsAdditiveColor()))
+        {
+            // White-only lights: warm white looks orange-ish, cold white blue-ish.
+            double warm = Get(ChannelType.WarmWhite, 0), cold = Get(ChannelType.ColdWhite, 0);
+            double w = Get(ChannelType.White, 0), amber = Get(ChannelType.Amber, 0);
+            r = Math.Min(1, warm + cold * 0.8 + w + amber);
+            g = Math.Min(1, warm * 0.75 + cold * 0.88 + w + amber * 0.6);
+            b = Math.Min(1, warm * 0.45 + cold + w);
+        }
 
         double intensity = fixture.HasDimmer ? Get(ChannelType.Intensity, 0) : Math.Max(r, Math.Max(g, b));
         if (!fixture.HasDimmer && intensity > 0) { r /= intensity; g /= intensity; b /= intensity; }

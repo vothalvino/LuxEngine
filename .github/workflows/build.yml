@@ -165,6 +165,8 @@ jobs:
             $item.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
             Start-Sleep 2
             Shot "8-white-only-light"
+            Click "Full"; Start-Sleep 2
+            Shot "8b-white-only-full"
           } catch { Write-Host "White-only light check failed: $_" }
           $log = Join-Path $env:LOCALAPPDATA "LuxEngine\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
