@@ -184,6 +184,22 @@ public sealed class LightingEngine
         lock (_sync) return Programmer.FixtureIds();
     }
 
+    public void ReleaseChannel(Guid fixtureId, string channel)
+    {
+        lock (_sync) Programmer.Release(fixtureId, channel);
+    }
+
+    public void RemoveEffect(Guid effectId)
+    {
+        lock (_sync) Programmer.RemoveEffect(effectId);
+    }
+
+    /// <summary>A copy of the programmer that the UI can read safely.</summary>
+    public ProgrammerSnapshot ProgrammerSnapshot()
+    {
+        lock (_sync) return Programmer.Snapshot();
+    }
+
     public void ReleaseFixture(Guid fixtureId)
     {
         lock (_sync) Programmer.ReleaseFixture(fixtureId);

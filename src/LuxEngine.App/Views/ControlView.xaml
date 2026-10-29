@@ -66,6 +66,26 @@
                       VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
             <StackPanel x:Name="Cards" Orientation="Horizontal" Spacing="10">
 
+                <!-- Every value in the preset being edited (built in code) -->
+                <Border Style="{StaticResource CardStyle}" x:Name="PresetValuesCard" Width="400" Visibility="Collapsed"
+                        BorderBrush="#FFC83D" BorderThickness="2">
+                    <Grid RowSpacing="6">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="In this preset" Style="{StaticResource SectionTitleStyle}" />
+                            <TextBlock Text="Exact values of every light. Drag a slider or type a number (0–255). Click a light's name to select it for the other controls."
+                                       TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="PresetValueRows" Spacing="2" Padding="0,0,12,0" />
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
                 <!-- Dimmer -->
                 <Border Style="{StaticResource CardStyle}" Width="120">
                     <Grid RowSpacing="6">
@@ -92,10 +112,13 @@
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <StackPanel>
                             <TextBlock Text="Color" Style="{StaticResource SectionTitleStyle}" />
-                            <ColorPicker x:Name="Picker" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
-                                         IsColorPreviewVisible="False" IsColorChannelTextInputVisible="False"
-                                         IsHexInputVisible="False" IsMoreButtonVisible="False" IsColorSliderVisible="False"
-                                         ColorChanged="Picker_ColorChanged" Width="210" />
+                            <!-- The picker has a large built-in size; the Viewbox scales it to fit so it never covers the quick colors. -->
+                            <Viewbox Width="200" Height="200" Margin="0,6,0,0">
+                                <ColorPicker x:Name="Picker" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                                             IsColorPreviewVisible="False" IsColorChannelTextInputVisible="False"
+                                             IsHexInputVisible="False" IsMoreButtonVisible="False" IsColorSliderVisible="False"
+                                             ColorChanged="Picker_ColorChanged" />
+                            </Viewbox>
                         </StackPanel>
                         <StackPanel Spacing="8" VerticalAlignment="Center">
                             <TextBlock Text="Quick colors" Style="{StaticResource CaptionTextBlockStyle}"

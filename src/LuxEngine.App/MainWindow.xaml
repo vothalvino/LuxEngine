@@ -62,6 +62,14 @@
                     <MenuFlyoutItem Text="Create new fixture type…" Click="NewFixtureType_Click">
                         <MenuFlyoutItem.Icon><SymbolIcon Symbol="Edit" /></MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="Edit selected fixture (name, address)…" Click="EditSelectedFixture_Click">
+                        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE70F;" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Edit fixture type (channels, ranges)…" Click="EditFixtureType_Click">
+                        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE90F;" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator />
                     <MenuFlyoutItem Text="Import fixture file…" Click="ImportFixture_Click" />
                     <MenuFlyoutItem Text="Open my fixtures folder" Click="OpenFixtureFolder_Click" />
                 </MenuBarItem>
