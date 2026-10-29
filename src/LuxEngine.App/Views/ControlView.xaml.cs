@@ -48,6 +48,11 @@ public sealed partial class ControlView : UserControl
             SyncFromSelection();
         };
         AppServices.PresetEditor.Changed += OnPresetEditChanged;
+        Ui.ThemeChanged += () =>
+        {
+            SyncFromSelection();
+            UpdatePresetValues(rebuild: true);
+        };
         // A clicked preset replaces the look, so the controls must show its values even if the selection stayed the same.
         AppServices.SelectedPresetChanged += () =>
         {
@@ -581,7 +586,7 @@ public sealed partial class ControlView : UserControl
                 {
                     Text = group == "Color" ? "Color & white" : group,
                     Style = (Style)Application.Current.Resources["CaptionTextBlockStyle"],
-                    Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                    Foreground = Ui.Brush("TextFillColorSecondaryBrush"),
                     Margin = new Thickness(0, ChannelRows.Children.Count == 0 ? 0 : 8, 0, 2),
                 });
             }
@@ -749,7 +754,7 @@ public sealed partial class ControlView : UserControl
         PresetValueRows.Children.Clear();
         _presetRows.Clear();
         var fixtures = AppServices.Engine.Fixtures;
-        var secondary = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"];
+        var secondary = Ui.Brush("TextFillColorSecondaryBrush");
 
         foreach (var fixture in AppServices.Engine.Show.Fixtures)
         {

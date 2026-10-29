@@ -34,6 +34,9 @@ public sealed class AppSettings
     public bool FirstRunDone { get; set; }
     public string AudioSource { get; set; } = "SystemSound";
 
+    /// <summary>Height of the Control / Cue area, set by dragging the handle above it.</summary>
+    public double BottomHeight { get; set; } = 380;
+
     public static AppSettings Load()
     {
         try

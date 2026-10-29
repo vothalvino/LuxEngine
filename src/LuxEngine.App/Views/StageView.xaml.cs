@@ -88,7 +88,7 @@ public sealed partial class StageView : UserControl
             var ring = new Ellipse
             {
                 Width = BodySize + 16, Height = BodySize + 16, IsHitTestVisible = false,
-                Stroke = new SolidColorBrush(Color.FromArgb(255, 255, 200, 61)), StrokeThickness = 2.5,
+                Stroke = Ui.Brush("LuxAttentionBrush"), StrokeThickness = 2.5,
                 StrokeDashArray = new DoubleCollection { 2, 1.5 },
                 HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
                 Visibility = Visibility.Collapsed,
@@ -131,7 +131,7 @@ public sealed partial class StageView : UserControl
 
     private void UpdateSelection()
     {
-        var accent = (Brush)Application.Current.Resources["LuxAccentBrush"];
+        var accent = Ui.Brush("LuxAccentBrush");
         var normal = new SolidColorBrush(Color.FromArgb(120, 255, 255, 255));
         foreach (var v in _visuals.Values)
         {

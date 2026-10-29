@@ -106,7 +106,7 @@ public sealed class AddFixtureDialog : ContentDialog
             {
                 Text = $"{def.Manufacturer} · {def.Category}{(def.IsUserDefined ? " · made by you" : "")}",
                 Style = (Style)Application.Current.Resources["CaptionTextBlockStyle"],
-                Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                Foreground = Ui.Brush("TextFillColorSecondaryBrush"),
             });
             _results.Items.Add(new ListViewItem { Content = row, Tag = def });
         }

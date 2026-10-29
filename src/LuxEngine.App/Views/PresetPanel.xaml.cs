@@ -111,7 +111,7 @@ public sealed partial class PresetPanel : UserControl
             {
                 Name = sub.Name,
                 IsExpanded = !_collapsed.Contains(sub.Id),
-                AccentBrush = (Brush)Application.Current.Resources["LuxAccentBrush"],
+                AccentBrush = Ui.Brush("LuxAccentBrush"),
                 Badge = sub.AllPresets().Count() is var n && n > 0 ? n.ToString() : "",
                 Detail = $"Folder with {sub.AllPresets().Count()} preset(s)",
             };
@@ -345,7 +345,7 @@ public sealed partial class PresetPanel : UserControl
         var preset = show.PresetRoot.FindPreset(id);
         if (preset is null) return;
         var box = new KeyCaptureBox { Key = preset.Key, Width = 260 };
-        var error = new TextBlock { Foreground = (Brush)Application.Current.Resources["LuxDangerBrush"], TextWrapping = TextWrapping.Wrap, Width = 320 };
+        var error = new TextBlock { Foreground = Ui.Brush("LuxDangerBrush"), TextWrapping = TextWrapping.Wrap, Width = 320 };
         box.Changed += () => error.Text = box.Error ?? "";
         var panel = new StackPanel { Spacing = 10, Width = 340 };
         panel.Children.Add(new TextBlock { Text = "Pressing the key shows this preset, like clicking it. Ctrl + the key adds it on top of the current look.", TextWrapping = TextWrapping.Wrap });

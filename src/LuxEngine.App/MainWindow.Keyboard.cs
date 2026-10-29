@@ -227,6 +227,15 @@ public sealed partial class MainWindow
 
     private void SetUpKeyboard()
     {
+        // The Control / Cue area keeps the size it was dragged to.
+        BottomRow.Height = new GridLength(Math.Clamp(AppServices.Settings.BottomHeight, 220, 900));
+        BottomSplitter.Target = BottomRow;
+        BottomSplitter.Resized += height =>
+        {
+            AppServices.Settings.BottomHeight = height;
+            AppServices.Settings.Save();
+        };
+
         // The stage takes the keyboard focus at start-up instead of the first menu ("File").
         Stage.IsTabStop = true;
         Stage.UseSystemFocusVisuals = false;

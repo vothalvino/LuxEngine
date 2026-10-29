@@ -58,7 +58,7 @@ public sealed class ButtonPageView : UserControl
                  + "Drag presets onto a button or an empty square; drag a button to move it. The grid grows as you add buttons at its edges. Drag the background to move around; Ctrl + wheel zooms.",
             TextWrapping = TextWrapping.Wrap,
             VerticalAlignment = VerticalAlignment.Center,
-            Foreground = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+            Foreground = Ui.Brush("TextFillColorSecondaryBrush"),
             Style = (Style)Application.Current.Resources["CaptionTextBlockStyle"],
         };
         var toolbar = new Grid { ColumnSpacing = 12 };
@@ -97,6 +97,7 @@ public sealed class ButtonPageView : UserControl
             if (change.HasFlag(ShowChange.Cues) || change.HasFlag(ShowChange.Presets)) Rebuild();
         };
         Loaded += (_, _) => Rebuild();
+        Ui.ThemeChanged += Rebuild;
 
         _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromMilliseconds(50);
@@ -235,7 +236,7 @@ public sealed class ButtonPageView : UserControl
     {
         var link = new Rectangle
         {
-            Fill = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+            Fill = Ui.Brush("TextFillColorSecondaryBrush"),
             Width = horizontal ? 12 : 18,
             Height = horizontal ? 18 : 12,
             RadiusX = 3,
@@ -260,7 +261,7 @@ public sealed class ButtonPageView : UserControl
             Margin = new Thickness(4),
             MinHeight = 56,
             Background = new SolidColorBrush(Colors.Transparent),
-            BorderBrush = (Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
+            BorderBrush = Ui.Brush("CardStrokeColorDefaultBrush"),
             Content = new FontIcon { Glyph = "", FontSize = 14, Opacity = 0.35 },
             AllowDrop = true,
         };
@@ -483,7 +484,7 @@ public sealed class ButtonPageView : UserControl
                 Width = 28, Height = 28, Padding = new Thickness(0), CornerRadius = new CornerRadius(14),
                 Background = new SolidColorBrush(ColorMixer.Parse(hex, Colors.Gray)),
                 BorderThickness = new Thickness(hex.Equals(color, StringComparison.OrdinalIgnoreCase) ? 3 : 0),
-                BorderBrush = (Brush)Application.Current.Resources["TextFillColorPrimaryBrush"],
+                BorderBrush = Ui.Brush("TextFillColorPrimaryBrush"),
             };
             swatch.Click += (_, _) =>
             {
@@ -543,7 +544,7 @@ public sealed class ButtonPageView : UserControl
         fades.Children.Add(fadeOut);
 
         var keyBox = new KeyCaptureBox { Key = button.Key };
-        var keyError = new TextBlock { Foreground = (Brush)Application.Current.Resources["LuxDangerBrush"], TextWrapping = TextWrapping.Wrap };
+        var keyError = new TextBlock { Foreground = Ui.Brush("LuxDangerBrush"), TextWrapping = TextWrapping.Wrap };
         keyBox.Changed += () => keyError.Text = keyBox.Error ?? "";
 
         var layout = new StackPanel { Spacing = 12, Width = 420 };

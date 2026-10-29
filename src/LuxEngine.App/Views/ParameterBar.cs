@@ -45,7 +45,8 @@ public sealed class ParameterBar : UserControl
     private readonly TextBlock _keys = new() { FontSize = 12, Opacity = 0.75, VerticalAlignment = VerticalAlignment.Center };
     private readonly TextBlock _name = new() { FontSize = 16, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center };
     private readonly TextBlock _value = new() { FontSize = 20, FontWeight = Microsoft.UI.Text.FontWeights.Bold, VerticalAlignment = VerticalAlignment.Center };
-    private readonly TextBlock _typed = new() { FontSize = 16, FontFamily = new FontFamily("Consolas"), Foreground = new SolidColorBrush(Colors.Orange), VerticalAlignment = VerticalAlignment.Center };
+    private readonly TextBlock _typed = new() { FontSize = 16, FontFamily = new FontFamily("Consolas"), FontWeight = Microsoft.UI.Text.FontWeights.Bold, VerticalAlignment = VerticalAlignment.Center };
+    private readonly Border _frame = new() { Padding = new Thickness(16, 10, 16, 10), CornerRadius = new CornerRadius(10), BorderThickness = new Thickness(1.5) };
     private readonly ProgressBar _level = new() { Minimum = 0, Maximum = 1, Width = 160, VerticalAlignment = VerticalAlignment.Center };
     private readonly TextBlock _hint = new() { FontSize = 11, Opacity = 0.7, TextWrapping = TextWrapping.Wrap };
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _timer;
@@ -65,16 +66,10 @@ public sealed class ParameterBar : UserControl
         var panel = new StackPanel { Spacing = 4 };
         panel.Children.Add(top);
         panel.Children.Add(_hint);
-        Content = new Border
-        {
-            Child = panel,
-            Padding = new Thickness(16, 10, 16, 10),
-            CornerRadius = new CornerRadius(10),
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(235, 24, 24, 30)),
-            BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 200, 61)),
-            BorderThickness = new Thickness(1.5),
-            RequestedTheme = ElementTheme.Dark,
-        };
+        _frame.Child = panel;
+        Content = _frame;
+        ApplyColors();
+        Helpers.Ui.ThemeChanged += ApplyColors;
         Visibility = Visibility.Collapsed;
         IsHitTestVisible = false;
 
@@ -94,6 +89,16 @@ public sealed class ParameterBar : UserControl
     }
 
     public bool IsOpen => _active is not null;
+
+    /// <summary>Overlay colours for the current theme: a floating card with an amber edge.</summary>
+    private void ApplyColors()
+    {
+        _frame.Background = Helpers.Ui.Brush("LuxOverlayBrush");
+        _frame.BorderBrush = Helpers.Ui.Brush("LuxAttentionBrush");
+        var text = Helpers.Ui.Brush("LuxOverlayTextBrush");
+        foreach (var t in new[] { _keys, _name, _value, _hint }) t.Foreground = text;
+        _typed.Foreground = Helpers.Ui.Brush("LuxAccentBrush");
+    }
 
     /// <summary>Called after the bar changed something, so the Control tab can show the new values.</summary>
     public event Action? ValuesChanged;

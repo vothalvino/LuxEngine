@@ -2,7 +2,8 @@
 <UserControl
     x:Class="LuxEngine.App.Views.ControlView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:LuxEngine.App.Helpers">
 
     <Grid RowSpacing="8" Padding="12,10,12,12">
         <Grid.RowDefinitions>
@@ -13,17 +14,17 @@
 
         <!-- Shown while a preset is being edited -->
         <Border Grid.Row="0" x:Name="PresetEditBar" Visibility="Collapsed" CornerRadius="8" Padding="12,8"
-                Background="{StaticResource LuxAccentBrush}">
+                Background="{ThemeResource LuxAttentionBrush}">
             <Grid ColumnSpacing="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <FontIcon Glyph="&#xE70F;" FontSize="16" Foreground="#1B1B1B" VerticalAlignment="Center" />
+                <FontIcon Glyph="&#xE70F;" FontSize="16" Foreground="{ThemeResource LuxAttentionTextBrush}" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock x:Name="PresetEditTitle" Foreground="#1B1B1B" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                    <TextBlock x:Name="PresetEditInfo" Foreground="#1B1B1B" Opacity="0.85" TextTrimming="CharacterEllipsis"
+                    <TextBlock x:Name="PresetEditTitle" Foreground="{ThemeResource LuxAttentionTextBrush}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="PresetEditInfo" Foreground="{ThemeResource LuxAttentionTextBrush}" Opacity="0.85" TextTrimming="CharacterEllipsis"
                                Style="{StaticResource CaptionTextBlockStyle}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
@@ -62,20 +63,21 @@
             </StackPanel>
         </Grid>
 
-        <ScrollViewer Grid.Row="2" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
-            <StackPanel x:Name="Cards" Orientation="Horizontal" Spacing="10">
+        <!-- Cards wrap onto new rows instead of running off the side; scroll down for more -->
+        <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled" Padding="0,0,12,0">
+            <helpers:WrapPanel x:Name="Cards" HorizontalSpacing="10" VerticalSpacing="10">
 
                 <!-- Every value in the preset being edited (built in code) -->
                 <Border Style="{StaticResource CardStyle}" x:Name="PresetValuesCard" Width="400" Visibility="Collapsed"
-                        BorderBrush="#FFC83D" BorderThickness="2">
+                        BorderBrush="{ThemeResource LuxAttentionBrush}" BorderThickness="2">
                     <Grid RowSpacing="6">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <StackPanel>
-                            <TextBlock Text="In this preset" Style="{StaticResource SectionTitleStyle}" />
+                            <StackPanel Style="{StaticResource CardHeaderStyle}"><FontIcon Glyph="&#xE70F;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="In this preset" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
                             <TextBlock Text="Exact values of every light. Drag a slider or type a number (0–255). Click a light's name to select it for the other controls."
                                        TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -94,7 +96,7 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Dimmer" Style="{StaticResource SectionTitleStyle}" ToolTipService.ToolTip="Keyboard: Shift+D, then ↑↓ or type a number" />
+                        <StackPanel Style="{StaticResource CardHeaderStyle}" ToolTipService.ToolTip="Keyboard: Shift+D, then ↑↓ or type a number"><FontIcon Glyph="&#xE706;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Dimmer" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
                         <Slider Grid.Row="1" x:Name="DimmerSlider" Orientation="Vertical" Minimum="0" Maximum="100"
                                 HorizontalAlignment="Center" ValueChanged="DimmerSlider_ValueChanged" MinHeight="140" />
                         <StackPanel Grid.Row="2" Spacing="4">
@@ -111,7 +113,7 @@
                 <Border Style="{StaticResource CardStyle}" x:Name="ColorCard">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <StackPanel>
-                            <TextBlock Text="Color" Style="{StaticResource SectionTitleStyle}" />
+                            <StackPanel Style="{StaticResource CardHeaderStyle}"><FontIcon Glyph="&#xE790;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Color" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
                             <!-- The picker has a large built-in size; the Viewbox scales it to fit so it never covers the quick colors. -->
                             <Viewbox Width="200" Height="200" Margin="0,6,0,0">
                                 <ColorPicker x:Name="Picker" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
@@ -135,7 +137,7 @@
                 <Border Style="{StaticResource CardStyle}" x:Name="PositionCard">
                     <StackPanel Spacing="6">
                         <Grid>
-                            <TextBlock Text="Position" Style="{StaticResource SectionTitleStyle}" ToolTipService.ToolTip="Keyboard: Shift+P, then the arrow keys" />
+                            <StackPanel Style="{StaticResource CardHeaderStyle}" ToolTipService.ToolTip="Keyboard: Shift+P, then the arrow keys"><FontIcon Glyph="&#xE81E;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Position" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
                             <Button Content="Center" Click="CenterPosition_Click" HorizontalAlignment="Right" Padding="8,2" />
                         </Grid>
                         <Border x:Name="XYPad" Width="190" Height="190" CornerRadius="6" Background="{StaticResource LuxStageBrush}"
@@ -164,7 +166,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.ColumnSpan="2" Text="Movement" Style="{StaticResource SectionTitleStyle}" />
+                        <StackPanel Grid.ColumnSpan="2" Style="{StaticResource CardHeaderStyle}"><FontIcon Glyph="&#xE7AD;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Movement" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
 
                         <StackPanel Grid.Row="1" Spacing="6">
                             <Grid ColumnSpacing="4">
@@ -234,14 +236,13 @@
                 <!-- Effects -->
                 <Border Style="{StaticResource CardStyle}" Width="300">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Effects" Style="{StaticResource SectionTitleStyle}" />
-                        <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" ItemWidth="92" ItemHeight="38">
-                            <Button Content="🌈 Rainbow" Tag="Rainbow" Click="Effect_Click" HorizontalAlignment="Stretch" Margin="2" />
-                            <Button Content="➡ Chase" Tag="Chase" Click="Effect_Click" HorizontalAlignment="Stretch" Margin="2" />
-                            <Button Content="〰 Wave" Tag="Wave" Click="Effect_Click" HorizontalAlignment="Stretch" Margin="2" />
-                            <Button Content="⚡ Strobe" Tag="Strobe" Click="Effect_Click" HorizontalAlignment="Stretch" Margin="2" />
-                            <Button Content="Stop all" Click="StopEffects_Click" HorizontalAlignment="Stretch" Margin="2"
-                                    ToolTipService.ToolTip="Stop every effect on the selected lights, including movement" />
+                        <StackPanel Style="{StaticResource CardHeaderStyle}"><FontIcon Glyph="&#xE734;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Effects" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
+                        <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="2" ItemWidth="134" ItemHeight="40">
+                            <Button Tag="Rainbow" Click="Effect_Click" Style="{StaticResource ToolButtonStyle}" AutomationProperties.Name="Rainbow"><StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE790;" FontSize="14" /><TextBlock Text="Rainbow" /></StackPanel></Button>
+                            <Button Tag="Chase" Click="Effect_Click" Style="{StaticResource ToolButtonStyle}" AutomationProperties.Name="Chase"><StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE72A;" FontSize="14" /><TextBlock Text="Chase" /></StackPanel></Button>
+                            <Button Tag="Wave" Click="Effect_Click" Style="{StaticResource ToolButtonStyle}" AutomationProperties.Name="Wave"><StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE895;" FontSize="14" /><TextBlock Text="Wave" /></StackPanel></Button>
+                            <Button Tag="Strobe" Click="Effect_Click" Style="{StaticResource ToolButtonStyle}" AutomationProperties.Name="Strobe"><StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE945;" FontSize="14" /><TextBlock Text="Strobe" /></StackPanel></Button>
+                            <Button Click="StopEffects_Click" Style="{StaticResource ToolButtonStyle}" AutomationProperties.Name="Stop all" ToolTipService.ToolTip="Stop every effect on the selected lights, including movement"><StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE71A;" FontSize="14" /><TextBlock Text="Stop all" /></StackPanel></Button>
                         </VariableSizedWrapGrid>
                         <Grid ColumnSpacing="8" RowSpacing="0">
                             <Grid.ColumnDefinitions>
@@ -269,7 +270,7 @@
                 <!-- Sound to light -->
                 <Border Style="{StaticResource CardStyle}" Width="220">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Sound to light" Style="{StaticResource SectionTitleStyle}" />
+                        <StackPanel Style="{StaticResource CardHeaderStyle}"><FontIcon Glyph="&#xE767;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Sound to light" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
                         <ToggleSwitch x:Name="SoundSwitch" OnContent="Listening" OffContent="Off" Toggled="SoundSwitch_Toggled" />
                         <ComboBox x:Name="SoundSource" HorizontalAlignment="Stretch" SelectionChanged="SoundSource_SelectionChanged">
                             <ComboBoxItem Content="Music playing on this PC" Tag="SystemSound" />
@@ -285,13 +286,13 @@
                 <!-- Other channels (built in code) -->
                 <Border Style="{StaticResource CardStyle}" x:Name="ChannelsCard" MinWidth="260">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="More controls" Style="{StaticResource SectionTitleStyle}" />
+                        <StackPanel Style="{StaticResource CardHeaderStyle}"><FontIcon Glyph="&#xE713;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="More controls" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="250">
                             <StackPanel x:Name="ChannelRows" Spacing="2" />
                         </ScrollViewer>
                     </StackPanel>
                 </Border>
-            </StackPanel>
+            </helpers:WrapPanel>
         </ScrollViewer>
 
         <!-- Shown when nothing is selected -->

@@ -50,7 +50,7 @@
                                 <TextBlock Text="{x:Bind Model}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="NoWrap"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
-                            <FontIcon Grid.Column="2" Glyph="&#xE70F;" FontSize="12" Foreground="#FFC83D" VerticalAlignment="Center"
+                            <FontIcon Grid.Column="2" Glyph="&#xE70F;" FontSize="12" Foreground="{ThemeResource LuxAttentionBrush}" VerticalAlignment="Center"
                                       Visibility="{x:Bind InPreset, Mode=OneWay}" ToolTipService.ToolTip="In the preset being edited" />
                             <TextBlock Grid.Column="3" Text="{x:Bind Address, Mode=OneWay}" FontFamily="Consolas"
                                        Foreground="{x:Bind AddressBrush, Mode=OneWay}" VerticalAlignment="Center" />

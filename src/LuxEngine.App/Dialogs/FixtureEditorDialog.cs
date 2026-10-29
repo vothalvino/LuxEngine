@@ -24,7 +24,7 @@ public sealed class FixtureEditorDialog : ContentDialog
     private readonly CheckBox _saveToLibrary = new() { Content = "Also update it in my fixture library, for future shows", IsChecked = true };
     private readonly FixtureDefinition? _existing;
     private readonly string? _existingMode;
-    private readonly TextBlock _error = new() { Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["LuxDangerBrush"], TextWrapping = TextWrapping.Wrap };
+    private readonly TextBlock _error = new() { Foreground = Ui.Brush("LuxDangerBrush"), TextWrapping = TextWrapping.Wrap };
 
     private FixtureEditorDialog(FixtureDefinition? existing = null, string? modeName = null)
     {

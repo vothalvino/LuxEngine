@@ -137,12 +137,12 @@ public sealed partial class MainWindow : Window
         }
         else if (errors.Count > 0)
         {
-            OutputLed.Fill = (Brush)Application.Current.Resources["LuxDangerBrush"];
+            OutputLed.Fill = Ui.Brush("LuxDangerBrush");
             OutputStatusText.Text = errors.Count == 1 ? "Output problem" : $"{errors.Count} output problems";
         }
         else
         {
-            OutputLed.Fill = (Brush)Application.Current.Resources["LuxOkBrush"];
+            OutputLed.Fill = Ui.Brush("LuxOkBrush");
             OutputStatusText.Text = outputs.Count == 1 ? "Output live" : $"{outputs.Count} outputs live";
         }
         ToolTipService.SetToolTip(OutputStatusButton, outputs.Count == 0
@@ -156,7 +156,7 @@ public sealed partial class MainWindow : Window
     {
         var engine = AppServices.Engine;
         if (BlackoutButton.IsChecked != engine.Blackout) BlackoutButton.IsChecked = engine.Blackout;
-        if (engine.Blackout) BlackoutButton.Background = (Brush)Application.Current.Resources["LuxDangerBrush"];
+        if (engine.Blackout) BlackoutButton.Background = Ui.Brush("LuxDangerBrush");
         else BlackoutButton.ClearValue(Microsoft.UI.Xaml.Controls.Control.BackgroundProperty);
         double master = Math.Round(engine.GrandMaster * 100);
         if (Math.Abs(MasterSlider.Value - master) > 0.5)
@@ -446,6 +446,8 @@ public sealed partial class MainWindow : Window
             "Light" => ElementTheme.Light,
             _ => ElementTheme.Default,
         };
+        // Parts of the window built in code pick their colours again for the new theme.
+        DispatcherQueue.TryEnqueue(Ui.RaiseThemeChanged);
         ThemeDefault.IsChecked = theme is not ("Dark" or "Light");
         ThemeDark.IsChecked = theme == "Dark";
         ThemeLight.IsChecked = theme == "Light";
