@@ -35,7 +35,16 @@ public sealed class PresetNode : ObservableObject
 
     public string Name { get => _name; set => SetProperty(ref _name, value); }
     public bool IsExpanded { get => _isExpanded; set => SetProperty(ref _isExpanded, value); }
-    public string Badge { get => _badge; set => SetProperty(ref _badge, value); }
+    public string Badge
+    {
+        get => _badge;
+        set
+        {
+            if (SetProperty(ref _badge, value)) OnPropertyChanged(nameof(BadgeVisibility));
+        }
+    }
+
+    public Visibility BadgeVisibility => string.IsNullOrEmpty(_badge) ? Visibility.Collapsed : Visibility.Visible;
     public string Detail { get => _detail; set => SetProperty(ref _detail, value); }
     public Brush AccentBrush { get => _accentBrush; set => SetProperty(ref _accentBrush, value); }
 }
@@ -111,7 +120,7 @@ public sealed partial class PresetPanel : UserControl
             {
                 Name = sub.Name,
                 IsExpanded = !_collapsed.Contains(sub.Id),
-                AccentBrush = (Brush)Application.Current.Resources["LuxAccentBrush"],
+                AccentBrush = Ui.Brush("LuxAccentBrush"),
                 Badge = sub.AllPresets().Count() is var n && n > 0 ? n.ToString() : "",
                 Detail = $"Folder with {sub.AllPresets().Count()} preset(s)",
             };
@@ -345,7 +354,7 @@ public sealed partial class PresetPanel : UserControl
         var preset = show.PresetRoot.FindPreset(id);
         if (preset is null) return;
         var box = new KeyCaptureBox { Key = preset.Key, Width = 260 };
-        var error = new TextBlock { Foreground = (Brush)Application.Current.Resources["LuxDangerBrush"], TextWrapping = TextWrapping.Wrap, Width = 320 };
+        var error = new TextBlock { Foreground = Ui.Brush("LuxDangerBrush"), TextWrapping = TextWrapping.Wrap, Width = 320 };
         box.Changed += () => error.Text = box.Error ?? "";
         var panel = new StackPanel { Spacing = 10, Width = 340 };
         panel.Children.Add(new TextBlock { Text = "Pressing the key shows this preset, like clicking it. Ctrl + the key adds it on top of the current look.", TextWrapping = TextWrapping.Wrap });

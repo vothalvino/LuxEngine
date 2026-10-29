@@ -23,7 +23,7 @@ public static class ShortcutsDialog
 
         var search = new TextBox { PlaceholderText = "Search shortcuts, e.g. dimmer or gobo" };
         var list = new StackPanel { Spacing = 2 };
-        var secondary = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"];
+        var secondary = Ui.Brush("TextFillColorSecondaryBrush");
 
         void Fill()
         {

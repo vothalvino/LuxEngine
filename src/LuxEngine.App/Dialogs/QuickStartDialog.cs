@@ -37,10 +37,10 @@ public static class QuickStartDialog
             var row = new Grid { ColumnSpacing = 14 };
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             row.ColumnDefinitions.Add(new ColumnDefinition());
-            var icon = new FontIcon { Glyph = glyph, FontSize = 22, Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["LuxAccentBrush"], VerticalAlignment = VerticalAlignment.Top };
+            var icon = new FontIcon { Glyph = glyph, FontSize = 22, Foreground = Ui.Brush("LuxAccentBrush"), VerticalAlignment = VerticalAlignment.Top };
             var texts = new StackPanel();
             texts.Children.Add(new TextBlock { Text = title, Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"] });
-            texts.Children.Add(new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"] });
+            texts.Children.Add(new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, Foreground = Ui.Brush("TextFillColorSecondaryBrush") });
             Grid.SetColumn(texts, 1);
             row.Children.Add(icon);
             row.Children.Add(texts);

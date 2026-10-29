@@ -227,6 +227,15 @@ public sealed partial class MainWindow
 
     private void SetUpKeyboard()
     {
+        // The Control / Cue area keeps the size it was dragged to.
+        BottomRow.Height = new GridLength(Math.Clamp(AppServices.Settings.BottomHeight, 220, 900));
+        BottomSplitter.Target = BottomRow;
+        BottomSplitter.Resized += height =>
+        {
+            AppServices.Settings.BottomHeight = height;
+            AppServices.Settings.Save();
+        };
+
         // The stage takes the keyboard focus at start-up instead of the first menu ("File").
         Stage.IsTabStop = true;
         Stage.UseSystemFocusVisuals = false;
@@ -235,14 +244,11 @@ public sealed partial class MainWindow
         {
             if (!IsInMenuBar(args.NewFocusedElement)) _menuByKeyboard = false;
         };
-        // After a menu or a dialog opened from it closes, the focus comes back to the menu title. Hand it
-        // to the stage once nothing is open any more, so the next shortcut cannot drop a menu.
-        TopMenu.GotFocus += (_, _) => DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
-        {
-            if (_menuByKeyboard) return;
-            if (Microsoft.UI.Xaml.Media.VisualTreeHelper.GetOpenPopupsForXamlRoot(Content.XamlRoot).Count > 0) return;
-            if (IsInMenuBar(FocusManager.GetFocusedElement(Content.XamlRoot))) FocusMainArea();
-        });
+        // Clicking a menu must not give it the keyboard focus: otherwise the next arrow key or shortcut
+        // drops a menu. (Taking the focus away from an open menu instead made its items stop responding.)
+        // F10 still opens the menus from the keyboard.
+        foreach (var item in TopMenu.Items)
+            item.AllowFocusOnInteraction = false;
         ParamBar.GetDimmerPercent = () => ControlView.DimmerPercent;
         ParamBar.SetDimmerPercent = v => ControlView.DimmerPercent = v;
         ParamBar.ValuesChanged += ControlView.RefreshValues;

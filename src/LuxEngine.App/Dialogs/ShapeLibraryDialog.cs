@@ -22,7 +22,7 @@ public sealed class ShapeLibraryDialog : ContentDialog
     private const double PadSize = 300;
 
     private readonly ListView _list = new() { SelectionMode = ListViewSelectionMode.Single, Width = 200, Height = 300 };
-    private readonly Canvas _pad = new() { Width = PadSize, Height = PadSize, Background = (Brush)Application.Current.Resources["LuxStageBrush"] };
+    private readonly Canvas _pad = new() { Width = PadSize, Height = PadSize, Background = Ui.Brush("LuxStageBrush") };
     private readonly CheckBox _closed = new() { Content = "Closed loop" };
     private readonly CheckBox _smooth = new() { Content = "Smooth curve" };
     private readonly TextBlock _hint = new()
@@ -219,7 +219,7 @@ public sealed class ShapeLibraryDialog : ContentDialog
 
         if (shape.Points.Count >= 2)
         {
-            var line = new Polyline { Stroke = (Brush)Application.Current.Resources["LuxAccentBrush"], StrokeThickness = 2.5, IsHitTestVisible = false };
+            var line = new Polyline { Stroke = Ui.Brush("LuxAccentBrush"), StrokeThickness = 2.5, IsHitTestVisible = false };
             foreach (var p in shape.Path()) line.Points.Add(ToPad(p));
             _pad.Children.Add(line);
         }

@@ -19,7 +19,7 @@
         <Canvas x:Name="StageCanvas" />
 
         <Rectangle x:Name="SelectionRect" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"
-                   Stroke="{StaticResource LuxAccentBrush}" StrokeThickness="1" Fill="#22FFB938" IsHitTestVisible="False" />
+                   Stroke="{ThemeResource LuxAccentBrush}" StrokeThickness="1" Fill="#22FFB938" IsHitTestVisible="False" />
 
         <TextBlock Text="STAGE" Foreground="#88FFFFFF" FontSize="12" CharacterSpacing="200" Margin="14,10"
                    HorizontalAlignment="Left" VerticalAlignment="Top" IsHitTestVisible="False" />

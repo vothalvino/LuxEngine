@@ -78,7 +78,7 @@ public sealed partial class FixturePanel : UserControl
             {
                 Name = fixture.Name,
                 Address = $"{fixture.Universe}.{fixture.Address:000}",
-                AddressBrush = conflicted.Contains(fixture.Id) ? (Brush)Application.Current.Resources["LuxDangerBrush"] : null,
+                AddressBrush = conflicted.Contains(fixture.Id) ? Ui.Brush("LuxDangerBrush") : null,
             });
         }
 

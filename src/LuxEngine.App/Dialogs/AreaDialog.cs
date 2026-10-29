@@ -24,7 +24,7 @@ public sealed class AreaDialog : ContentDialog
 
     private readonly ListView _list = new() { SelectionMode = ListViewSelectionMode.Single, Width = 180, Height = 260 };
     private readonly ComboBox _head = new() { Header = "Moving head", Width = 240 };
-    private readonly Canvas _pad = new() { Width = PadSize, Height = PadSize, Background = (Brush)Application.Current.Resources["LuxStageBrush"] };
+    private readonly Canvas _pad = new() { Width = PadSize, Height = PadSize, Background = Ui.Brush("LuxStageBrush") };
     private readonly RadioButton _aimMode = new() { Content = "Drag to aim the light", IsChecked = true, GroupName = "areaMode" };
     private readonly RadioButton _boxMode = new() { Content = "Drag to draw the box", GroupName = "areaMode" };
     private readonly NumberBox _panFrom = Box("Pan from"), _panTo = Box("Pan to"), _tiltFrom = Box("Tilt from"), _tiltTo = Box("Tilt to");
@@ -313,7 +313,7 @@ public sealed class AreaDialog : ContentDialog
         if (Bounds is { } b) AddBox(b.Normalized(), 90);
 
         var (pan, tilt) = Aim();
-        var dot = new Ellipse { Width = 18, Height = 18, Fill = (Brush)Application.Current.Resources["LuxAccentBrush"], Stroke = new SolidColorBrush(Colors.White), StrokeThickness = 2, IsHitTestVisible = false };
+        var dot = new Ellipse { Width = 18, Height = 18, Fill = Ui.Brush("LuxAccentBrush"), Stroke = new SolidColorBrush(Colors.White), StrokeThickness = 2, IsHitTestVisible = false };
         Canvas.SetLeft(dot, ToPad(pan) - 9);
         Canvas.SetTop(dot, ToPad(tilt) - 9);
         _pad.Children.Add(dot);
