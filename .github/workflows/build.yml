@@ -248,7 +248,7 @@ jobs:
             Shot "14-key-button"
             Press 0x70; Start-Sleep 2                                               # F1: shortcut sheet
             Shot "15-shortcuts"
-            Click "Close"; Start-Sleep 1
+            Press 0x1B; Start-Sleep 1                                               # Esc closes the sheet
           } catch { Write-Host "Keyboard check failed: $_" }
           try {
             # The same screens in both themes, for checking the look.
