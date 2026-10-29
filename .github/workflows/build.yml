@@ -214,7 +214,6 @@ jobs:
               $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond).GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
               Start-Sleep 1
             }
-            MouseClick "Panel"   # focus the app window (stage label) without changing much
             SelectLight "Par 1"
             Press 0x10,0x44; Press 0x35; Press 0x30; Press 0x0D; Start-Sleep 1    # Shift+D, 5, 0, Enter
             Shot "12-parameter-bar"
