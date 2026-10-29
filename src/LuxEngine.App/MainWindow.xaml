@@ -111,14 +111,20 @@
                 </MenuBarItem>
             </MenuBar>
 
+            <!-- In the flexible middle, so a long cue name shortens instead of pushing Blackout off-screen -->
+            <Border Grid.Column="1" Style="{StaticResource PillStyle}" HorizontalAlignment="Right" MinWidth="0">
+                <Grid ColumnSpacing="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource LuxAccentBrush}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" x:Name="CueStatus" Text="No cue running" VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </Border>
+
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-                <Border Style="{StaticResource PillStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                        <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource LuxAccentBrush}" />
-                        <TextBlock x:Name="CueStatus" Text="No cue running" VerticalAlignment="Center"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" MaxWidth="220" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
 
                 <Button x:Name="OutputStatusButton" Click="Outputs_Click" AutomationProperties.Name="DMX outputs" Padding="12,4" CornerRadius="14" ToolTipService.ToolTip="DMX output status">
                     <StackPanel Orientation="Horizontal" Spacing="8">
