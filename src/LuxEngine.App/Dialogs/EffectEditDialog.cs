@@ -31,7 +31,7 @@ public static class EffectEditDialog
         foreach (var s in shapes) shapeBox.Items.Add(s.Label);
         shapeBox.SelectedIndex = Math.Max(0, shapes.FindIndex(s => s.Type == effect.Type && s.Id == effect.ShapeId));
 
-        var areas = new List<(string Label, Guid? Id)> { ("Around where it points", null) };
+        var areas = new List<(string Label, Guid? Id)> { ("No area (free)", null) };
         areas.AddRange(show.Areas.Select(a => (a.Name, (Guid?)a.Id)));
         var areaBox = new ComboBox { Header = "Area", Width = 220 };
         foreach (var a in areas) areaBox.Items.Add(a.Label);

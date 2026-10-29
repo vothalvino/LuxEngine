@@ -381,7 +381,7 @@ public sealed partial class ControlView : UserControl
                                     ?? ShapeBox.Items[0];
 
             AreaBox.Items.Clear();
-            AreaBox.Items.Add(new AreaChoice("Around where it points", null));
+            AreaBox.Items.Add(new AreaChoice("No area (free)", null));
             foreach (var a in show.Areas) AreaBox.Items.Add(new AreaChoice(a.Name, a.Id));
             AreaBox.SelectedItem = AreaBox.Items.OfType<AreaChoice>().FirstOrDefault(c => c.AreaId == area?.AreaId) ?? AreaBox.Items[0];
         }
