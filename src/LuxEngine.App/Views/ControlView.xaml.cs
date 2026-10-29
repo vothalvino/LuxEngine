@@ -122,6 +122,12 @@ public sealed partial class ControlView : UserControl
         return AppServices.Engine.GetPlaybackValue(fixture.Instance.Id, ch.Channel.Name);
     }
 
+    /// <summary>How bright a light without a dimmer is set to: its strongest color channel, before the master and effects.</summary>
+    private static double ColorBrightness(PatchedFixture fixture) =>
+        fixture.Channels.Where(c => c.Channel.Type.IsAdditiveColor())
+            .Select(c => AppServices.Engine.GetPlaybackValue(fixture.Instance.Id, c.Channel.Name) ?? 0)
+            .DefaultIfEmpty(0).Max() / 255;
+
     private double ReadDimmer(PatchedFixture fixture)
     {
         if (fixture.HasDimmer) return (Read(fixture, ChannelType.Intensity) ?? 0) / 255;
@@ -196,36 +202,13 @@ public sealed partial class ControlView : UserControl
             _syncing = false;
         }
 
-        double level = DimmerSlider.Value / 100;
         foreach (var fixture in SelectedFixtures())
         {
             _baseColors[fixture.Instance.Id] = color;
-            if (fixture.HasDimmer)
-            {
-                ColorMixer.Apply(AppServices.Engine, fixture, color);
-                // Take the dimmer under hand control too, so cue effects don't hide the new color.
-                // A dark light is turned on so the color is visible.
-                double dimmer = Read(fixture, ChannelType.Intensity) ?? 0;
-                if (dimmer == 0)
-                {
-                    dimmer = 255;
-                    _syncing = true;
-                    DimmerSlider.Value = 100;
-                    _syncing = false;
-                }
-                AppServices.Engine.SetValue(new[] { fixture.Instance.Id }, ChannelType.Intensity, (byte)Math.Round(dimmer));
-            }
-            else
-            {
-                if (level == 0)
-                {
-                    level = 1;
-                    _syncing = true;
-                    DimmerSlider.Value = 100;
-                    _syncing = false;
-                }
-                ColorMixer.Apply(AppServices.Engine, fixture, color, level);
-            }
+            // Only the color channels change; the dimmer stays where it is, so a dark light stays dark.
+            // Lights without a dimmer mix the color at their current brightness.
+            if (fixture.HasDimmer) ColorMixer.Apply(AppServices.Engine, fixture, color);
+            else ColorMixer.Apply(AppServices.Engine, fixture, color, ColorBrightness(fixture));
         }
     }
 
