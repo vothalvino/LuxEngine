@@ -53,7 +53,7 @@
                         <TextBlock Text="Clear" />
                     </StackPanel>
                 </Button>
-                <Button Click="SavePreset_Click" Style="{StaticResource AccentButtonStyle}">
+                <Button x:Name="SavePresetButton" Click="SavePreset_Click" Style="{StaticResource AccentButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE74E;" FontSize="14" />
                         <TextBlock Text="Save as preset" />

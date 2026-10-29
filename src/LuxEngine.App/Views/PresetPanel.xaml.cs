@@ -53,6 +53,10 @@ public sealed partial class PresetPanel : UserControl
     public PresetPanel()
     {
         InitializeComponent();
+        var saveTimer = DispatcherQueue.CreateTimer();
+        saveTimer.Interval = TimeSpan.FromMilliseconds(200);
+        saveTimer.Tick += (_, _) => ControlView.UpdateSaveButton(RecordButton);
+        saveTimer.Start();
         AppServices.Document.Changed += change =>
         {
             if (change.HasFlag(ShowChange.Presets) || change.HasFlag(ShowChange.Patch)) Refresh();
