@@ -45,6 +45,15 @@ public sealed class MidiController : IDisposable
     /// <summary>Raised after a mapping changed engine state the UI should show (e.g. blackout).</summary>
     public event Action<string>? ActionPerformed;
 
+    /// <summary>
+    /// Raised (on a MIDI thread) when a preset button is pressed. The app shows the preset the same way as
+    /// a click. Without a handler the preset is shown directly.
+    /// </summary>
+    public event Action<Guid>? PresetRequested;
+
+    /// <summary>Raised (on a MIDI thread) when handling a message failed; MIDI keeps working.</summary>
+    public event Action<Exception>? Error;
+
     public IReadOnlyList<string> DeviceNames => _devices.Select(d => d.Name).ToList();
 
     public static IReadOnlyList<string> AvailableDevices()
@@ -108,6 +117,19 @@ public sealed class MidiController : IDisposable
 
     private void OnEvent(object? sender, MidiEventReceivedEventArgs e)
     {
+        // This runs on a MIDI device thread: an error here must not close the app.
+        try
+        {
+            Receive(e);
+        }
+        catch (Exception ex)
+        {
+            Error?.Invoke(ex);
+        }
+    }
+
+    private void Receive(MidiEventReceivedEventArgs e)
+    {
         MidiInput? input = e.Event switch
         {
             NoteOnEvent n => new MidiInput("Note", n.Channel, n.NoteNumber, n.Velocity),
@@ -134,8 +156,12 @@ public sealed class MidiController : IDisposable
         var show = _engine.Show;
         var key = (message.MessageType, message.Channel, message.Number);
         bool down = message.Value >= 64 || (message.MessageType == "Note" && message.Value > 0);
-        bool wasDown = _pressed.GetValueOrDefault(key);
-        _pressed[key] = down;
+        bool wasDown;
+        lock (_pressed)   // several devices can deliver messages at the same time
+        {
+            wasDown = _pressed.GetValueOrDefault(key);
+            _pressed[key] = down;
+        }
         bool pressed = down && !wasDown;
 
         List<MidiMapping> mappings;
@@ -169,7 +195,9 @@ public sealed class MidiController : IDisposable
                     break;
                 case MidiActions.Preset when pressed && mapping.Target is Guid id:
                     var preset = show.PresetRoot.FindPreset(id);
-                    if (preset is not null) _engine.ShowPreset(preset);
+                    if (preset is null) continue;
+                    if (PresetRequested is { } showPreset) showPreset(id);
+                    else _engine.ShowPreset(preset);
                     break;
                 case MidiActions.CueButton when mapping.Target is Guid buttonId:
                     var button = show.ButtonPage.Find(buttonId);

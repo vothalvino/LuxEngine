@@ -54,6 +54,19 @@ public sealed class SoundToLight : IDisposable
 
     private void OnData(object? sender, WaveInEventArgs e)
     {
+        // Audio arrives on a capture thread; a bad buffer must not close the app.
+        try
+        {
+            Measure(e);
+        }
+        catch (Exception)
+        {
+            // Skip this buffer; the next one usually works.
+        }
+    }
+
+    private void Measure(WaveInEventArgs e)
+    {
         var format = _capture?.WaveFormat;
         if (format is null || e.BytesRecorded == 0) return;
 

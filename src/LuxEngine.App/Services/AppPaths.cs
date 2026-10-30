@@ -44,8 +44,9 @@ public sealed class AppSettings
             if (File.Exists(AppPaths.SettingsFile))
                 return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(AppPaths.SettingsFile), ShowSerializer.Options) ?? new();
         }
-        catch (Exception ex) when (ex is IOException or JsonException)
+        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException or NotSupportedException)
         {
+            // A missing, unreadable or broken settings file just means default settings.
         }
         return new AppSettings();
     }
@@ -56,8 +57,9 @@ public sealed class AppSettings
         {
             File.WriteAllText(AppPaths.SettingsFile, JsonSerializer.Serialize(this, ShowSerializer.Options));
         }
-        catch (IOException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+            // Settings are a convenience; failing to save them must not stop the show.
         }
     }
 
