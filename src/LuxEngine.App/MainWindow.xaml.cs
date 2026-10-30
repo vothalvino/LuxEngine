@@ -44,6 +44,9 @@ public sealed partial class MainWindow : Window
         AppServices.Document.StateChanged += UpdateTitle;
         AppServices.Document.Changed += OnShowChanged;
         AppServices.Midi.ActionPerformed += _ => DispatcherQueue.TryEnqueue(SyncLiveControls);
+        // A MIDI preset button works like clicking the preset: on the UI thread, selecting its lights.
+        AppServices.Midi.PresetRequested += id => DispatcherQueue.TryEnqueue(() => Views.PresetPanel.UsePreset(id, layer: false));
+        AppServices.Midi.Error += ex => DispatcherQueue.TryEnqueue(() => App.LogError(ex));
 
         _statusTimer = DispatcherQueue.CreateTimer();
         _statusTimer.Interval = TimeSpan.FromMilliseconds(150);
@@ -285,7 +288,16 @@ public sealed partial class MainWindow : Window
         RecentMenu.IsEnabled = RecentMenu.Items.Count > 0;
     }
 
-    private void Exit_Click(object sender, RoutedEventArgs e) => Close();
+    /// <summary>
+    /// File > Exit asks about unsaved changes like the close button does. (Window.Close() does not raise
+    /// AppWindow.Closing, so without this the changes were lost and the recovery copy deleted.)
+    /// </summary>
+    private async void Exit_Click(object sender, RoutedEventArgs e)
+    {
+        if (AppServices.Document.IsDirty && !await ConfirmDiscardAsync()) return;
+        _closeConfirmed = true;
+        Close();
+    }
 
     private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {

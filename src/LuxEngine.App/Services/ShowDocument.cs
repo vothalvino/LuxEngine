@@ -76,8 +76,18 @@ public sealed class ShowDocument
         Show show = _engine.Show;
         lock (_engine.SyncRoot)
         {
+            // The show takes the file's name; if writing fails it keeps its old name.
+            var oldName = show.Name;
             show.Name = Path.GetFileNameWithoutExtension(path);
-            ShowSerializer.Save(show, path);
+            try
+            {
+                ShowSerializer.Save(show, path);
+            }
+            catch
+            {
+                show.Name = oldName;
+                throw;
+            }
         }
         FilePath = path;
         IsDirty = false;
@@ -92,7 +102,7 @@ public sealed class ShowDocument
         {
             lock (_engine.SyncRoot) ShowSerializer.Save(_engine.Show, AutosavePath);
         }
-        catch (IOException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             // Autosave is best effort; the next tick tries again.
         }
@@ -100,6 +110,6 @@ public sealed class ShowDocument
 
     public static void DeleteAutosave()
     {
-        try { File.Delete(AutosavePath); } catch (IOException) { }
+        try { File.Delete(AutosavePath); } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
     }
 }

@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\LuxEngine.Core\LuxEngine.Core.csproj" />
+    <ProjectReference Include="..\..\src\LuxEngine.Control\LuxEngine.Control.csproj" />
   </ItemGroup>
 
 </Project>

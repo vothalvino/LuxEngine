@@ -561,7 +561,18 @@ public sealed partial class ControlView : UserControl
     {
         AppServices.Settings.AudioSource = CurrentAudioSource().ToString();
         AppServices.Settings.Save();
-        if (SoundSwitch?.IsOn == true) AppServices.Sound.Start(CurrentAudioSource());
+        if (SoundSwitch?.IsOn != true) return;
+        try
+        {
+            AppServices.Sound.Start(CurrentAudioSource());
+        }
+        catch (Exception ex)
+        {
+            AppServices.Sound.Stop();
+            AppServices.Engine.SoundToLightAmount = 0;
+            SoundSwitch.IsOn = false;
+            _ = DialogHelper.ShowMessageAsync("Could not listen to audio", ex.Message);
+        }
     }
 
     private void SoundAmount_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
