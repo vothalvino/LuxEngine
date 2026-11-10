@@ -31,6 +31,7 @@
 - **Effects.** Rainbow, chase, wave and strobe, with speed, size and spread. They run across the lights in stage order.
 - **Movement for moving heads.** Circle, figure 8, sweeps and your own drawn shapes. Give each head an **area** (for example "only on the back wall") and movements never leave it. Invert pan or tilt per light.
 - **Keyboard control.** Shift+letter sets a parameter of the selected lights (Shift+D, 50, Enter = dimmer 50%), plus keys for selection, playback and your own keys for presets, groups and cue buttons. Press **F1** for the full list.
+- **Tap tempo and fan.** Tap the beat (T) and let effects and movements follow it; fan the dimmer, a rainbow, pan or tilt across the selected lights.
 - **Undo and redo.** Ctrl+Z takes back changes to the show: deleted presets, moved lights, edited cues.
 - **Outputs.** Art-Net, sACN (E1.31), Enttec DMX USB Pro and Open DMX USB, with as many universes as you need.
 - **External control.** MIDI controllers (learn mode) and sound-to-light from music playing on the PC or a microphone.
@@ -76,6 +77,7 @@ The most used shortcuts (press **F1** in the app for all of them):
 |---|---|
 | Space / Shift+Space | GO / Back |
 | B | Blackout |
+| T | Tap tempo |
 | Ctrl+Z / Ctrl+Y | Undo / Redo |
 | Shift+D, then a number and Enter | Dimmer of the selected lights (other letters: see F1) |
 | Ctrl+A / Ctrl+I / Esc | Select all / invert selection / deselect |

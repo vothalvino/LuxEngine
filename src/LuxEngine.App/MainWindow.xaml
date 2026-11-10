@@ -142,7 +142,7 @@
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
 
                 <Button x:Name="UpdateButton" Visibility="Collapsed" Click="Update_Click" AutomationProperties.Name="Update available"
                         Padding="12,4" CornerRadius="14" ToolTipService.ToolTip="Open the download page for the new version">
@@ -150,6 +150,28 @@
                         <FontIcon Glyph="&#xE896;" FontSize="12" Foreground="{ThemeResource LuxAccentBrush}" />
                         <TextBlock x:Name="UpdateText" Text="Update available" />
                     </StackPanel>
+                </Button>
+
+                <Button x:Name="TapButton" Click="Tap_Click" AutomationProperties.Name="Tap tempo" Padding="12,4" CornerRadius="14"
+                        ToolTipService.ToolTip="Tap along with the music to set the tempo (T). Right-click to type it.">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Ellipse x:Name="BeatDot" Width="10" Height="10" Fill="{ThemeResource LuxAccentBrush}" />
+                        <TextBlock x:Name="BpmText" Text="120 BPM" />
+                    </StackPanel>
+                    <Button.ContextFlyout>
+                        <Flyout x:Name="BpmFlyout" Opening="BpmFlyout_Opening">
+                            <StackPanel Spacing="8" Width="200">
+                                <NumberBox x:Name="BpmBox" Header="Tempo (BPM)" Minimum="20" Maximum="300" SpinButtonPlacementMode="Inline"
+                                           SmallChange="1" LargeChange="10" ValueChanged="BpmBox_ValueChanged" />
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Button Content="Half" Tag="0.5" Click="BpmScale_Click" ToolTipService.ToolTip="Half the tempo" />
+                                    <Button Content="Double" Tag="2" Click="BpmScale_Click" ToolTipService.ToolTip="Twice the tempo" />
+                                </StackPanel>
+                                <TextBlock Text="Effects and movements set “To the beat” follow this tempo." TextWrapping="Wrap"
+                                           Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </Flyout>
+                    </Button.ContextFlyout>
                 </Button>
 
                 <Button x:Name="OutputStatusButton" Click="Outputs_Click" AutomationProperties.Name="DMX outputs" Padding="12,4" CornerRadius="14" ToolTipService.ToolTip="DMX output status">
@@ -161,8 +183,7 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" ToolTipService.ToolTip="Master (Ctrl+↑ / Ctrl+↓)">
                     <FontIcon Glyph="&#xE706;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBlock Text="Master" VerticalAlignment="Center" />
-                    <Slider x:Name="MasterSlider" Width="150" Minimum="0" Maximum="100" Value="100"
+                    <Slider x:Name="MasterSlider" Width="100" AutomationProperties.Name="Master" Minimum="0" Maximum="100" Value="100"
                             ValueChanged="MasterSlider_ValueChanged" VerticalAlignment="Center" />
                     <TextBlock x:Name="MasterText" Text="100%" Width="38" VerticalAlignment="Center" />
                 </StackPanel>

@@ -7,6 +7,7 @@ A short guide to every part of LuxEngine. New here? Start with [the first ten mi
 - [Lights: adding, selecting, groups](#lights-adding-selecting-groups)
 - [Control: dimmer, color, position](#control-dimmer-color-position)
 - [Effects and strobe](#effects-and-strobe)
+- [Fan](#fan)
 - [Movement, shapes and areas](#movement-shapes-and-areas)
 - [Presets](#presets)
 - [Cue list](#cue-list)
@@ -77,10 +78,22 @@ Values you set by hand stay until you clear them (**Clear**, or **Ctrl+Backspace
 
 Select lights, then click an effect: **Rainbow**, **Chase**, **Wave** or **Strobe**. Set **speed**, **size** and **spread** (how far the lights are apart in the pattern: 0 = all together). Click the effect again to stop it.
 
+**To the beat.** Tap the **BPM** button at the top of the window along with the music (or press **T**); four taps are enough. The dot on the button blinks on the beat. Right-click the button to type the tempo, or to halve or double it. Then tick **To the beat** in the Effects card and choose how many beats one round of the effect takes: a chase on 4 lights with *4 beats* steps once per beat. The Speed slider is off while the effect follows the beat. The same works for movements (Movement card). The tempo is live: it is not saved in the show, but "to the beat" is saved with the effect in presets and cues.
+
 **Strobe, two ways:**
 
 - The **Strobe effect** flashes any light, also ones without a strobe channel.
 - A light's own **strobe / shutter channel** (in the beam card, or **Shift+S**) uses the strobe built into the light. It is usually faster and sharper. The stage shows the flicker.
+
+## Fan
+
+The **Fan** card spreads a value across the selected lights instead of giving them all the same. Select at least two lights, choose what to fan (**dimmer**, **color**, **pan** or **tilt**), and move the **First** and **Last** sliders: the first light gets the first value, the last light the last one, and the lights in between are spread evenly. "First" and "last" follow the stage: left to right, then top to bottom, in whatever order you selected.
+
+- Dimmer from 0% to 100%: a ramp from dark to bright.
+- Color: a rainbow across the lights.
+- Pan from 25% to 75% on moving heads: the beams open like a fan. **Swap** turns it around.
+
+The result is ordinary values, so you can save it as a preset. Lights without the chosen channel are skipped.
 
 ## Movement, shapes and areas
 
@@ -150,6 +163,8 @@ In the Cue tab, switch to **Buttons** (F4): a grid of buttons for playing live w
 A bar appears: use the arrow keys or mouse wheel, or type a number and press Enter. Esc closes it. These keys only work with lights selected.
 
 **Your own keys.** Presets, groups and cue buttons can each have a key (right-click → set a key). LuxEngine tells you when a key is already taken.
+
+**T** taps the tempo. If you gave T to a preset, group or cue button, your own key wins.
 
 Shortcuts are off while you type in a text box.
 

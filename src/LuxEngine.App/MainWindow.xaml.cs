@@ -18,6 +18,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _statusTimer;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _autosaveTimer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _beatTimer;
     private bool _closeConfirmed;
     private bool _updatingMaster;
 
@@ -52,6 +53,12 @@ public sealed partial class MainWindow : Window
         _statusTimer.Interval = TimeSpan.FromMilliseconds(150);
         _statusTimer.Tick += (_, _) => UpdateStatus();
         _statusTimer.Start();
+
+        // The dot on the Tap button lights up on every beat and fades until the next.
+        _beatTimer = DispatcherQueue.CreateTimer();
+        _beatTimer.Interval = TimeSpan.FromMilliseconds(40);
+        _beatTimer.Tick += (_, _) => BeatDot.Opacity = 1 - 0.85 * AppServices.Engine.BeatPhase;
+        _beatTimer.Start();
 
         _autosaveTimer = DispatcherQueue.CreateTimer();
         _autosaveTimer.Interval = TimeSpan.FromSeconds(60);
@@ -177,6 +184,34 @@ public sealed partial class MainWindow : Window
     }
 
     // ------------------------------------------------------------------ live controls
+
+    /// <summary>One tap of the tempo (the Tap button or the T key).</summary>
+    public void TapTempo()
+    {
+        AppServices.Engine.Tap();
+        ShowBpm();
+    }
+
+    private void ShowBpm() => BpmText.Text = $"{Math.Round(AppServices.Engine.Bpm)} BPM";
+
+    private void Tap_Click(object sender, RoutedEventArgs e) => TapTempo();
+
+    private void BpmFlyout_Opening(object? sender, object e) => BpmBox.Value = Math.Round(AppServices.Engine.Bpm);
+
+    private void BpmBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (double.IsNaN(args.NewValue) || Math.Abs(args.NewValue - Math.Round(AppServices.Engine.Bpm)) < 0.5) return;
+        AppServices.Engine.Bpm = args.NewValue;
+        ShowBpm();
+    }
+
+    private void BpmScale_Click(object sender, RoutedEventArgs e)
+    {
+        double factor = double.Parse((string)((FrameworkElement)sender).Tag, System.Globalization.CultureInfo.InvariantCulture);
+        AppServices.Engine.Bpm *= factor;
+        BpmBox.Value = Math.Round(AppServices.Engine.Bpm);
+        ShowBpm();
+    }
 
     private void MasterSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
     {

@@ -64,6 +64,13 @@ public sealed partial class MainWindow
             AppServices.Engine.Blackout = !AppServices.Engine.Blackout;
             SyncLiveControls();
         }));
+        // T stays free for your own keys: a show that gave T to a button, group or preset keeps that.
+        Add("T", "Playback", "Tap tempo: tap along with the music (effects set “To the beat” follow)", VirtualKey.T, false, false, () =>
+        {
+            if (KeyNames.UsedBy(AppServices.Engine.Show, VirtualKey.T.ToString(), null) is not null) return false;
+            TapTempo();
+            return true;
+        }, repeats: false);
         Add("Ctrl+↑", "Playback", "Master fader up 5%", VirtualKey.Up, true, false, () => Do(() => NudgeMaster(+0.05)), repeats: true);
         Add("Ctrl+↓", "Playback", "Master fader down 5%", VirtualKey.Down, true, false, () => Do(() => NudgeMaster(-0.05)), repeats: true);
 
