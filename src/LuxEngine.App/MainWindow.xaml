@@ -183,8 +183,7 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" ToolTipService.ToolTip="Master (Ctrl+↑ / Ctrl+↓)">
                     <FontIcon Glyph="&#xE706;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBlock Text="Master" VerticalAlignment="Center" />
-                    <Slider x:Name="MasterSlider" Width="150" Minimum="0" Maximum="100" Value="100"
+                    <Slider x:Name="MasterSlider" Width="120" AutomationProperties.Name="Master" Minimum="0" Maximum="100" Value="100"
                             ValueChanged="MasterSlider_ValueChanged" VerticalAlignment="Center" />
                     <TextBlock x:Name="MasterText" Text="100%" Width="38" VerticalAlignment="Center" />
                 </StackPanel>
