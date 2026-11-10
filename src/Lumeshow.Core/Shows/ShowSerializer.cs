@@ -3,18 +3,11 @@ using System.Text.Json.Serialization;
 
 namespace Lumeshow.Core.Shows;
 
-/// <summary>Reads and writes .lumeshow files (indented JSON).</summary>
+/// <summary>Reads and writes .luxshow files (indented JSON).</summary>
 public static class ShowSerializer
 {
-    public const string FileExtension = ".lumeshow";
-
-    /// <summary>What show files were called while the app was named LuxEngine. They still open; the content is the same.</summary>
-    public const string LegacyFileExtension = ".luxshow";
-
-    /// <summary>True for a path that ends in the current or the old show file extension.</summary>
-    public static bool IsShowFile(string? path) =>
-        path is not null && (path.EndsWith(FileExtension, StringComparison.OrdinalIgnoreCase)
-                             || path.EndsWith(LegacyFileExtension, StringComparison.OrdinalIgnoreCase));
+    // The extension is from the time the app was called LuxEngine. It stays, so every show keeps opening.
+    public const string FileExtension = ".luxshow";
 
     public static readonly JsonSerializerOptions Options = new()
     {

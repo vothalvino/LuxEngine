@@ -51,7 +51,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
-Name: "association"; Description: "Open show files (.lumeshow, .luxshow) with Lumeshow"; GroupDescription: "File types:"
+Name: "association"; Description: "Open .luxshow files with Lumeshow"; GroupDescription: "File types:"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -68,8 +68,7 @@ Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
 
 [Registry]
-Root: HKA; Subkey: "Software\Classes\.lumeshow"; ValueType: string; ValueName: ""; ValueData: "Lumeshow.Show"; Flags: uninsdeletevalue; Tasks: association
-; Shows saved while the app was called LuxEngine open with Lumeshow too.
+; Show files keep the .luxshow extension from the time the app was called LuxEngine.
 Root: HKA; Subkey: "Software\Classes\.luxshow"; ValueType: string; ValueName: ""; ValueData: "Lumeshow.Show"; Flags: uninsdeletevalue; Tasks: association
 Root: HKA; Subkey: "Software\Classes\{#OldName}.Show"; ValueType: none; Flags: deletekey dontcreatekey
 Root: HKA; Subkey: "Software\Classes\Lumeshow.Show"; ValueType: string; ValueName: ""; ValueData: "Lumeshow show"; Flags: uninsdeletekey; Tasks: association

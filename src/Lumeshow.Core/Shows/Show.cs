@@ -49,7 +49,7 @@ public sealed class MidiMapping
     public Guid? Target { get; set; }
 }
 
-/// <summary>Everything in a .lumeshow file.</summary>
+/// <summary>Everything in a .luxshow file.</summary>
 public sealed class Show
 {
     public const int CurrentVersion = 1;

@@ -11,11 +11,11 @@ The software has a new name, because several other programs are already called L
 
 - **Updating:** install Lumeshow over LuxEngine. The installer replaces the old program, so you have one app, with one entry in the Start menu. Close LuxEngine first.
 - **Your settings** and your own fixture types move to the new folders by themselves the first time Lumeshow starts (`Documents\Lumeshow\Fixtures` for fixtures).
-- **Your shows keep working.** New shows are saved as `.lumeshow` files. Existing `.luxshow` files open as before, by double-click too, and keep their name when you save them. Use *Save as* if you want a `.lumeshow` copy.
+- **Your shows keep working.** Show files are still `.luxshow` files, and nothing about them changes.
 - Shows you saved yourself stay where you saved them, also inside `Documents\LuxEngine`.
 - The project's address is now [github.com/vothalvino/Lumeshow](https://github.com/vothalvino/Lumeshow). Old links are forwarded.
 
-Going back to LuxEngine 1.8 afterwards is possible, but it starts with fresh settings, and `.lumeshow` files have to be renamed to `.luxshow` for it.
+Going back to LuxEngine 1.8 afterwards is possible, but it starts with fresh settings.
 
 ## 1.8.0
 

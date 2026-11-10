@@ -13,7 +13,7 @@ public static class AppPaths
     {
         var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var path = Path.Combine(local, Name);
-        if (LegacyFolders.Move(Path.Combine(local, LegacyFolders.OldName), path)) RenameLegacyAutosave(path);
+        LegacyFolders.Move(Path.Combine(local, LegacyFolders.OldName), path);
         Directory.CreateDirectory(path);
         return path;
     });
@@ -37,21 +37,6 @@ public static class AppPaths
     public static string BundledFixtures => Path.Combine(AppContext.BaseDirectory, "fixtures");
 
     public static string SettingsFile => Path.Combine(DataFolder, "settings.json");
-
-    /// <summary>A recovery copy written by LuxEngine keeps working: it gets the name Lumeshow looks for.</summary>
-    private static void RenameLegacyAutosave(string folder)
-    {
-        try
-        {
-            var old = Path.Combine(folder, "autosave" + ShowSerializer.LegacyFileExtension);
-            var now = Path.Combine(folder, "autosave" + ShowSerializer.FileExtension);
-            if (File.Exists(old) && !File.Exists(now)) File.Move(old, now);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            // Without it there is just no recovery offer.
-        }
-    }
 }
 
 /// <summary>Per-user preferences, stored next to the autosave.</summary>

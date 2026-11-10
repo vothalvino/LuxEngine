@@ -40,7 +40,7 @@
     <Content Include="Assets\Lumeshow.ico" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Lumeshow.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Lumeshow-64.png" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\..\samples\*.lumeshow" Link="samples\%(Filename)%(Extension)"
+    <None Include="..\..\samples\*.luxshow" Link="samples\%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Include="..\..\fixtures\*.json" Link="fixtures\%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

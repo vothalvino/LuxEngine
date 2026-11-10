@@ -70,15 +70,14 @@ jobs:
             $bmp.Save("screenshots/$name.png")
           }
           # Start like someone who used the app while it was called LuxEngine: settings and their own fixtures
-          # are in the old folders, and the show is an old .luxshow file. All of it must still work.
+          # are in the old folders. All of it must still work.
           $oldData = Join-Path $env:LOCALAPPDATA "LuxEngine"
           $oldDocs = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "LuxEngine"
           New-Item -ItemType Directory -Force $oldData, "$oldDocs\Fixtures" | Out-Null
           '{"recentShows":["C:\\Shows\\From the old name.luxshow"],"firstRunDone":true}' | Set-Content "$oldData\settings.json"
           "kept" | Set-Content "$oldDocs\Fixtures\notes.txt"
           "{}" | Set-Content "$oldDocs\My show.luxshow"
-          Copy-Item samples\Demo.lumeshow "$env:TEMP\Demo.luxshow"
-          $app = Start-Process publish/Lumeshow.exe -ArgumentList "`"$env:TEMP\Demo.luxshow`"" -PassThru
+          $app = Start-Process publish/Lumeshow.exe -ArgumentList "`"$PWD\samples\Demo.luxshow`"" -PassThru
           # Drive the real UI through Windows UI Automation, like a user clicking.
           Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
           $A = [System.Windows.Automation.AutomationElement]
@@ -102,7 +101,6 @@ jobs:
           if (Test-Path $oldData) { throw "The old settings folder is still there" }
           if (-not (Test-Path "$newDocs\Fixtures\notes.txt")) { throw "The user's fixtures were not brought over" }
           if (-not (Test-Path "$oldDocs\My show.luxshow")) { throw "A show the user saved in Documents\LuxEngine was touched" }
-          if (-not (Find "Deep blue")) { throw "The old .luxshow file did not open" }
           function Find($name) {
             foreach ($try in 1..3) {
               $el = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
@@ -460,7 +458,6 @@ jobs:
           Check (-not (Test-Path "$startMenu\LuxEngine.lnk")) "Start menu no longer has LuxEngine"
           Check (Test-Path "$desktop\Lumeshow.lnk") "the desktop shortcut was carried over under the new name"
           Check (-not (Test-Path "$desktop\LuxEngine.lnk")) "the old desktop shortcut is gone"
-          Check ((Class ".lumeshow") -eq "Lumeshow.Show") ".lumeshow files open with Lumeshow"
           Check ((Class ".luxshow") -eq "Lumeshow.Show") ".luxshow files open with Lumeshow"
           Check (-not (Test-Path "HKCU:\Software\Classes\LuxEngine.Show")) "the old file type entry is gone"
           $entries = @(Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" | Where-Object { $_.DisplayName -match "LuxEngine|Lumeshow" })

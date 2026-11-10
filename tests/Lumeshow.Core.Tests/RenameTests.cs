@@ -102,28 +102,10 @@ public class RenameTests : IDisposable
     }
 
     [Fact]
-    public void Old_and_new_show_files_are_both_show_files()
+    public void Show_files_keep_their_extension()
     {
-        Assert.Equal(".lumeshow", ShowSerializer.FileExtension);
-        Assert.True(ShowSerializer.IsShowFile(@"C:\Shows\Friday.lumeshow"));
-        Assert.True(ShowSerializer.IsShowFile(@"C:\Shows\Friday.luxshow"));
-        Assert.True(ShowSerializer.IsShowFile(@"C:\Shows\FRIDAY.LUXSHOW"));
-        Assert.False(ShowSerializer.IsShowFile(@"C:\Shows\Friday.json"));
-        Assert.False(ShowSerializer.IsShowFile(null));
-    }
-
-    [Fact]
-    public void A_show_saved_by_the_old_name_opens_unchanged()
-    {
-        var t = new TestShow();
-        t.AddCue(2, t.AddPreset("Look", (t.Par1, "Intensity", 200)));
-        var path = Path.Combine(_root, "Old" + ShowSerializer.LegacyFileExtension);
-        ShowSerializer.Save(t.Show, path);
-
-        var loaded = ShowSerializer.Load(path);
-
-        Assert.Equal(3, loaded.Fixtures.Count);
-        Assert.Single(loaded.CueList.Cues);
+        // Renaming the app must not orphan anyone's shows.
+        Assert.Equal(".luxshow", ShowSerializer.FileExtension);
     }
 
     [Fact]

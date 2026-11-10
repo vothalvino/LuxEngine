@@ -7,7 +7,6 @@ TestResults/
 artifacts/
 installer/Output/
 __pycache__/
-*.lumeshow.tmp
 *.luxshow.tmp
 AppPackages/
 BundleArtifacts/

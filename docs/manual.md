@@ -206,8 +206,7 @@ Several phones can use the remote at the same time.
 
 ## Files, autosave and updates
 
-- Shows are single `.lumeshow` files: copy them to another PC freely.
-- Shows from the time the program was called LuxEngine (`.luxshow`) open the same way and keep their name when saved. **File → Save as…** makes a `.lumeshow` copy.
+- Shows are single `.luxshow` files: copy them to another PC freely.
 - Lumeshow keeps a recovery copy of unsaved work and offers it after a crash or power cut.
 - Your own fixture types are in `Documents\Lumeshow\Fixtures` (**Fixtures → Open my fixtures folder**) and can be shared.
 - **Updates:** at start-up Lumeshow asks GitHub whether a newer version exists and shows **Update available** in the top bar. Nothing about you or your show is sent. Switch it off under **Help → Check for updates at start-up**. Install a new version over the old one; shows and settings are kept.

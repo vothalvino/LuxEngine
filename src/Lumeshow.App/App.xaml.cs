@@ -38,8 +38,8 @@ public partial class App : Application
         AppServices.MainWindow = window;
         window.Activate();
 
-        // A show file double-clicked in Explorer arrives as the first argument.
-        var file = Environment.GetCommandLineArgs().Skip(1).FirstOrDefault(Lumeshow.Core.Shows.ShowSerializer.IsShowFile);
+        // A .luxshow file double-clicked in Explorer arrives as the first argument.
+        var file = Environment.GetCommandLineArgs().Skip(1).FirstOrDefault(a => a.EndsWith(".luxshow", StringComparison.OrdinalIgnoreCase));
         window.StartUp(file);
     }
 

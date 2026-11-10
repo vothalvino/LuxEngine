@@ -47,7 +47,7 @@ public class DemoShowTests
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Lumeshow.sln"))) dir = dir.Parent;
-        var show = Shows.ShowSerializer.Load(Path.Combine(dir!.FullName, "samples", "Demo.lumeshow"));
+        var show = Shows.ShowSerializer.Load(Path.Combine(dir!.FullName, "samples", "Demo.luxshow"));
         var engine = new Engine.LightingEngine(show, () => 0);
 
         engine.GoTo(2); // "Chorus – red chase": red + full + chase + spots on audience

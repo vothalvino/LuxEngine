@@ -268,7 +268,7 @@ public sealed partial class MainWindow : Window
     private async void Open_Click(object sender, RoutedEventArgs e)
     {
         if (!await ConfirmDiscardAsync()) return;
-        var path = await DialogHelper.PickOpenFileAsync(ShowSerializer.FileExtension, ShowSerializer.LegacyFileExtension);
+        var path = await DialogHelper.PickOpenFileAsync(ShowSerializer.FileExtension);
         if (path is not null) TryOpen(path);
     }
 
@@ -536,7 +536,7 @@ public sealed partial class MainWindow : Window
 
     private async void Demo_Click(object sender, RoutedEventArgs e)
     {
-        var demo = Path.Combine(AppContext.BaseDirectory, "samples", "Demo" + ShowSerializer.FileExtension);
+        var demo = Path.Combine(AppContext.BaseDirectory, "samples", "Demo.luxshow");
         if (!File.Exists(demo)) return;
         // Open as an untitled copy so the bundled demo is never overwritten.
         if (await ConfirmDiscardAsync()) TryOpen(demo, keepPath: false);

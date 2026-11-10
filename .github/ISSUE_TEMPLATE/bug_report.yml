@@ -39,4 +39,4 @@ body:
     id: extra
     attributes:
       label: Anything else
-      description: Screenshots or the show file (.lumeshow) help a lot.
+      description: Screenshots or the show file (.luxshow) help a lot.
