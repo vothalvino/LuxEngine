@@ -48,6 +48,8 @@ public sealed partial class MainWindow : Window
         // A MIDI preset button works like clicking the preset: on the UI thread, selecting its lights.
         AppServices.Midi.PresetRequested += id => DispatcherQueue.TryEnqueue(() => Views.PresetPanel.UsePreset(id, layer: false));
         AppServices.Midi.Error += ex => DispatcherQueue.TryEnqueue(() => App.LogError(ex));
+        AppServices.Remote.ActionPerformed += () => DispatcherQueue.TryEnqueue(SyncLiveControls);
+        AppServices.RemoteServer.Error += ex => DispatcherQueue.TryEnqueue(() => App.LogError(ex));
 
         _statusTimer = DispatcherQueue.CreateTimer();
         _statusTimer.Interval = TimeSpan.FromMilliseconds(150);
@@ -529,6 +531,8 @@ public sealed partial class MainWindow : Window
     private async void Monitor_Click(object sender, RoutedEventArgs e) => await DialogHelper.ShowAsync(new UniverseMonitorDialog());
 
     private async void Midi_Click(object sender, RoutedEventArgs e) => await DialogHelper.ShowAsync(new MidiDialog());
+
+    private async void Remote_Click(object sender, RoutedEventArgs e) => await DialogHelper.ShowAsync(new RemoteDialog());
 
     private async void Demo_Click(object sender, RoutedEventArgs e)
     {

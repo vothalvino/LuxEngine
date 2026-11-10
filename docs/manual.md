@@ -15,6 +15,7 @@ A short guide to every part of LuxEngine. New here? Start with [the first ten mi
 - [Keyboard](#keyboard)
 - [Undo and redo](#undo-and-redo)
 - [Outputs, MIDI and sound](#outputs-midi-and-sound)
+- [Phone remote](#phone-remote)
 - [Files, autosave and updates](#files-autosave-and-updates)
 - [Problems and answers](#problems-and-answers)
 
@@ -184,6 +185,25 @@ Shortcuts are off while you type in a text box.
 - **Output → MIDI controllers…**: click **learn**, move a fader or press a pad on your controller, and choose what it does (master, GO, a preset, a cue button…).
 - **Sound to light** (a card in Control): switch it to *Listening* and the lights react to the music playing on the PC, or to a microphone / line in. *Strength* sets how much.
 
+## Phone remote
+
+Walk around the room with the show in your hand: a phone or tablet can press GO, Back, Pause and Release, switch Blackout, move the master, tap the tempo and play your cue buttons. Nothing is installed on the phone, and no internet is needed.
+
+1. Connect the phone to the **same network** (Wi-Fi) as the PC.
+2. In LuxEngine, open **Output → Phone remote…** and switch it **On**. The first time, Windows may ask whether LuxEngine may be reached from the network: choose **Allow**.
+3. The dialog shows an address such as `http://192.168.1.20:8080`. Type it into the phone's browser.
+4. Enter the **PIN** from the dialog. The phone remembers it.
+
+Tip: use the browser's **Add to Home screen** to get the remote as an icon.
+
+- **Cue buttons** look and work like in LuxEngine: toggle buttons switch on and off, flash buttons are on while you hold them, and buttons that touch replace each other.
+- **Release** asks first, because it fades out the cue list and all cue buttons.
+- The **PIN** keeps other people on the same Wi-Fi out. *New PIN* makes another one (phones then ask again); an empty PIN switches the protection off, which is only sensible on a network of your own. After five wrong PINs the remote waits half a minute.
+- The remote stays on the next time you start LuxEngine, until you switch it off. It is only reachable inside your network, not from the internet.
+- If port 8080 is used by another program, choose another **port**; the address changes with it.
+
+Several phones can use the remote at the same time.
+
 ## Files, autosave and updates
 
 - Shows are single `.luxshow` files: copy them to another PC freely.
@@ -200,6 +220,8 @@ Shortcuts are off while you type in a text box.
 **The keys do nothing.** Click the stage once: shortcuts are off while a text box has the cursor. Parameter keys need lights selected.
 
 **A moving head goes left when the others go right.** Right-click → **Invert pan** (or tilt).
+
+**The phone cannot open the remote.** Check that the phone is on the same Wi-Fi as the PC (not on mobile data, and not on a "guest" Wi-Fi, which often keeps devices apart). Type the address exactly, starting with `http://`. If Windows asked about network access and you chose Cancel, allow LuxEngine under *Windows Security → Firewall & network protection → Allow an app through firewall*. If the PC has several addresses in the dialog, try each.
 
 **Windows says the installer is unrecognized.** The installer is not code-signed yet. Click **More info → Run anyway**.
 

@@ -40,6 +40,13 @@ public sealed class AppSettings
     /// <summary>Height of the Control / Cue area, set by dragging the handle above it.</summary>
     public double BottomHeight { get; set; } = 380;
 
+    /// <summary>The phone remote (Output → Phone remote). Off until the user switches it on.</summary>
+    public bool RemoteEnabled { get; set; }
+    public int RemotePort { get; set; } = 8080;
+
+    /// <summary>The PIN a phone has to give. Empty means no PIN.</summary>
+    public string RemotePin { get; set; } = "";
+
     public static AppSettings Load()
     {
         try

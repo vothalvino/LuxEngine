@@ -2,6 +2,12 @@
 
 What changed in each version of LuxEngine. Downloads are on the [releases page](https://github.com/vothalvino/LuxEngine/releases).
 
+## 1.8.0
+
+### New
+- **Phone remote.** Run the show from a phone or tablet: GO, Back, Pause, Release, Blackout, the master, tap tempo and your cue buttons (flash buttons work while you hold them). Switch it on under **Output → Phone remote…** and open the address shown there in the phone's browser. Nothing to install on the phone, no internet needed, and a PIN keeps other people on the Wi-Fi out. It is off until you switch it on.
+- **To the beat when editing an effect.** The edit dialog of a running or saved effect now also has **To the beat** and the number of beats.
+
 ## 1.7.0
 
 ### New

@@ -24,6 +24,25 @@ public static class EffectEditDialog
         var height = SliderFor(0, 1, effect.Height);
         var reverse = new CheckBox { Content = "Reverse direction", IsChecked = effect.Reverse };
 
+        // "To the beat": the effect follows the tapped tempo instead of the speed slider.
+        var beatChoices = new (string Label, double Beats)[] { ("¼ beat", 0.25), ("½ beat", 0.5), ("1 beat", 1), ("2 beats", 2), ("4 beats", 4), ("8 beats", 8), ("16 beats", 16) };
+        var sync = new CheckBox { Content = "To the beat", IsChecked = effect.Sync, MinWidth = 0 };
+        var beats = new ComboBox { MinWidth = 104, IsEnabled = effect.Sync };
+        foreach (var choice in beatChoices) beats.Items.Add(choice.Label);
+        beats.SelectedIndex = Math.Max(0, Array.FindIndex(beatChoices, c => Math.Abs(c.Beats - effect.Beats) < 0.001));
+        if (Array.FindIndex(beatChoices, c => Math.Abs(c.Beats - effect.Beats) < 0.001) < 0) beats.SelectedIndex = 4;
+        speed.IsEnabled = !effect.Sync;
+        void SyncChanged(object sender, RoutedEventArgs e)
+        {
+            speed.IsEnabled = sync.IsChecked != true;
+            beats.IsEnabled = sync.IsChecked == true;
+        }
+        sync.Checked += SyncChanged;
+        sync.Unchecked += SyncChanged;
+        var beatRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+        beatRow.Children.Add(sync);
+        beatRow.Children.Add(beats);
+
         var shapes = new List<(string Label, EffectType Type, Guid? Id)>();
         foreach (var t in new[] { EffectType.Circle, EffectType.Figure8, EffectType.PanSweep, EffectType.TiltSweep }) shapes.Add((t.DisplayName(), t, null));
         foreach (var s in show.Shapes) shapes.Add(($"★ {s.Name}", EffectType.Shape, s.Id));
@@ -52,6 +71,7 @@ public static class EffectEditDialog
             grid.Children.Add(control);
         }
         Row("Speed", speed);
+        Row("", beatRow);
         Row("Size", size);
         if (movement)
         {
@@ -82,6 +102,8 @@ public static class EffectEditDialog
         AppServices.Engine.UpdateEffect(effectId, e =>
         {
             e.Speed = speed.Value;
+            e.Sync = sync.IsChecked == true;
+            e.Beats = beatChoices[Math.Max(0, beats.SelectedIndex)].Beats;
             e.Size = size.Value;
             e.Spread = spread.Value;
             if (!movement) return;

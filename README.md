@@ -34,6 +34,7 @@
 - **Tap tempo and fan.** Tap the beat (T) and let effects and movements follow it; fan the dimmer, a rainbow, pan or tilt across the selected lights.
 - **Undo and redo.** Ctrl+Z takes back changes to the show: deleted presets, moved lights, edited cues.
 - **Outputs.** Art-Net, sACN (E1.31), Enttec DMX USB Pro and Open DMX USB, with as many universes as you need.
+- **Phone remote.** GO, blackout, master, tap tempo and your cue buttons on a phone or tablet, in the browser: nothing to install, protected by a PIN.
 - **External control.** MIDI controllers (learn mode) and sound-to-light from music playing on the PC or a microphone.
 - **Safe for live use.** Blackout, master fader, autosave with crash recovery, and keeps Windows awake during a show.
 - **Light and dark theme**, following Windows or your choice.
@@ -122,7 +123,7 @@ GitHub Actions builds, tests and creates the installer for every push. Pushing a
 |---|---|
 | `src/LuxEngine.Core` | Fixtures, patch, presets and folders, cues, effects, the mixing engine and show files. No UI, fully unit-tested. |
 | `src/LuxEngine.Output` | DMX output thread plus the Art-Net, sACN, Enttec Pro and Open DMX drivers. |
-| `src/LuxEngine.Control` | MIDI input and sound-to-light. |
+| `src/LuxEngine.Control` | MIDI input, sound-to-light and the phone remote (a small built-in web server). |
 | `src/LuxEngine.App` | The WinUI 3 desktop app. |
 | `fixtures/` | Bundled fixture library (JSON). |
 | `tools/FixtureImporter` | Script that converts the Open Fixture Library into `fixtures/`. |

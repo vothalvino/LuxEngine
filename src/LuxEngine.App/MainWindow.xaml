@@ -103,6 +103,9 @@
                     <MenuFlyoutItem Text="MIDI controllers…" Click="Midi_Click">
                         <MenuFlyoutItem.Icon><SymbolIcon Symbol="Audio" /></MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Phone remote…" Click="Remote_Click">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="CellPhone" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
                 </MenuBarItem>
                 <MenuBarItem Title="View">
                     <!-- Plain items with a tick drawn by the app (radio items stopped responding after the first change) -->
