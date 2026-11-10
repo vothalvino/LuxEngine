@@ -21,15 +21,23 @@
 
 ## Features
 
-- **Presets in folders.** The left panel holds your saved looks in folders. Click a preset to use it live, drag to reorganize.
-- **Control and Cue in one place.** The area under the stage switches between **Control** (dimmer, color wheel, quick colors, pan/tilt pad, effects, beam channels) and **Cue** (your cue list).
+- **Presets in folders.** The left panel holds your saved looks in folders. Click a preset to see exactly that look, Ctrl+click to add it on top. Presets name themselves ("Par 1–4 · Blue") until you rename them.
+- **Control and Cue in one place.** The area under the stage switches between **Control** (dimmer, color, pan/tilt pad, effects, movement, beam channels) and **Cue** (cue list and cue buttons).
 - **Cues made of several presets.** A cue can combine, for example, "Blue wash" + "Spots center" + "Slow rainbow", with its own fade in, fade out, delay and auto-follow.
-- **Hundreds of fixtures built in.** More than 500 fixtures from the [Open Fixture Library](https://open-fixture-library.org) (Chauvet, ADJ, Eurolite, Stairville, Cameo, Martin, Robe, Showtec, generic pars and more). If your light isn't there, create it in a simple form.
-- **Live stage view.** See every light's color and brightness. Select by clicking or dragging, and arrange lights to match your rig.
-- **Effects.** Rainbow, chase, wave, strobe and circle, with speed, size and spread.
+- **Cue buttons.** A grid of buttons for busking: toggle or flash, each with its own presets and fades, on top of the cue list. Buttons that touch form a group where only one is on.
+- **Hundreds of fixtures built in.** More than 500 fixtures from the [Open Fixture Library](https://open-fixture-library.org) (Chauvet, ADJ, Eurolite, Stairville, Cameo, Martin, Robe, Showtec, generic pars and more). If your light isn't there, create it in a simple form, or edit a fixture type after adding it.
+- **Fixture groups.** Save a selection ("Front", "Movers left") and get it back with one click or your own key.
+- **Live stage view.** See every light's color, brightness and strobe. Select by clicking or dragging, and arrange lights to match your rig.
+- **Effects.** Rainbow, chase, wave and strobe, with speed, size and spread. They run across the lights in stage order.
+- **Movement for moving heads.** Circle, figure 8, sweeps and your own drawn shapes. Give each head an **area** (for example "only on the back wall") and movements never leave it. Invert pan or tilt per light.
+- **Keyboard control.** Shift+letter sets a parameter of the selected lights (Shift+D, 50, Enter = dimmer 50%), plus keys for selection, playback and your own keys for presets, groups and cue buttons. Press **F1** for the full list.
+- **Undo and redo.** Ctrl+Z takes back changes to the show: deleted presets, moved lights, edited cues.
 - **Outputs.** Art-Net, sACN (E1.31), Enttec DMX USB Pro and Open DMX USB, with as many universes as you need.
 - **External control.** MIDI controllers (learn mode) and sound-to-light from music playing on the PC or a microphone.
 - **Safe for live use.** Blackout, master fader, autosave with crash recovery, and keeps Windows awake during a show.
+- **Light and dark theme**, following Windows or your choice.
+
+📖 **[User manual](docs/manual.md)** · 📝 **[What's new](CHANGELOG.md)**
 
 ## Screenshots
 
@@ -58,13 +66,28 @@ Requires Windows 10 (1809) or newer, 64-bit. Windows 11 recommended.
 5. In the **Cue** tab, add cues and drag presets onto them.
 6. Press **GO** (or Space).
 
+The most used shortcuts (press **F1** in the app for all of them):
+
 | Shortcut | Action |
 |---|---|
 | Space / Shift+Space | GO / Back |
 | B | Blackout |
-| Esc | Deselect all |
+| Ctrl+Z / Ctrl+Y | Undo / Redo |
+| Shift+D, then a number and Enter | Dimmer of the selected lights (other letters: see F1) |
+| Ctrl+A / Ctrl+I / Esc | Select all / invert selection / deselect |
+| [ and ] | Previous / next light |
+| H | Highlight the selected lights |
+| Ctrl+G | Save the selected lights as a group |
+| Ctrl+R | Save the current look as a preset |
+| F2 / F3 / F4 | Control / Cue list / Cue buttons |
 | Ctrl+N / O / S | New / Open / Save |
 | F11 | Full screen |
+
+The [user manual](docs/manual.md) explains each part step by step.
+
+## Updates
+
+LuxEngine asks GitHub once at start-up whether a newer version exists and shows a small **Update available** button if so. Nothing about you or your show is sent. Turn it off under *Help → Check for updates at start-up*. To update, install the new version over the old one; shows and settings are kept.
 
 ## Building from source
 
@@ -108,7 +131,7 @@ python3 tools/FixtureImporter/ofl_import.py ofl/fixtures fixtures
 
 ## Contributing
 
-Bug reports, fixture requests and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Bug reports, ideas and pull requests are welcome: [open an issue](https://github.com/vothalvino/LuxEngine/issues/new/choose) or see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

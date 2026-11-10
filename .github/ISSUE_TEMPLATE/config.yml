@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: A fixture is missing
+    url: https://open-fixture-library.org/fixture-editor
+    about: Add it to the Open Fixture Library so everyone gets it, or create it in LuxEngine under Fixtures → Create new fixture type.
+  - name: User manual
+    url: https://github.com/vothalvino/LuxEngine/blob/main/docs/manual.md
+    about: How each part of LuxEngine works.

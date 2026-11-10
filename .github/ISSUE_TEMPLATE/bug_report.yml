@@ -1,0 +1,42 @@
+name: Bug report
+description: Something does not work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+      placeholder: "1. Select Par 1\n2. Click …\n3. …"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: LuxEngine version
+      description: See Help → About LuxEngine.
+      placeholder: "1.6.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 24H2
+  - type: input
+    id: output
+    attributes:
+      label: DMX output
+      description: Art-Net, sACN, or which USB interface.
+      placeholder: Enttec DMX USB Pro
+  - type: textarea
+    id: log
+    attributes:
+      label: Error log
+      description: If the file %LOCALAPPDATA%\LuxEngine\errors.log exists, paste its contents here.
+      render: text
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots or the show file (.luxshow) help a lot.

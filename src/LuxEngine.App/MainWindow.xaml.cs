@@ -60,6 +60,10 @@ public sealed partial class MainWindow : Window
 
         UpdateTitle();
         BuildRecentMenu();
+        AutoUpdateCheckItem.IsChecked = AppServices.Settings.CheckForUpdates;
+        // Test builds are version 0.0.0 and would always find an "update".
+        bool released = (typeof(MainWindow).Assembly.GetName().Version ?? new Version(0, 0)) > new Version(0, 0, 0, 0);
+        if (released && AppServices.Settings.CheckForUpdates) _ = CheckForUpdatesAsync(byUser: false);
     }
 
     /// <summary>Opens at 1500×940, or maximized on screens too small for that.</summary>
@@ -112,6 +116,8 @@ public sealed partial class MainWindow : Window
     private void UpdateTitle()
     {
         var doc = AppServices.Document;
+        UndoItem.IsEnabled = doc.CanUndo;
+        RedoItem.IsEnabled = doc.CanRedo;
         ShowTitle.Text = "—  " + doc.DisplayName + (doc.IsDirty ? " •" : "");
         Title = $"{doc.DisplayName}{(doc.IsDirty ? " *" : "")} - LuxEngine";
     }
@@ -308,6 +314,84 @@ public sealed partial class MainWindow : Window
             _closeConfirmed = true;
             Close();
         }
+    }
+
+    // ------------------------------------------------------------------ edit menu
+
+    private void Undo_Click(object sender, RoutedEventArgs e) => UndoOrRedo(redo: false);
+
+    private void Redo_Click(object sender, RoutedEventArgs e) => UndoOrRedo(redo: true);
+
+    /// <summary>Undo covers changes to the show (lights, groups, presets, cues, buttons, shapes, outputs), not live fader moves.</summary>
+    private void UndoOrRedo(bool redo)
+    {
+        if (AppServices.PresetEditor.IsEditing)
+        {
+            ParamBar.ShowMessage("Save or cancel the preset you are editing first");
+            return;
+        }
+        var doc = AppServices.Document;
+        try
+        {
+            bool done = redo ? doc.Redo() : doc.Undo();
+            ParamBar.ShowMessage(done
+                ? (redo ? "Redone" : "Undone — Ctrl+Y puts it back")
+                : (redo ? "Nothing to redo" : "Nothing to undo"));
+        }
+        catch (Exception ex) when (ex is System.Text.Json.JsonException or InvalidDataException)
+        {
+            App.LogError(ex);
+            ParamBar.ShowMessage("That step could not be restored");
+        }
+    }
+
+    private async void NewGroup_Click(object sender, RoutedEventArgs e) => await FixturePanel.NewGroupAsync();
+
+    // ------------------------------------------------------------------ updates
+
+    private Core.Updates.UpdateInfo? _update;
+
+    /// <summary>Asks GitHub for the latest release. Nothing about you or your show is sent.</summary>
+    private async Task CheckForUpdatesAsync(bool byUser)
+    {
+        var current = typeof(MainWindow).Assembly.GetName().Version ?? new Version(0, 0, 0);
+        try
+        {
+            if (!byUser) await Task.Delay(4000);   // not during start-up
+            using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("LuxEngine/" + current.ToString(3));
+            http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+            var json = await http.GetStringAsync(Core.Updates.UpdateCheck.LatestReleaseApi);
+            _update = Core.Updates.UpdateCheck.FromJson(json, current);
+        }
+        catch (Exception ex) when (ex is System.Net.Http.HttpRequestException or TaskCanceledException or IOException)
+        {
+            // Offline or GitHub unreachable: try again next time.
+            if (byUser) await DialogHelper.ShowMessageAsync("Could not check for updates", "GitHub could not be reached. Check your internet connection and try again.");
+            return;
+        }
+
+        UpdateButton.Visibility = _update is null ? Visibility.Collapsed : Visibility.Visible;
+        if (_update is not null) UpdateText.Text = $"Update {_update.Version} available";
+        if (!byUser) return;
+        if (_update is null)
+            await DialogHelper.ShowMessageAsync("LuxEngine is up to date", $"You have the newest version ({current.ToString(3)}).");
+        else if (await DialogHelper.ConfirmAsync($"LuxEngine {_update.Version} is available",
+                     $"You have {current.ToString(3)}. Open the download page? Install the new version over this one; your shows and settings are kept.", "Open download page"))
+            OpenUpdatePage();
+    }
+
+    private void OpenUpdatePage() =>
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_update?.Url ?? Core.Updates.UpdateCheck.ReleasesPage) { UseShellExecute = true });
+
+    private void Update_Click(object sender, RoutedEventArgs e) => OpenUpdatePage();
+
+    private async void CheckUpdates_Click(object sender, RoutedEventArgs e) => await CheckForUpdatesAsync(byUser: true);
+
+    private void AutoUpdateCheck_Click(object sender, RoutedEventArgs e)
+    {
+        AppServices.Settings.CheckForUpdates = AutoUpdateCheckItem.IsChecked;
+        AppServices.Settings.Save();
     }
 
     // ------------------------------------------------------------------ other menus

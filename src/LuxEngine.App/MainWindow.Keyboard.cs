@@ -73,6 +73,10 @@ public sealed partial class MainWindow
         Add("F2", "Navigation", "Control tab", VirtualKey.F2, false, false, () => Do(ShowControlTab));
         Add("F3", "Navigation", "Cue list", VirtualKey.F3, false, false, () => Do(() => { ShowCueTab(); CueView.ShowCueList(); }));
         Add("F4", "Navigation", "Cue buttons", VirtualKey.F4, false, false, () => Do(() => { ShowCueTab(); CueView.ShowButtons(); }));
+        Add("Ctrl+Z", "Editing", "Undo the last change to the show", VirtualKey.Z, true, false, () => Do(() => UndoOrRedo(redo: false)), repeats: true);
+        Add("Ctrl+Y", "Editing", "Redo", VirtualKey.Y, true, false, () => Do(() => UndoOrRedo(redo: true)), repeats: true);
+        list.Add(list[^1] with { Keys = "Ctrl+Shift+Z", Key = VirtualKey.Z, Shift = true });
+        Add("Ctrl+G", "Selection", "Save the selected lights as a group", VirtualKey.G, true, false, () => Do(() => _ = FixturePanel.NewGroupAsync()));
         Add("Ctrl+F", "Navigation", "Search presets", VirtualKey.F, true, false, () => Do(PresetPanel.FocusSearch));
         Add("Ctrl+R", "Navigation", "Save the current look as a preset", VirtualKey.R, true, false, () => Do(() => _ = PresetPanel.RecordPresetAsync()));
         Add("Ctrl+Enter", "Navigation", "Save the preset you are editing", VirtualKey.Enter, true, false, () =>
@@ -148,6 +152,12 @@ public sealed partial class MainWindow
             return true;
         }
         if (!down) return false;
+        var group = show.Groups.FirstOrDefault(g => g.Key == name);
+        if (group is not null)
+        {
+            FixturePanel.SelectGroup(group, add: ctrl);
+            return true;
+        }
         var preset = show.PresetRoot.AllPresets().FirstOrDefault(p => p.Key == name);
         if (preset is null) return false;
         PresetPanel.UsePreset(preset.Id, layer: ctrl);

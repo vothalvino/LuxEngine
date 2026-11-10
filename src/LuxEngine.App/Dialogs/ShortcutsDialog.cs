@@ -21,6 +21,9 @@ public static class ShortcutsDialog
         rows.AddRange(show.ButtonPage.Buttons.Where(b => b.Key is not null)
             .Select(b => ("Your keys", KeyNames.Display(b.Key), $"Cue button \"{b.Name}\"{(b.Mode == Core.Cues.CueButtonMode.Flash ? " (while held)" : "")}")));
 
+        rows.AddRange(show.Groups.Where(g => g.Key is not null)
+            .Select(g => ("Your keys", KeyNames.Display(g.Key), $"Group \"{g.Name}\" (Ctrl+key adds its lights to the selection)")));
+
         var search = new TextBox { PlaceholderText = "Search shortcuts, e.g. dimmer or gobo" };
         var list = new StackPanel { Spacing = 2 };
         var secondary = Ui.Brush("TextFillColorSecondaryBrush");
