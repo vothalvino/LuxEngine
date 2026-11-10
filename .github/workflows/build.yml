@@ -312,10 +312,22 @@ jobs:
               (New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $app.Id))))) |
             Where-Object { -not $_.Current.IsOffscreen -and $_.Current.BoundingRectangle.Width -gt 0 } | Select-Object -Last 1
           if (-not $item) { throw "Output > Phone remote is missing" }
-          $item.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke(); Start-Sleep 2
-          $switch = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, (New-Object System.Windows.Automation.AndCondition(
-            (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Phone remote")),
-            (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)))))
+          $r = $item.Current.BoundingRectangle
+          [Lux.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+          [Lux.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Lux.Mouse]::mouse_event(4, 0, 0, 0, 0)
+          Start-Sleep 3
+          $switch = $null
+          foreach ($try in 1..5) {
+            # The tree changes while the dialog opens, which can make a search fail: try again.
+            try {
+              $switch = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, (New-Object System.Windows.Automation.AndCondition(
+                (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Phone remote")),
+                (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)))))
+            } catch { Write-Host "Looking for the remote switch: $_" }
+            if ($switch) { break }
+            Start-Sleep 1
+          }
+          if (-not $switch) { Shot "19c-remote-switch-missing" }
           if (-not $switch) { throw "The phone remote switch is missing" }
           $switch.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep 3
           $pin = (Find "Remote PIN").GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value
