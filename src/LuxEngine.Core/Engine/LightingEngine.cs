@@ -94,6 +94,19 @@ public sealed partial class LightingEngine
         }
     }
 
+    /// <summary>
+    /// Swaps in another version of the same show (undo/redo). Unlike <see cref="LoadShow"/>, what is
+    /// live keeps running: the programmer, the cue list position and the buttons that are on.
+    /// </summary>
+    public void ReplaceShow(Show show)
+    {
+        lock (_sync)
+        {
+            _show = show;
+            _patchDirty = true;
+        }
+    }
+
     /// <summary>Runs an edit of the show under the engine lock and refreshes the patch afterwards.</summary>
     public void Edit(Action<Show> edit)
     {
@@ -281,7 +294,9 @@ public sealed partial class LightingEngine
     {
         lock (_sync)
         {
-            if (CuePlayer.CurrentIndex > 0) GoToLocked(CuePlayer.CurrentIndex - 1);
+            // The list can have become shorter (cues deleted, undo) since the current cue started.
+            int previous = Math.Min(CuePlayer.CurrentIndex, _show.CueList.Cues.Count) - 1;
+            if (previous >= 0) GoToLocked(previous);
         }
     }
 

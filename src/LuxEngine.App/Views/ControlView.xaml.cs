@@ -41,7 +41,7 @@ public sealed partial class ControlView : UserControl
         AppServices.Document.Changed += change =>
         {
             if (change.HasFlag(ShowChange.Patch)) SyncFromSelection();
-            if (change == ShowChange.All) FillMovementLists();
+            if (change == ShowChange.All || change.HasFlag(ShowChange.Restored)) FillMovementLists();
         };
         Loaded += (_, _) =>
         {

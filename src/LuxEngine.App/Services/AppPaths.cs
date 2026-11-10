@@ -34,6 +34,9 @@ public sealed class AppSettings
     public bool FirstRunDone { get; set; }
     public string AudioSource { get; set; } = "SystemSound";
 
+    /// <summary>Ask GitHub once at start-up whether a newer version exists.</summary>
+    public bool CheckForUpdates { get; set; } = true;
+
     /// <summary>Height of the Control / Cue area, set by dragging the handle above it.</summary>
     public double BottomHeight { get; set; } = 380;
 

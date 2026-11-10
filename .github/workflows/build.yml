@@ -250,6 +250,28 @@ jobs:
             Shot "15-shortcuts"
             Press 0x1B; Start-Sleep 1                                               # Esc closes the sheet
           } catch { Write-Host "Keyboard check failed: $_" }
+          # Groups and undo: these must work, so a failure here fails the run.
+          Press 0x71; Start-Sleep 1                                                 # F2: Control tab
+          SelectLight "Par 1"
+          $cond = New-Object System.Windows.Automation.AndCondition(
+            (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Par 2")),
+            (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::ListItem)))
+          $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond).GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).AddToSelection()
+          Start-Sleep 1
+          Press 0x11,0x47; Start-Sleep 2                                            # Ctrl+G: new group
+          Shot "16-new-group"
+          Press 0x0D; Start-Sleep 2                                                 # Enter: create "Group 1"
+          if (-not (Find "Group Group 1")) { throw "The new group is not shown" }
+          Press 0x1B; Start-Sleep 1                                                 # Esc: deselect
+          Click "Group Group 1"; Start-Sleep 1
+          Shot "16b-group-selected"
+          Press 0x11,0x5A; Start-Sleep 2                                            # Ctrl+Z
+          Shot "17-undo"
+          if (Find "Group Group 1") { throw "Undo did not remove the group" }
+          if (-not (Find "2 lights selected: Par 1, Par 2")) { throw "Undo deselected the lights" }
+          Press 0x11,0x59; Start-Sleep 2                                            # Ctrl+Y
+          Shot "18-redo"
+          if (-not (Find "Group Group 1")) { throw "Redo did not bring the group back" }
           try {
             # The same screens in the dark theme (the runner uses Windows light, so the other screenshots show light).
             foreach ($theme in @("Dark")) {

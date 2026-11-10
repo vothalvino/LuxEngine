@@ -56,6 +56,19 @@
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem Text="Exit" Click="Exit_Click" />
                 </MenuBarItem>
+                <MenuBarItem Title="Edit" x:Name="EditMenu">
+                    <!-- Ctrl+Z / Ctrl+Y are handled with the other shortcuts, so they never fire while typing in a box -->
+                    <MenuFlyoutItem x:Name="UndoItem" Text="Undo" Click="Undo_Click" KeyboardAcceleratorTextOverride="Ctrl+Z">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Undo" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="RedoItem" Text="Redo" Click="Redo_Click" KeyboardAcceleratorTextOverride="Ctrl+Y">
+                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Redo" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="Group the selected lights…" Click="NewGroup_Click" KeyboardAcceleratorTextOverride="Ctrl+G">
+                        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE902;" /></MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuBarItem>
                 <MenuBarItem Title="Fixtures">
                     <MenuFlyoutItem Text="Add fixture from library…" Click="AddFixture_Click">
                         <MenuFlyoutItem.Icon><SymbolIcon Symbol="Add" /></MenuFlyoutItem.Icon>
@@ -107,6 +120,10 @@
                     </MenuFlyoutItem>
                     <MenuFlyoutItem Text="Open demo show" Click="Demo_Click" />
                     <MenuFlyoutItem Text="Keyboard shortcuts" Click="Shortcuts_Click" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="Check for updates now" Click="CheckUpdates_Click" />
+                    <ToggleMenuFlyoutItem x:Name="AutoUpdateCheckItem" Text="Check for updates at start-up" Click="AutoUpdateCheck_Click" />
+                    <MenuFlyoutSeparator />
                     <MenuFlyoutItem Text="Project on GitHub" Click="GitHub_Click" />
                     <MenuFlyoutItem Text="About LuxEngine" Click="About_Click" />
                 </MenuBarItem>
@@ -126,6 +143,14 @@
             </Border>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+
+                <Button x:Name="UpdateButton" Visibility="Collapsed" Click="Update_Click" AutomationProperties.Name="Update available"
+                        Padding="12,4" CornerRadius="14" ToolTipService.ToolTip="Open the download page for the new version">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE896;" FontSize="12" Foreground="{ThemeResource LuxAccentBrush}" />
+                        <TextBlock x:Name="UpdateText" Text="Update available" />
+                    </StackPanel>
+                </Button>
 
                 <Button x:Name="OutputStatusButton" Click="Outputs_Click" AutomationProperties.Name="DMX outputs" Padding="12,4" CornerRadius="14" ToolTipService.ToolTip="DMX output status">
                     <StackPanel Orientation="Horizontal" Spacing="8">

@@ -4,7 +4,7 @@ Thanks for helping make LuxEngine better!
 
 ## Reporting bugs
 
-Open an [issue](https://github.com/vothalvino/LuxEngine/issues) and include:
+Open an [issue](https://github.com/vothalvino/LuxEngine/issues/new/choose) (the form asks for these) and include:
 
 - what you did, what you expected and what happened
 - your Windows version and DMX interface
@@ -20,3 +20,4 @@ The best fix for everyone is to add the fixture to the [Open Fixture Library](ht
 - Add or update tests in `tests/` for engine changes and run `dotnet test` on both test projects.
 - Match the style of the surrounding code (`.editorconfig` defaults, nullable enabled).
 - One topic per pull request, with a short description of what and why.
+- Add a line to `CHANGELOG.md` under the next version for anything a user would notice.

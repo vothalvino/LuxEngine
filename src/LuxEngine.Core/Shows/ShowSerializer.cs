@@ -19,7 +19,12 @@ public static class ShowSerializer
         AllowTrailingCommas = true,
     };
 
+    private static readonly JsonSerializerOptions CompactOptions = new(Options) { WriteIndented = false };
+
     public static string Serialize(Show show) => JsonSerializer.Serialize(show, Options);
+
+    /// <summary>The show on one line: smaller and quicker, used for undo snapshots.</summary>
+    public static string SerializeCompact(Show show) => JsonSerializer.Serialize(show, CompactOptions);
 
     public static Show Deserialize(string json)
     {

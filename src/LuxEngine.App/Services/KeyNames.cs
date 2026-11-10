@@ -47,6 +47,8 @@ public static class KeyNames
         var preset = show.PresetRoot.AllPresets().FirstOrDefault(p => p.Key == key && !ReferenceEquals(p, self));
         if (preset is not null) return $"the preset \"{preset.Name}\"";
         var button = show.ButtonPage.Buttons.FirstOrDefault(b => b.Key == key && !ReferenceEquals(b, self));
-        return button is null ? null : $"the cue button \"{button.Name}\"";
+        if (button is not null) return $"the cue button \"{button.Name}\"";
+        var group = show.Groups.FirstOrDefault(g => g.Key == key && !ReferenceEquals(g, self));
+        return group is null ? null : $"the group \"{group.Name}\"";
     }
 }

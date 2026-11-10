@@ -61,6 +61,9 @@ public sealed class Show
     public Dictionary<string, FixtureDefinition> FixtureDefinitions { get; set; } = new();
 
     public List<FixtureInstance> Fixtures { get; set; } = new();
+
+    /// <summary>Saved selections of lights ("Front pars", "All movers").</summary>
+    public List<FixtureGroup> Groups { get; set; } = new();
     public PresetFolder PresetRoot { get; set; } = new() { Name = "Presets" };
     public CueList CueList { get; set; } = new();
     public ButtonPage ButtonPage { get; set; } = new();
@@ -91,6 +94,7 @@ public sealed class Show
     public void RemoveFixture(Guid id)
     {
         Fixtures.RemoveAll(f => f.Id == id);
+        foreach (var group in Groups) group.FixtureIds.Remove(id);
         foreach (var preset in PresetRoot.AllPresets())
         {
             preset.Values.RemoveAll(v => v.FixtureId == id);
