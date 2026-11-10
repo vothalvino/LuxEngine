@@ -304,6 +304,39 @@ jobs:
           Click "Apply fan"; Start-Sleep 2
           try { (Find "Apply fan").GetCurrentPattern([System.Windows.Automation.ScrollItemPattern]::Pattern).ScrollIntoView(); Start-Sleep 1 } catch { }
           Shot "19b-fan"
+          # Phone remote: switch it on in the dialog, then use it the way a phone would.
+          MouseClick "Output"; Start-Sleep 1
+          $item = $A::RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants,
+            (New-Object System.Windows.Automation.AndCondition(
+              (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Phone remote…")),
+              (New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $app.Id))))) |
+            Where-Object { -not $_.Current.IsOffscreen -and $_.Current.BoundingRectangle.Width -gt 0 } | Select-Object -Last 1
+          if (-not $item) { throw "Output > Phone remote is missing" }
+          $item.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke(); Start-Sleep 2
+          $switch = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, (New-Object System.Windows.Automation.AndCondition(
+            (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Phone remote")),
+            (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)))))
+          if (-not $switch) { throw "The phone remote switch is missing" }
+          $switch.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep 3
+          $pin = (Find "Remote PIN").GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value
+          if ($pin -notmatch '^\d{4}$') { throw "Switching the remote on did not create a PIN (got '$pin')" }
+          $remote = "http://localhost:8080"
+          $page = Invoke-WebRequest "$remote/" -UseBasicParsing
+          if ($page.Content -notmatch "LuxEngine remote") { throw "The remote page is not served" }
+          $denied = try { (Invoke-WebRequest "$remote/api/state" -UseBasicParsing).StatusCode } catch { [int]$_.Exception.Response.StatusCode }
+          if ($denied -ne 401) { throw "The remote answered $denied without a PIN (expected 401)" }
+          $state = Invoke-RestMethod "$remote/api/blackout?on=1&pin=$pin" -Method Post
+          Write-Host "Remote state: $($state | ConvertTo-Json -Compress -Depth 4)"
+          if (-not $state.blackout) { throw "Blackout from the remote did not work" }
+          if ($state.buttons.Count -lt 1) { throw "The remote does not list the cue buttons" }
+          Start-Sleep 1
+          Shot "19c-phone-remote"                                                   # the Blackout button behind the dialog is red
+          $state = Invoke-RestMethod "$remote/api/blackout?on=0&pin=$pin" -Method Post
+          if ($state.blackout) { throw "The remote could not switch blackout off" }
+          $switch.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep 2
+          $stopped = try { Invoke-WebRequest "$remote/" -UseBasicParsing -TimeoutSec 5 | Out-Null; $false } catch { $true }
+          if (-not $stopped) { throw "Switching the remote off did not stop it" }
+          Click "Done"; Start-Sleep 1
           try {
             # The same screens in the dark theme (the runner uses Windows light, so the other screenshots show light).
             foreach ($theme in @("Dark")) {

@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using LuxEngine.Control;
+using LuxEngine.Control.Remote;
 using LuxEngine.Core.Engine;
 using LuxEngine.Core.Fixtures;
 using LuxEngine.Output;
@@ -19,6 +20,8 @@ public static class AppServices
     public static PresetEditor PresetEditor { get; } = new();
     public static MidiController Midi { get; } = new(Engine);
     public static SoundToLight Sound { get; } = new(Engine);
+    public static RemoteApi Remote { get; } = new(Engine);
+    public static RemoteServer RemoteServer { get; } = new(Remote);
     public static MainWindow? MainWindow { get; set; }
 
     /// <summary>The preset most recently clicked in the preset panel (used by "Add to cue").</summary>
@@ -46,11 +49,32 @@ public static class AppServices
         Output.Configure(Engine.Show.Outputs);
         Output.Start();
         Midi.Start();
+        if (Settings.RemoteEnabled) StartRemote();
         KeepAwake(true);
+    }
+
+    /// <summary>
+    /// Starts (or restarts) the phone remote with the port and PIN from the settings.
+    /// Returns what went wrong in plain words, or null when it runs.
+    /// </summary>
+    public static string? StartRemote()
+    {
+        Remote.Pin = Settings.RemotePin;
+        if (RemoteServer.IsRunning && RemoteServer.Port == Settings.RemotePort) return null;
+        try
+        {
+            RemoteServer.Start(Settings.RemotePort);
+            return null;
+        }
+        catch (Exception ex) when (ex is System.Net.Sockets.SocketException or ArgumentOutOfRangeException)
+        {
+            return $"Port {Settings.RemotePort} cannot be used, probably because another program has it. Choose another port.";
+        }
     }
 
     public static void Shutdown()
     {
+        RemoteServer.Dispose();
         Sound.Dispose();
         Midi.Dispose();
         Output.Dispose();
