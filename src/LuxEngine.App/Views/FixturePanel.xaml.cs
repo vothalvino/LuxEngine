@@ -71,16 +71,25 @@ public sealed partial class FixturePanel : UserControl
         var conflicts = PatchHelper.FindConflicts(show);
         var conflicted = conflicts.SelectMany(c => new[] { c.First.Id, c.Second.Id }).ToHashSet();
 
-        Rows.Clear();
-        foreach (var fixture in show.Fixtures.OrderBy(f => f.Universe).ThenBy(f => f.Address))
+        // Rebuilding the rows empties the list's own selection; that must not deselect the lights.
+        _syncingSelection = true;
+        try
         {
-            var def = show.DefinitionOf(fixture);
-            Rows.Add(new FixtureRow(fixture.Id, def is null ? "Unknown fixture type" : $"{def.DisplayName} · {fixture.ModeName}")
+            Rows.Clear();
+            foreach (var fixture in show.Fixtures.OrderBy(f => f.Universe).ThenBy(f => f.Address))
             {
-                Name = fixture.Name,
-                Address = $"{fixture.Universe}.{fixture.Address:000}",
-                AddressBrush = conflicted.Contains(fixture.Id) ? Ui.Brush("LuxDangerBrush") : null,
-            });
+                var def = show.DefinitionOf(fixture);
+                Rows.Add(new FixtureRow(fixture.Id, def is null ? "Unknown fixture type" : $"{def.DisplayName} · {fixture.ModeName}")
+                {
+                    Name = fixture.Name,
+                    Address = $"{fixture.Universe}.{fixture.Address:000}",
+                    AddressBrush = conflicted.Contains(fixture.Id) ? Ui.Brush("LuxDangerBrush") : null,
+                });
+            }
+        }
+        finally
+        {
+            _syncingSelection = false;
         }
 
         Header.Text = Rows.Count == 0 ? "FIXTURES" : $"FIXTURES ({Rows.Count})";

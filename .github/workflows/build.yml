@@ -268,6 +268,7 @@ jobs:
           Press 0x11,0x5A; Start-Sleep 2                                            # Ctrl+Z
           Shot "17-undo"
           if (Find "Group Group 1") { throw "Undo did not remove the group" }
+          if (-not (Find "2 lights selected: Par 1, Par 2")) { throw "Undo deselected the lights" }
           Press 0x11,0x59; Start-Sleep 2                                            # Ctrl+Y
           Shot "18-redo"
           if (-not (Find "Group Group 1")) { throw "Redo did not bring the group back" }

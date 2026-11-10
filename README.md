@@ -41,9 +41,13 @@
 
 ## Screenshots
 
-| Live control | Fixture library |
+| Live control, with a fixture group | Cue buttons |
 |---|---|
-| ![Control tab with four pars set to blue](docs/screenshots/control.png) | ![Searching the built-in fixture library](docs/screenshots/fixture-library.png) |
+| ![Control tab with four pars selected, dark theme](docs/screenshots/control.png) | ![Cue buttons, two of them on](docs/screenshots/buttons.png) |
+
+| Moving heads | Fixture library |
+|---|---|
+| ![Position pad of a moving head](docs/screenshots/movement.png) | ![Searching the built-in fixture library](docs/screenshots/fixture-library.png) |
 
 These screenshots are taken automatically by the CI smoke test on Windows, using the bundled demo show (*Help → Open demo show*).
 
