@@ -1,6 +1,6 @@
-# LuxEngine user manual
+# Lumeshow user manual
 
-A short guide to every part of LuxEngine. New here? Start with [the first ten minutes](#the-first-ten-minutes). In the app, **Help → Quick start guide** and **F1** (all shortcuts) are always one click away.
+A short guide to every part of Lumeshow. New here? Start with [the first ten minutes](#the-first-ten-minutes). In the app, **Help → Quick start guide** and **F1** (all shortcuts) are always one click away.
 
 - [The window](#the-window)
 - [The first ten minutes](#the-first-ten-minutes)
@@ -163,7 +163,7 @@ In the Cue tab, switch to **Buttons** (F4): a grid of buttons for playing live w
 
 A bar appears: use the arrow keys or mouse wheel, or type a number and press Enter. Esc closes it. These keys only work with lights selected.
 
-**Your own keys.** Presets, groups and cue buttons can each have a key (right-click → set a key). LuxEngine tells you when a key is already taken.
+**Your own keys.** Presets, groups and cue buttons can each have a key (right-click → set a key). Lumeshow tells you when a key is already taken.
 
 **T** taps the tempo. If you gave T to a preset, group or cue button, your own key wins.
 
@@ -175,13 +175,13 @@ Shortcuts are off while you type in a text box.
 
 - Covered: lights (added, removed, moved, addresses), groups, presets and folders, cues, cue buttons, shapes, areas, outputs.
 - Not covered: what is live right now (fader moves that are not saved in a preset, which cue is running). Undo never interrupts the output.
-- The last 100 steps are kept until you open another show or close LuxEngine.
+- The last 100 steps are kept until you open another show or close Lumeshow.
 - While you edit a preset, save or cancel it first.
 
 ## Outputs, MIDI and sound
 
 - **Output → DMX outputs…**: add Art-Net, sACN (E1.31), Enttec DMX USB Pro or Open DMX USB, one per universe. USB interfaces need the [FTDI VCP driver](https://ftdichip.com/drivers/vcp-drivers/) and then appear as a COM port.
-- **Output → Universe monitor…** shows the DMX values being sent: useful to check whether a problem is in LuxEngine or in the cable.
+- **Output → Universe monitor…** shows the DMX values being sent: useful to check whether a problem is in Lumeshow or in the cable.
 - **Output → MIDI controllers…**: click **learn**, move a fader or press a pad on your controller, and choose what it does (master, GO, a preset, a cue button…).
 - **Sound to light** (a card in Control): switch it to *Listening* and the lights react to the music playing on the PC, or to a microphone / line in. *Strength* sets how much.
 
@@ -190,39 +190,42 @@ Shortcuts are off while you type in a text box.
 Walk around the room with the show in your hand: a phone or tablet can press GO, Back, Pause and Release, switch Blackout, move the master, tap the tempo and play your cue buttons. Nothing is installed on the phone, and no internet is needed.
 
 1. Connect the phone to the **same network** (Wi-Fi) as the PC.
-2. In LuxEngine, open **Output → Phone remote…** and switch it **On**. The first time, Windows may ask whether LuxEngine may be reached from the network: choose **Allow**.
+2. In Lumeshow, open **Output → Phone remote…** and switch it **On**. The first time, Windows may ask whether Lumeshow may be reached from the network: choose **Allow**.
 3. The dialog shows an address such as `http://192.168.1.20:8080`. Type it into the phone's browser.
 4. Enter the **PIN** from the dialog. The phone remembers it.
 
 Tip: use the browser's **Add to Home screen** to get the remote as an icon.
 
-- **Cue buttons** look and work like in LuxEngine: toggle buttons switch on and off, flash buttons are on while you hold them, and buttons that touch replace each other.
+- **Cue buttons** look and work like in Lumeshow: toggle buttons switch on and off, flash buttons are on while you hold them, and buttons that touch replace each other.
 - **Release** asks first, because it fades out the cue list and all cue buttons.
 - The **PIN** keeps other people on the same Wi-Fi out. *New PIN* makes another one (phones then ask again); an empty PIN switches the protection off, which is only sensible on a network of your own. After five wrong PINs the remote waits half a minute.
-- The remote stays on the next time you start LuxEngine, until you switch it off. It is only reachable inside your network, not from the internet.
+- The remote stays on the next time you start Lumeshow, until you switch it off. It is only reachable inside your network, not from the internet.
 - If port 8080 is used by another program, choose another **port**; the address changes with it.
 
 Several phones can use the remote at the same time.
 
 ## Files, autosave and updates
 
-- Shows are single `.luxshow` files: copy them to another PC freely.
-- LuxEngine keeps a recovery copy of unsaved work and offers it after a crash or power cut.
-- Your own fixture types are in `Documents\LuxEngine\Fixtures` (**Fixtures → Open my fixtures folder**) and can be shared.
-- **Updates:** at start-up LuxEngine asks GitHub whether a newer version exists and shows **Update available** in the top bar. Nothing about you or your show is sent. Switch it off under **Help → Check for updates at start-up**. Install a new version over the old one; shows and settings are kept.
+- Shows are single `.lumeshow` files: copy them to another PC freely.
+- Shows from the time the program was called LuxEngine (`.luxshow`) open the same way and keep their name when saved. **File → Save as…** makes a `.lumeshow` copy.
+- Lumeshow keeps a recovery copy of unsaved work and offers it after a crash or power cut.
+- Your own fixture types are in `Documents\Lumeshow\Fixtures` (**Fixtures → Open my fixtures folder**) and can be shared.
+- **Updates:** at start-up Lumeshow asks GitHub whether a newer version exists and shows **Update available** in the top bar. Nothing about you or your show is sent. Switch it off under **Help → Check for updates at start-up**. Install a new version over the old one; shows and settings are kept.
 
 ## Problems and answers
 
 **The stage shows light, but the real lights stay dark.** Check the output status in the top bar and **Output → DMX outputs…**. For Art-Net/sACN the PC must be in the same network as the node, and the universe numbers must match. For USB, install the FTDI driver and pick the right COM port. Check **Blackout** and **Master**.
 
-**A light reacts, but wrongly** (wrong color, moves instead of dims). The light is set to another mode or address than in LuxEngine. Compare the light's own menu with right-click → **Edit name and address…**, and the channel count of the mode.
+**A light reacts, but wrongly** (wrong color, moves instead of dims). The light is set to another mode or address than in Lumeshow. Compare the light's own menu with right-click → **Edit name and address…**, and the channel count of the mode.
 
 **The keys do nothing.** Click the stage once: shortcuts are off while a text box has the cursor. Parameter keys need lights selected.
 
 **A moving head goes left when the others go right.** Right-click → **Invert pan** (or tilt).
 
-**The phone cannot open the remote.** Check that the phone is on the same Wi-Fi as the PC (not on mobile data, and not on a "guest" Wi-Fi, which often keeps devices apart). Type the address exactly, starting with `http://`. If Windows asked about network access and you chose Cancel, allow LuxEngine under *Windows Security → Firewall & network protection → Allow an app through firewall*. If the PC has several addresses in the dialog, try each.
+**The phone cannot open the remote.** Check that the phone is on the same Wi-Fi as the PC (not on mobile data, and not on a "guest" Wi-Fi, which often keeps devices apart). Type the address exactly, starting with `http://`. If Windows asked about network access and you chose Cancel, allow Lumeshow under *Windows Security → Firewall & network protection → Allow an app through firewall*. If the PC has several addresses in the dialog, try each.
+
+**I used LuxEngine. Where are my things?** Lumeshow is the new name of LuxEngine (since version 2.0). Installing it replaces LuxEngine. Settings and your own fixture types are brought over the first time Lumeshow starts; your show files are not moved or changed.
 
 **Windows says the installer is unrecognized.** The installer is not code-signed yet. Click **More info → Run anyway**.
 
-**Something else?** [Open an issue](https://github.com/vothalvino/LuxEngine/issues/new/choose). If LuxEngine reported an error, add the file `%LOCALAPPDATA%\LuxEngine\errors.log`.
+**Something else?** [Open an issue](https://github.com/vothalvino/Lumeshow/issues/new/choose). If Lumeshow reported an error, add the file `%LOCALAPPDATA%\Lumeshow\errors.log`.

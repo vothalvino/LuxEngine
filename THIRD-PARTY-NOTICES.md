@@ -1,6 +1,6 @@
 # Third-party notices
 
-LuxEngine includes or uses the following open-source work.
+Lumeshow includes or uses the following open-source work.
 
 ## Open Fixture Library — fixture definitions
 

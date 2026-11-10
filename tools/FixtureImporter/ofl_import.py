@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Convert Open Fixture Library (OFL) fixtures into LuxEngine's fixture library format.
+"""Convert Open Fixture Library (OFL) fixtures into Lumeshow's fixture library format.
 
 Usage:
     git clone --depth 1 https://github.com/OpenLightingProject/open-fixture-library.git ofl
     python3 tools/FixtureImporter/ofl_import.py ofl/fixtures fixtures
 
 Writes one JSON file per manufacturer (an array of fixtures) into the output folder.
-Matrix modes and modes that need switching channels LuxEngine cannot represent are skipped.
+Matrix modes and modes that need switching channels Lumeshow cannot represent are skipped.
 OFL is MIT licensed: https://github.com/OpenLightingProject/open-fixture-library
 """
 

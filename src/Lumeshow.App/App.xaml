@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="Lumeshow.App.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Colours that follow the Light / Dark theme. Code reads them through Helpers/Ui.cs. -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <!-- Accent: the Windows accent colour, so rings, links and accent buttons match -->
+                    <SolidColorBrush x:Key="LumeAccentBrush" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <!-- Attention (amber): preset editing, highlight and preset rings only -->
+                    <SolidColorBrush x:Key="LumeAttentionBrush" Color="#FFE8A317" />
+                    <SolidColorBrush x:Key="LumeAttentionTextBrush" Color="#FF1B1B1B" />
+                    <SolidColorBrush x:Key="LumeDangerBrush" Color="#FFC42B1C" />
+                    <SolidColorBrush x:Key="LumeOkBrush" Color="#FF0F7B0F" />
+                    <SolidColorBrush x:Key="LumeOverlayBrush" Color="#F5FBFBFB" />
+                    <SolidColorBrush x:Key="LumeOverlayTextBrush" Color="#FF1B1B1B" />
+                    <SolidColorBrush x:Key="LumePillBrush" Color="#0A000000" />
+                    <SolidColorBrush x:Key="LumeTrackBrush" Color="#14000000" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="LumeAccentBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="LumeAttentionBrush" Color="#FFFFC83D" />
+                    <SolidColorBrush x:Key="LumeAttentionTextBrush" Color="#FF1B1B1B" />
+                    <SolidColorBrush x:Key="LumeDangerBrush" Color="#FFE5484D" />
+                    <SolidColorBrush x:Key="LumeOkBrush" Color="#FF6CCB5F" />
+                    <SolidColorBrush x:Key="LumeOverlayBrush" Color="#F0202028" />
+                    <SolidColorBrush x:Key="LumeOverlayTextBrush" Color="#FFFFFFFF" />
+                    <SolidColorBrush x:Key="LumePillBrush" Color="#0FFFFFFF" />
+                    <SolidColorBrush x:Key="LumeTrackBrush" Color="#1FFFFFFF" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="LumeAccentBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="LumeAttentionBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="LumeAttentionTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+                    <SolidColorBrush x:Key="LumeDangerBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="LumeOkBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="LumeOverlayBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="LumeOverlayTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="LumePillBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="LumeTrackBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <!-- Wider dialogs for the fixture browser and output settings -->
+            <x:Double x:Key="ContentDialogMaxWidth">1000</x:Double>
+            <x:Double x:Key="ContentDialogMaxHeight">900</x:Double>
+
+            <!-- The stage is a dark venue in every theme -->
+            <SolidColorBrush x:Key="LumeStageBrush" Color="#FF101018" />
+
+            <Style x:Key="CardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="14" />
+            </Style>
+
+            <Style x:Key="PanelHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="CharacterSpacing" Value="60" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <!-- Card titles: an icon and a name in one row -->
+            <Style x:Key="SectionTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="CardHeaderStyle" TargetType="StackPanel">
+                <Setter Property="Orientation" Value="Horizontal" />
+                <Setter Property="Spacing" Value="8" />
+                <Setter Property="Margin" Value="0,0,0,10" />
+            </Style>
+            <Style x:Key="CardIconStyle" TargetType="FontIcon">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="Foreground" Value="{ThemeResource LumeAccentBrush}" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <!-- Small rounded status chips (cue status, keys, badges) -->
+            <Style x:Key="PillStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource LumePillBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="11" />
+                <Setter Property="Padding" Value="10,3,10,4" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="IconButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="MinWidth" Value="0" />
+            </Style>
+
+            <!-- Icon + label buttons in a grid (effects, movement) -->
+            <Style x:Key="ToolButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Height" Value="36" />
+                <Setter Property="Padding" Value="10,0" />
+                <Setter Property="Margin" Value="2" />
+            </Style>
+
+            <Style x:Key="SwatchButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Width" Value="34" />
+                <Setter Property="Height" Value="34" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="CornerRadius" Value="17" />
+                <Setter Property="BorderThickness" Value="2" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

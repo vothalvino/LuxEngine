@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="src/LuxEngine.App/Assets/LuxEngine.png" width="96" alt="LuxEngine logo" />
+  <img src="src/Lumeshow.App/Assets/Lumeshow.png" width="96" alt="Lumeshow logo" />
 </p>
 
-<h1 align="center">LuxEngine</h1>
+<h1 align="center">Lumeshow</h1>
 
 <p align="center">
   Free, open-source DMX lighting control for Windows.<br/>
@@ -10,11 +10,15 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/vothalvino/LuxEngine/releases/latest"><b>⬇ Download LuxEngine for Windows</b></a>
+  <a href="https://github.com/vothalvino/Lumeshow/releases/latest"><b>⬇ Download Lumeshow for Windows</b></a>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/cues.png" width="800" alt="LuxEngine cue list: each cue combines several presets" />
+  <sub>Lumeshow was called <b>LuxEngine</b> until version 1.8. Same program, new name: installing it replaces LuxEngine and keeps your settings and shows.</sub>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/cues.png" width="800" alt="Lumeshow cue list: each cue combines several presets" />
 </p>
 
 ---
@@ -55,7 +59,7 @@ These screenshots are taken automatically by the CI smoke test on Windows, using
 
 ## Install
 
-1. Download `LuxEngine-Setup.exe` from the [latest release](https://github.com/vothalvino/LuxEngine/releases/latest).
+1. Download `Lumeshow-Setup.exe` from the [latest release](https://github.com/vothalvino/Lumeshow/releases/latest).
 2. Run it. No admin rights are needed when you install "for me only".
 3. Windows SmartScreen may warn that the app is unrecognized, because the installer isn't code-signed yet. Click **More info → Run anyway**.
 
@@ -94,25 +98,25 @@ The [user manual](docs/manual.md) explains each part step by step.
 
 ## Updates
 
-LuxEngine asks GitHub once at start-up whether a newer version exists and shows a small **Update available** button if so. Nothing about you or your show is sent. Turn it off under *Help → Check for updates at start-up*. To update, install the new version over the old one; shows and settings are kept.
+Lumeshow asks GitHub once at start-up whether a newer version exists and shows a small **Update available** button if so. Nothing about you or your show is sent. Turn it off under *Help → Check for updates at start-up*. To update, install the new version over the old one; shows and settings are kept.
 
 ## Building from source
 
 You need Windows 10/11 and the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). Visual Studio 2022 with the *Windows application development* workload is the easiest way to work on the UI.
 
 ```powershell
-git clone https://github.com/vothalvino/LuxEngine.git
-cd LuxEngine
-dotnet test tests/LuxEngine.Core.Tests
-dotnet test tests/LuxEngine.Output.Tests
-dotnet run --project src/LuxEngine.App -p:Platform=x64
+git clone https://github.com/vothalvino/Lumeshow.git
+cd Lumeshow
+dotnet test tests/Lumeshow.Core.Tests
+dotnet test tests/Lumeshow.Output.Tests
+dotnet run --project src/Lumeshow.App -p:Platform=x64
 ```
 
 To build the installer, install [Inno Setup 6](https://jrsoftware.org/isinfo.php) and run:
 
 ```powershell
-dotnet publish src/LuxEngine.App -c Release -r win-x64 -p:Platform=x64 -o publish
-iscc installer\LuxEngine.iss
+dotnet publish src/Lumeshow.App -c Release -r win-x64 -p:Platform=x64 -o publish
+iscc installer\Lumeshow.iss
 ```
 
 GitHub Actions builds, tests and creates the installer for every push. Pushing a tag such as `v1.0.0` publishes a release.
@@ -121,10 +125,10 @@ GitHub Actions builds, tests and creates the installer for every push. Pushing a
 
 | Folder | What's inside |
 |---|---|
-| `src/LuxEngine.Core` | Fixtures, patch, presets and folders, cues, effects, the mixing engine and show files. No UI, fully unit-tested. |
-| `src/LuxEngine.Output` | DMX output thread plus the Art-Net, sACN, Enttec Pro and Open DMX drivers. |
-| `src/LuxEngine.Control` | MIDI input, sound-to-light and the phone remote (a small built-in web server). |
-| `src/LuxEngine.App` | The WinUI 3 desktop app. |
+| `src/Lumeshow.Core` | Fixtures, patch, presets and folders, cues, effects, the mixing engine and show files. No UI, fully unit-tested. |
+| `src/Lumeshow.Output` | DMX output thread plus the Art-Net, sACN, Enttec Pro and Open DMX drivers. |
+| `src/Lumeshow.Control` | MIDI input, sound-to-light and the phone remote (a small built-in web server). |
+| `src/Lumeshow.App` | The WinUI 3 desktop app. |
 | `fixtures/` | Bundled fixture library (JSON). |
 | `tools/FixtureImporter` | Script that converts the Open Fixture Library into `fixtures/`. |
 | `installer/` | Inno Setup script. |
@@ -138,8 +142,8 @@ python3 tools/FixtureImporter/ofl_import.py ofl/fixtures fixtures
 
 ## Contributing
 
-Bug reports, ideas and pull requests are welcome: [open an issue](https://github.com/vothalvino/LuxEngine/issues/new/choose) or see [CONTRIBUTING.md](CONTRIBUTING.md).
+Bug reports, ideas and pull requests are welcome: [open an issue](https://github.com/vothalvino/Lumeshow/issues/new/choose) or see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-LuxEngine is released under the [MIT License](LICENSE). Fixture data comes from the Open Fixture Library (MIT). See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+Lumeshow is released under the [MIT License](LICENSE). Fixture data comes from the Open Fixture Library (MIT). See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

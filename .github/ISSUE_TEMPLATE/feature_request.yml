@@ -1,5 +1,5 @@
 name: Idea or feature request
-description: Something LuxEngine should be able to do
+description: Something Lumeshow should be able to do
 labels: [enhancement]
 body:
   - type: textarea
