@@ -496,12 +496,12 @@ public sealed partial class LightingEngine
             var overCueList = ControlledFixtures(Programmer.Values.Keys.Concat(_buttonValues.Keys));
             foreach (var effect in CuePlayer.ActiveEffects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness,
-                    overCueList.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show);
+                    overCueList.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show, _tempo);
             foreach (var effect in buttonEffects)
                 EffectEngine.Apply(effect, now, _fixtures, values, brightness,
-                    handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show);
+                    handControlled.GetValueOrDefault(EffectEngine.Affects(effect.Type)), _show, _tempo);
             foreach (var effect in Programmer.Effects)
-                EffectEngine.Apply(effect, now, _fixtures, values, brightness, show: _show);
+                EffectEngine.Apply(effect, now, _fixtures, values, brightness, show: _show, tempo: _tempo);
 
             ApplyHighlight(values, brightness);
 

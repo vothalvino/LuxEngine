@@ -2,6 +2,13 @@
 
 What changed in each version of LuxEngine. Downloads are on the [releases page](https://github.com/vothalvino/LuxEngine/releases).
 
+## 1.7.0
+
+### New
+- **Tap tempo.** Tap the new **BPM** button at the top (or press **T**) along with the music. Right-click it to type the tempo, or to halve or double it.
+- **Effects and movements to the beat.** Tick **To the beat** in the Effects or Movement card and choose how many beats one round takes (¼ to 16). The effect then follows the tapped tempo, also when it is saved in a preset or cue.
+- **Fan.** The new Fan card spreads the dimmer, a rainbow of colors, pan or tilt across the selected lights, from the first to the last as they stand on the stage.
+
 ## 1.6.0
 
 ### New

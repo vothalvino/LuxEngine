@@ -233,6 +233,7 @@
                                 <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
+                                <RowDefinition />
                             </Grid.RowDefinitions>
                             <TextBlock Text="Speed" VerticalAlignment="Center" />
                             <Slider Grid.Column="1" x:Name="MoveSpeedSlider" Minimum="0.02" Maximum="2" StepFrequency="0.02" Value="0.25"
@@ -251,6 +252,20 @@
                             <Slider Grid.Row="4" Grid.Column="1" x:Name="MoveSpreadSlider" Minimum="0" Maximum="1" StepFrequency="0.05" Value="0"
                                     ValueChanged="MoveParam_ValueChanged" />
                             <CheckBox Grid.Row="5" Grid.ColumnSpan="2" x:Name="MoveReverseBox" Content="Reverse direction" Click="MoveSetting_Changed" />
+                            <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8">
+                                <CheckBox x:Name="MoveSyncBox" Content="To the beat" MinWidth="0" Checked="MoveSync_Changed" Unchecked="MoveSync_Changed" AutomationProperties.Name="Movement to the beat"
+                                          ToolTipService.ToolTip="Follow the tapped tempo (Tap button at the top, or T) instead of the Speed slider" />
+                                <ComboBox x:Name="MoveBeatsBox" SelectedIndex="4" MinWidth="104" IsEnabled="False" SelectionChanged="MoveChoice_Changed" AutomationProperties.Name="Movement beats"
+                                          ToolTipService.ToolTip="How many beats one round of the effect takes">
+                                    <ComboBoxItem Content="¼ beat" Tag="0.25" />
+                                    <ComboBoxItem Content="½ beat" Tag="0.5" />
+                                    <ComboBoxItem Content="1 beat" Tag="1" />
+                                    <ComboBoxItem Content="2 beats" Tag="2" />
+                                    <ComboBoxItem Content="4 beats" Tag="4" />
+                                    <ComboBoxItem Content="8 beats" Tag="8" />
+                                    <ComboBoxItem Content="16 beats" Tag="16" />
+                                </ComboBox>
+                            </StackPanel>
                         </Grid>
                     </Grid>
                 </Border>
@@ -286,6 +301,61 @@
                             <Slider Grid.Row="2" Grid.Column="1" x:Name="SpreadSlider" Minimum="0" Maximum="1" StepFrequency="0.05" Value="1"
                                     ValueChanged="EffectParam_ValueChanged" />
                         </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <CheckBox x:Name="EffectSyncBox" Content="To the beat" MinWidth="0" Checked="EffectSync_Changed" Unchecked="EffectSync_Changed" AutomationProperties.Name="Effects to the beat"
+                                      ToolTipService.ToolTip="Follow the tapped tempo (Tap button at the top, or T) instead of the Speed slider" />
+                            <ComboBox x:Name="EffectBeatsBox" SelectedIndex="4" MinWidth="104" IsEnabled="False" SelectionChanged="EffectBeats_Changed" AutomationProperties.Name="Effect beats"
+                                          ToolTipService.ToolTip="How many beats one round of the effect takes">
+                                    <ComboBoxItem Content="¼ beat" Tag="0.25" />
+                                    <ComboBoxItem Content="½ beat" Tag="0.5" />
+                                    <ComboBoxItem Content="1 beat" Tag="1" />
+                                    <ComboBoxItem Content="2 beats" Tag="2" />
+                                    <ComboBoxItem Content="4 beats" Tag="4" />
+                                    <ComboBoxItem Content="8 beats" Tag="8" />
+                                    <ComboBoxItem Content="16 beats" Tag="16" />
+                                </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Fan: spread a value across the selected lights -->
+                <Border Style="{StaticResource CardStyle}" Width="260">
+                    <StackPanel Spacing="6">
+                        <StackPanel Style="{StaticResource CardHeaderStyle}" ToolTipService.ToolTip="Spreads a value across the selected lights, from the first to the last as they stand on the stage"><FontIcon Glyph="&#xE8CB;" Style="{StaticResource CardIconStyle}" /><TextBlock Text="Fan" Style="{StaticResource SectionTitleStyle}" /></StackPanel>
+                        <ComboBox x:Name="FanWhatBox" SelectedIndex="0" HorizontalAlignment="Stretch" SelectionChanged="FanWhat_Changed" AutomationProperties.Name="Fan what">
+                            <ComboBoxItem Content="Dimmer" Tag="Intensity" />
+                            <ComboBoxItem Content="Colour (rainbow)" Tag="Colour" />
+                            <ComboBoxItem Content="Pan" Tag="Pan" />
+                            <ComboBoxItem Content="Tilt" Tag="Tilt" />
+                        </ComboBox>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="56" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="40" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="First" VerticalAlignment="Center" ToolTipService.ToolTip="The value for the first light (left)" />
+                            <Slider Grid.Column="1" x:Name="FanFromSlider" Minimum="0" Maximum="100" Value="0" ValueChanged="Fan_ValueChanged"
+                                    AutomationProperties.Name="Fan first light" />
+                            <Border Grid.Column="2" x:Name="FanFromChip" Height="20" CornerRadius="4" VerticalAlignment="Center">
+                                <TextBlock x:Name="FanFromText" Text="0%" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Grid.Row="1" Text="Last" VerticalAlignment="Center" ToolTipService.ToolTip="The value for the last light (right)" />
+                            <Slider Grid.Row="1" Grid.Column="1" x:Name="FanToSlider" Minimum="0" Maximum="100" Value="100" ValueChanged="Fan_ValueChanged"
+                                    AutomationProperties.Name="Fan last light" />
+                            <Border Grid.Row="1" Grid.Column="2" x:Name="FanToChip" Height="20" CornerRadius="4" VerticalAlignment="Center">
+                                <TextBlock x:Name="FanToText" Text="100%" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Content="Apply" Click="FanApply_Click" Style="{StaticResource AccentButtonStyle}" AutomationProperties.Name="Apply fan"
+                                    ToolTipService.ToolTip="Spread the values across the selected lights (moving a slider does this too)" />
+                            <Button Content="Swap" Click="FanSwap_Click" ToolTipService.ToolTip="Turn the fan around" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 

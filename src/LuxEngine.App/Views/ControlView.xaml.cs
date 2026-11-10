@@ -388,6 +388,8 @@ public sealed partial class ControlView : UserControl
         {
             Type = type,
             Speed = type == EffectType.Strobe ? Math.Max(SpeedSlider.Value * 4, 2) : SpeedSlider.Value,
+            Sync = EffectSyncBox.IsChecked == true,
+            Beats = BeatsOf(EffectBeatsBox),
             Size = SizeSlider.Value,
             Spread = SpreadSlider.Value,
             FixtureIds = fixtures.Select(f => f.Instance.Id).ToList(),
@@ -404,18 +406,115 @@ public sealed partial class ControlView : UserControl
         }
     }
 
-    private void EffectParam_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    /// <summary>The choice in a "beats per cycle" list.</summary>
+    private static double BeatsOf(ComboBox box) =>
+        box.SelectedItem is ComboBoxItem { Tag: string tag } ? double.Parse(tag, System.Globalization.CultureInfo.InvariantCulture) : 4;
+
+    private void EffectSync_Changed(object sender, RoutedEventArgs e)
     {
-        if (SpeedSlider is null || SizeSlider is null || SpreadSlider is null) return;
+        bool sync = EffectSyncBox.IsChecked == true;
+        SpeedSlider.IsEnabled = !sync;
+        EffectBeatsBox.IsEnabled = sync;
+        UpdateRunningEffects();
+    }
+
+    private void EffectBeats_Changed(object sender, SelectionChangedEventArgs e) => UpdateRunningEffects();
+
+    private void EffectParam_ValueChanged(object sender, RangeBaseValueChangedEventArgs e) => UpdateRunningEffects();
+
+    /// <summary>Changes to the Effects card apply straight away to effects running on the selected lights.</summary>
+    private void UpdateRunningEffects()
+    {
+        if (SpeedSlider is null || SizeSlider is null || SpreadSlider is null || EffectSyncBox is null || EffectBeatsBox is null) return;
         var selected = Selected.ToHashSet();
         lock (AppServices.Engine.SyncRoot)
         {
             foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => !ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)))
             {
                 effect.Speed = effect.Type == EffectType.Strobe ? Math.Max(SpeedSlider.Value * 4, 2) : SpeedSlider.Value;
+                effect.Sync = EffectSyncBox.IsChecked == true;
+                effect.Beats = BeatsOf(EffectBeatsBox);
                 effect.Size = SizeSlider.Value;
                 effect.Spread = SpreadSlider.Value;
             }
+        }
+    }
+
+    // ------------------------------------------------------------------ fan
+
+    private bool _settingFan;
+
+    private string FanWhat => FanWhatBox?.SelectedItem is ComboBoxItem { Tag: string tag } ? tag : "Intensity";
+
+    /// <summary>The colour a fan slider stands for: once round the rainbow from 0 to 100.</summary>
+    private static Color FanColor(double percent)
+    {
+        var (r, g, b) = EffectEngine.HsvToRgb(percent / 100 * 0.999, 1, 1);
+        return Color.FromArgb(255, (byte)Math.Round(r * 255), (byte)Math.Round(g * 255), (byte)Math.Round(b * 255));
+    }
+
+    /// <summary>Shows the two fan values next to their sliders: a percentage, or the colour.</summary>
+    private void ShowFanValues()
+    {
+        if (FanFromSlider is null || FanToSlider is null || FanFromText is null || FanToText is null) return;
+        bool colour = FanWhat == "Colour";
+        foreach (var (slider, chip, text) in new[] { (FanFromSlider, FanFromChip, FanFromText), (FanToSlider, FanToChip, FanToText) })
+        {
+            text.Text = colour ? "" : $"{slider.Value:0}%";
+            chip.Background = colour ? new SolidColorBrush(FanColor(slider.Value)) : null;
+        }
+    }
+
+    private void FanWhat_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (FanFromSlider is null || FanToSlider is null) return;
+        // Choosing what to fan only gets the sliders ready; nothing changes on stage until you move one or press Apply.
+        _settingFan = true;
+        (FanFromSlider.Value, FanToSlider.Value) = FanWhat switch
+        {
+            "Colour" => (0, 80),
+            "Pan" or "Tilt" => (25, 75),
+            _ => (0, 100),
+        };
+        _settingFan = false;
+        ShowFanValues();
+    }
+
+    private void Fan_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        ShowFanValues();
+        if (!_settingFan) ApplyFan();
+    }
+
+    private void FanApply_Click(object sender, RoutedEventArgs e) => ApplyFan();
+
+    private void FanSwap_Click(object sender, RoutedEventArgs e)
+    {
+        _settingFan = true;
+        (FanFromSlider.Value, FanToSlider.Value) = (FanToSlider.Value, FanFromSlider.Value);
+        _settingFan = false;
+        ShowFanValues();
+        ApplyFan();
+    }
+
+    private void ApplyFan()
+    {
+        if (FanFromSlider is null || FanToSlider is null) return;
+        double from = FanFromSlider.Value, to = FanToSlider.Value;
+        if (FanWhat != "Colour")
+        {
+            AppServices.Engine.Fan(Selected, Enum.Parse<ChannelType>(FanWhat), from * 2.55, to * 2.55);
+            return;
+        }
+
+        var fixtures = SelectedFixtures().OrderByStage(f => f.Instance).ToList();
+        var steps = Fan.Spread(fixtures.Count, from, to);
+        for (int i = 0; i < fixtures.Count; i++)
+        {
+            var color = FanColor(steps[i]);
+            _baseColors[fixtures[i].Instance.Id] = color;
+            if (fixtures[i].HasDimmer) ColorMixer.Apply(AppServices.Engine, fixtures[i], color);
+            else ColorMixer.Apply(AppServices.Engine, fixtures[i], color, ColorBrightness(fixtures[i]));
         }
     }
 
@@ -474,6 +573,8 @@ public sealed partial class ControlView : UserControl
         }
         effect.AreaId = (AreaBox.SelectedItem as AreaChoice)?.AreaId;
         effect.Speed = MoveSpeedSlider.Value;
+        effect.Sync = MoveSyncBox.IsChecked == true;
+        effect.Beats = BeatsOf(MoveBeatsBox);
         effect.Size = MoveSizeSlider.Value;
         effect.Width = MoveWidthSlider.Value;
         effect.Height = MoveHeightSlider.Value;
@@ -503,13 +604,22 @@ public sealed partial class ControlView : UserControl
     /// <summary>Changes to the Movement card apply straight away to movements running on the selected lights.</summary>
     private void UpdateRunningMovement()
     {
-        if (_fillingMoveLists || MoveReverseBox is null || MoveSpreadSlider is null || ShapeBox is null || AreaBox is null) return;
+        if (_fillingMoveLists || MoveReverseBox is null || MoveSpreadSlider is null || ShapeBox is null || AreaBox is null
+            || MoveSyncBox is null || MoveBeatsBox is null) return;
         var selected = Selected.ToHashSet();
         lock (AppServices.Engine.SyncRoot)
         {
             foreach (var effect in AppServices.Engine.Programmer.Effects.Where(ef => ef.Type.IsMovement() && ef.FixtureIds.Any(selected.Contains)))
                 ApplyMoveSettings(effect);
         }
+    }
+
+    private void MoveSync_Changed(object sender, RoutedEventArgs e)
+    {
+        bool sync = MoveSyncBox.IsChecked == true;
+        MoveSpeedSlider.IsEnabled = !sync;
+        MoveBeatsBox.IsEnabled = sync;
+        UpdateRunningMovement();
     }
 
     private void MoveParam_ValueChanged(object sender, RangeBaseValueChangedEventArgs e) => UpdateRunningMovement();

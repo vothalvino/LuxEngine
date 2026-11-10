@@ -9,9 +9,10 @@ public static class EffectEngine
     /// <param name="values">Channel values (0–255) to modify in place.</param>
     /// <param name="brightness">Per-fixture brightness multipliers, combined by multiplication.</param>
     /// <param name="exclude">Fixtures the effect should leave alone (they keep their place in the pattern).</param>
+    /// <param name="tempo">The live beat, for effects set to follow it (<see cref="Effect.Sync"/>).</param>
     public static void Apply(Effect effect, double time, IReadOnlyDictionary<Guid, PatchedFixture> fixtures,
         Dictionary<ChannelKey, double> values, Dictionary<Guid, double> brightness, IReadOnlySet<Guid>? exclude = null,
-        Shows.Show? show = null)
+        Shows.Show? show = null, Tempo? tempo = null)
     {
         var shape = effect.Type == EffectType.Shape ? show?.Shapes.FirstOrDefault(sh => sh.Id == effect.ShapeId) : null;
         var area = effect.AreaId is Guid areaId ? show?.Areas.FirstOrDefault(a => a.Id == areaId) : null;
@@ -23,7 +24,9 @@ public static class EffectEngine
         int n = ids.Count;
         if (n == 0) return;
         double size = Math.Clamp(effect.Size, 0, 1);
-        double cycle = time * effect.Speed;
+        double cycle = effect.Sync && tempo is Tempo beat
+            ? beat.BeatsAt(time) / Math.Max(effect.Beats, 0.01)
+            : time * effect.Speed;
 
         for (int i = 0; i < n; i++)
         {

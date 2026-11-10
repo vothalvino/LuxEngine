@@ -47,6 +47,12 @@ public sealed class Effect
     /// <summary>Cycles per second.</summary>
     public double Speed { get; set; } = 0.5;
 
+    /// <summary>Follow the tapped tempo instead of <see cref="Speed"/>: one cycle takes <see cref="Beats"/> beats.</summary>
+    public bool Sync { get; set; }
+
+    /// <summary>Beats per cycle when <see cref="Sync"/> is on (0.25–16).</summary>
+    public double Beats { get; set; } = 4;
+
     /// <summary>Strength of the effect, 0–1 (depth for dimmer effects, radius for movement).</summary>
     public double Size { get; set; } = 1.0;
 
@@ -78,7 +84,7 @@ public sealed class Effect
 
     public Effect Clone() => new()
     {
-        Id = Guid.NewGuid(), Type = Type, Speed = Speed, Size = Size, Spread = Spread,
+        Id = Guid.NewGuid(), Type = Type, Speed = Speed, Sync = Sync, Beats = Beats, Size = Size, Spread = Spread,
         FixtureIds = new List<Guid>(FixtureIds),
         ShapeId = ShapeId, AreaId = AreaId, Width = Width, Height = Height, Reverse = Reverse,
     };

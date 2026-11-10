@@ -272,6 +272,33 @@ jobs:
           Press 0x11,0x59; Start-Sleep 2                                            # Ctrl+Y
           Shot "18-redo"
           if (-not (Find "Group Group 1")) { throw "Redo did not bring the group back" }
+          # Tap tempo, effects to the beat and fan: the controls must be there and react.
+          Press 0x1B; Start-Sleep 1                                                 # Esc: deselect
+          SelectLight "Par 1"
+          foreach ($n in 2..4) {
+            $cond = New-Object System.Windows.Automation.AndCondition(
+              (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Par $n")),
+              (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::ListItem)))
+            $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond).GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).AddToSelection()
+          }
+          Start-Sleep 1
+          foreach ($i in 1..4) { Click "Tap tempo"; Start-Sleep -Milliseconds 250 }
+          $bpm = (Find "Tap tempo").FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+            (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::Text))).Current.Name
+          Write-Host "Tempo after four taps: $bpm"
+          if ($bpm -notmatch '^\d+ BPM$') { throw "The tempo is not shown after tapping (got '$bpm')" }
+          $beat = Find "Effects to the beat"
+          if (-not $beat) { throw "'To the beat' is missing from the Effects card" }
+          $beat.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep 1
+          if (-not (Find "Effect beats").Current.IsEnabled) { throw "'To the beat' did not switch the beats list on" }
+          Click "Chase"; Start-Sleep 2
+          try { $beat.GetCurrentPattern([System.Windows.Automation.ScrollItemPattern]::Pattern).ScrollIntoView(); Start-Sleep 1 } catch { }
+          Shot "19-chase-to-the-beat"
+          Click "Stop all"; Start-Sleep 1
+          $beat.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep 1
+          Click "Apply fan"; Start-Sleep 2
+          try { (Find "Apply fan").GetCurrentPattern([System.Windows.Automation.ScrollItemPattern]::Pattern).ScrollIntoView(); Start-Sleep 1 } catch { }
+          Shot "19b-fan"
           try {
             # The same screens in the dark theme (the runner uses Windows light, so the other screenshots show light).
             foreach ($theme in @("Dark")) {
