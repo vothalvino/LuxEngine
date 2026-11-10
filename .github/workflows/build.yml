@@ -291,7 +291,12 @@ jobs:
           if (-not $beat) { throw "'To the beat' is missing from the Effects card" }
           $beat.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep 1
           if (-not (Find "Effect beats").Current.IsEnabled) { throw "'To the beat' did not switch the beats list on" }
-          Click "Chase"; Start-Sleep 2
+          # "Chase" is also the name of a preset in the demo show: take the button.
+          $chase = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, (New-Object System.Windows.Automation.AndCondition(
+            (New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, "Chase")),
+            (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)))))
+          if (-not $chase) { throw "The Chase effect button is missing" }
+          $chase.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke(); Start-Sleep 2
           try { $beat.GetCurrentPattern([System.Windows.Automation.ScrollItemPattern]::Pattern).ScrollIntoView(); Start-Sleep 1 } catch { }
           Shot "19-chase-to-the-beat"
           Click "Stop all"; Start-Sleep 1
