@@ -1,6 +1,6 @@
 # Third-party notices
 
-Lumeshow includes or uses the following open-source work.
+Trussbright includes or uses the following open-source work.
 
 ## Open Fixture Library — fixture definitions
 

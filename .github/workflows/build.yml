@@ -38,12 +38,12 @@ jobs:
       - name: Unit tests
         run: |
           dotnet --list-sdks
-          dotnet test tests/Lumeshow.Core.Tests -c Release
-          dotnet test tests/Lumeshow.Output.Tests -c Release
+          dotnet test tests/Trussbright.Core.Tests -c Release
+          dotnet test tests/Trussbright.Output.Tests -c Release
 
       - name: Publish app (self-contained, x64)
         run: >
-          dotnet publish src/Lumeshow.App/Lumeshow.App.csproj
+          dotnet publish src/Trussbright.App/Trussbright.App.csproj
           -c Release -r win-x64 -p:Platform=x64
           -p:Version=${{ steps.version.outputs.version }}
           -o publish
@@ -51,7 +51,7 @@ jobs:
       - name: Check published files
         shell: pwsh
         run: |
-          if (-not (Test-Path publish/Lumeshow.exe)) { throw "Lumeshow.exe missing" }
+          if (-not (Test-Path publish/Trussbright.exe)) { throw "Trussbright.exe missing" }
           $fixtures = (Get-ChildItem publish/fixtures -Filter *.json).Count
           Write-Host "Bundled fixture files: $fixtures"
           if ($fixtures -lt 50) { throw "Fixture library missing from the build" }
@@ -77,14 +77,14 @@ jobs:
           '{"recentShows":["C:\\Shows\\From the old name.luxshow"],"firstRunDone":true}' | Set-Content "$oldData\settings.json"
           "kept" | Set-Content "$oldDocs\Fixtures\notes.txt"
           "{}" | Set-Content "$oldDocs\My show.luxshow"
-          $app = Start-Process publish/Lumeshow.exe -ArgumentList "`"$PWD\samples\Demo.luxshow`"" -PassThru
+          $app = Start-Process publish/Trussbright.exe -ArgumentList "`"$PWD\samples\Demo.luxshow`"" -PassThru
           # Drive the real UI through Windows UI Automation, like a user clicking.
           Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
           $A = [System.Windows.Automation.AutomationElement]
           # Wait until the window is up and its GO button exists, instead of a fixed wait.
           $win = $null
           foreach ($i in 1..60) {
-            if ($app.HasExited) { throw "Lumeshow exited during startup (code $($app.ExitCode))" }
+            if ($app.HasExited) { throw "Trussbright exited during startup (code $($app.ExitCode))" }
             $win = $A::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Children,
               (New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $app.Id)))
             if ($win -and $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
@@ -95,8 +95,8 @@ jobs:
           if (-not $win) { throw "Main window not found" }
           Start-Sleep 2
           Shot "1-startup"
-          $newData = Join-Path $env:LOCALAPPDATA "Lumeshow"
-          $newDocs = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "Lumeshow"
+          $newData = Join-Path $env:LOCALAPPDATA "Trussbright"
+          $newDocs = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "Trussbright"
           if (-not (Select-String -Path "$newData\settings.json" -Pattern "From the old name" -Quiet)) { throw "The LuxEngine settings were not brought over" }
           if (Test-Path $oldData) { throw "The old settings folder is still there" }
           if (-not (Test-Path "$newDocs\Fixtures\notes.txt")) { throw "The user's fixtures were not brought over" }
@@ -124,13 +124,13 @@ jobs:
             Shot "3-cue-tab"
           } catch { Write-Host "Could not switch to the Cue tab: $_" }
           try {
-            Add-Type -Namespace Lume -Name Mouse -MemberDefinition ('[DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y); ' + '[DllImport("user32.dll")] public static extern void mouse_event(int f, int x, int y, int d, int e);')
+            Add-Type -Namespace Truss -Name Mouse -MemberDefinition ('[DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y); ' + '[DllImport("user32.dll")] public static extern void mouse_event(int f, int x, int y, int d, int e);')
             function MouseClick($name) {
               $el = Find $name
               if (-not $el) { throw "UI element '$name' not found" }
               $r = $el.Current.BoundingRectangle
-              [Lume.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
-              [Lume.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Lume.Mouse]::mouse_event(4, 0, 0, 0, 0)
+              [Truss.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+              [Truss.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Truss.Mouse]::mouse_event(4, 0, 0, 0, 0)
             }
             (Find "Buttons").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
             Start-Sleep 2
@@ -142,9 +142,9 @@ jobs:
             Click "Zoom in (Ctrl + mouse wheel)"; Click "Zoom in (Ctrl + mouse wheel)"; Start-Sleep 1
             $r = (Find "Red button").Current.BoundingRectangle
             $x = [int]($r.X + $r.Width / 2); $y = [int]($r.Y + $r.Height / 2)
-            [Lume.Mouse]::SetCursorPos($x, $y); [Lume.Mouse]::mouse_event(0x20, 0, 0, 0, 0)    # middle button down
-            foreach ($i in 1..10) { [Lume.Mouse]::SetCursorPos($x - 15 * $i, $y - 6 * $i); Start-Sleep -Milliseconds 30 }
-            [Lume.Mouse]::mouse_event(0x40, 0, 0, 0, 0); Start-Sleep 1
+            [Truss.Mouse]::SetCursorPos($x, $y); [Truss.Mouse]::mouse_event(0x20, 0, 0, 0, 0)    # middle button down
+            foreach ($i in 1..10) { [Truss.Mouse]::SetCursorPos($x - 15 * $i, $y - 6 * $i); Start-Sleep -Milliseconds 30 }
+            [Truss.Mouse]::mouse_event(0x40, 0, 0, 0, 0); Start-Sleep 1
             Shot "3d-zoomed-and-panned"
             Click "Show all buttons"; Start-Sleep 1
             (Find "Cue list").GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
@@ -176,8 +176,8 @@ jobs:
           } catch { Write-Host "Control check failed: $_" }
           try {
             $r = (Find "Deep blue").Current.BoundingRectangle
-            [Lume.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
-            foreach ($i in 1..2) { [Lume.Mouse]::mouse_event(2, 0, 0, 0, 0); [Lume.Mouse]::mouse_event(4, 0, 0, 0, 0); Start-Sleep -Milliseconds 60 }
+            [Truss.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+            foreach ($i in 1..2) { [Truss.Mouse]::mouse_event(2, 0, 0, 0, 0); [Truss.Mouse]::mouse_event(4, 0, 0, 0, 0); Start-Sleep -Milliseconds 60 }
             Start-Sleep 2
             Shot "6-editing-preset"
             Click "Save preset changes"; Start-Sleep 1
@@ -188,10 +188,10 @@ jobs:
             Shot "7-edit-fixture-type"
             Click "Cancel"; Start-Sleep 1
             # After using a menu, shortcuts must not drop it again (Ctrl+Up/Down master, arrows, Enter).
-            Add-Type -Namespace Lume -Name MenuKeys -MemberDefinition '[DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, int flags, int extra);'
+            Add-Type -Namespace Truss -Name MenuKeys -MemberDefinition '[DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, int flags, int extra);'
             foreach ($k in @(@(0x11,0x26), @(0x11,0x28), @(0x28), @(0x0D))) {
-              foreach ($v in $k) { [Lume.MenuKeys]::keybd_event($v, 0, 0, 0) }
-              foreach ($v in $k) { [Lume.MenuKeys]::keybd_event($v, 0, 2, 0) }
+              foreach ($v in $k) { [Truss.MenuKeys]::keybd_event($v, 0, 0, 0) }
+              foreach ($v in $k) { [Truss.MenuKeys]::keybd_event($v, 0, 2, 0) }
               Start-Sleep -Milliseconds 300
             }
             Start-Sleep 1
@@ -232,11 +232,11 @@ jobs:
             Click "Done"; Start-Sleep 1
           } catch { Write-Host "Areas check failed: $_" }
           try {
-            Add-Type -Namespace Lume -Name Keys -MemberDefinition '[DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, int flags, int extra);'
+            Add-Type -Namespace Truss -Name Keys -MemberDefinition '[DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, int flags, int extra);'
             function Press([byte[]]$keys) {
-              foreach ($k in $keys) { [Lume.Keys]::keybd_event($k, 0, 0, 0) }
+              foreach ($k in $keys) { [Truss.Keys]::keybd_event($k, 0, 0, 0) }
               [array]::Reverse($keys)
-              foreach ($k in $keys) { [Lume.Keys]::keybd_event($k, 0, 2, 0) }
+              foreach ($k in $keys) { [Truss.Keys]::keybd_event($k, 0, 2, 0) }
               Start-Sleep -Milliseconds 150
             }
             function SelectLight($name) {
@@ -327,8 +327,8 @@ jobs:
             Where-Object { -not $_.Current.IsOffscreen -and $_.Current.BoundingRectangle.Width -gt 0 } | Select-Object -Last 1
           if (-not $item) { throw "Output > Phone remote is missing" }
           $r = $item.Current.BoundingRectangle
-          [Lume.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
-          [Lume.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Lume.Mouse]::mouse_event(4, 0, 0, 0, 0)
+          [Truss.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+          [Truss.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Truss.Mouse]::mouse_event(4, 0, 0, 0, 0)
           Start-Sleep 3
           $switch = $null
           foreach ($try in 1..5) {
@@ -348,7 +348,7 @@ jobs:
           if ($pin -notmatch '^\d{4}$') { throw "Switching the remote on did not create a PIN (got '$pin')" }
           $remote = "http://localhost:8080"
           $page = Invoke-WebRequest "$remote/" -UseBasicParsing
-          if ($page.Content -notmatch "Lumeshow remote") { throw "The remote page is not served" }
+          if ($page.Content -notmatch "Trussbright remote") { throw "The remote page is not served" }
           $denied = try { (Invoke-WebRequest "$remote/api/state" -UseBasicParsing).StatusCode } catch { [int]$_.Exception.Response.StatusCode }
           if ($denied -ne 401) { throw "The remote answered $denied without a PIN (expected 401)" }
           $state = Invoke-RestMethod "$remote/api/blackout?on=1&pin=$pin" -Method Post
@@ -375,8 +375,8 @@ jobs:
               # Menus opened earlier can leave hidden copies behind: use the one on screen.
               $item = $items | Where-Object { -not $_.Current.IsOffscreen -and $_.Current.BoundingRectangle.Width -gt 0 } | Select-Object -Last 1
               $r = $item.Current.BoundingRectangle
-              [Lume.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
-              [Lume.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Lume.Mouse]::mouse_event(4, 0, 0, 0, 0)
+              [Truss.Mouse]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+              [Truss.Mouse]::mouse_event(2, 0, 0, 0, 0); Start-Sleep -Milliseconds 80; [Truss.Mouse]::mouse_event(4, 0, 0, 0, 0)
               Start-Sleep 2
               Press 0x71; Start-Sleep 1                                              # F2: Control tab
               SelectLight "Par 1"
@@ -398,9 +398,9 @@ jobs:
               Press 0x31; Start-Sleep 1
             }
           } catch { Write-Host "Theme screenshots failed: $_" }
-          $log = Join-Path $env:LOCALAPPDATA "Lumeshow\errors.log"
+          $log = Join-Path $env:LOCALAPPDATA "Trussbright\errors.log"
           if (Test-Path $log) { Get-Content $log; throw "The app reported errors" }
-          if ($app.HasExited) { throw "Lumeshow crashed while running cues (code $($app.ExitCode))" }
+          if ($app.HasExited) { throw "Trussbright crashed while running cues (code $($app.ExitCode))" }
           Stop-Process -Id $app.Id
 
       - uses: actions/upload-artifact@v7
@@ -422,7 +422,7 @@ jobs:
         run: |
           $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source
           if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
-          & $iscc /DAppVersion=${{ steps.version.outputs.version }} /DSourceDir=..\publish installer\Lumeshow.iss
+          & $iscc /DAppVersion=${{ steps.version.outputs.version }} /DSourceDir=..\publish installer\Trussbright.iss
           if ($LASTEXITCODE -ne 0) { throw "Installer build failed" }
 
       # Install the last version that was called LuxEngine, then this build over it, like a user updating.
@@ -447,39 +447,39 @@ jobs:
           if (-not (Test-Path "$programs\LuxEngine\LuxEngine.exe")) { Get-Content old.log -Tail 40; throw "LuxEngine 1.8.0 did not install" }
           "mine" | Set-Content "$programs\LuxEngine\my-own-file.txt"       # something the old installer did not put there
 
-          Setup "installer\Output\Lumeshow-Setup.exe" "upgrade.log"
+          Setup "installer\Output\Trussbright-Setup.exe" "upgrade.log"
           Select-String -Path upgrade.log -Pattern "old uninstaller" | ForEach-Object { Write-Host $_.Line }
           $failed = $false
-          Check (Test-Path "$programs\Lumeshow\Lumeshow.exe") "Lumeshow is installed in a folder with the new name"
+          Check (Test-Path "$programs\Trussbright\Trussbright.exe") "Trussbright is installed in a folder with the new name"
           Check (-not (Test-Path "$programs\LuxEngine\LuxEngine.exe")) "the old program is gone"
           Check (-not (Test-Path "$programs\LuxEngine\LuxEngine.Core.dll")) "the old program files are gone"
           Check (Test-Path "$programs\LuxEngine\my-own-file.txt") "a file the user put in the old folder is kept"
-          Check (Test-Path "$startMenu\Lumeshow.lnk") "Start menu has Lumeshow"
+          Check (Test-Path "$startMenu\Trussbright.lnk") "Start menu has Trussbright"
           Check (-not (Test-Path "$startMenu\LuxEngine.lnk")) "Start menu no longer has LuxEngine"
-          Check (Test-Path "$desktop\Lumeshow.lnk") "the desktop shortcut was carried over under the new name"
+          Check (Test-Path "$desktop\Trussbright.lnk") "the desktop shortcut was carried over under the new name"
           Check (-not (Test-Path "$desktop\LuxEngine.lnk")) "the old desktop shortcut is gone"
-          Check ((Class ".luxshow") -eq "Lumeshow.Show") ".luxshow files open with Lumeshow"
+          Check ((Class ".luxshow") -eq "Trussbright.Show") ".luxshow files open with Trussbright"
           Check (-not (Test-Path "HKCU:\Software\Classes\LuxEngine.Show")) "the old file type entry is gone"
-          $entries = @(Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" | Where-Object { $_.DisplayName -match "LuxEngine|Lumeshow" })
+          $entries = @(Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" | Where-Object { $_.DisplayName -match "LuxEngine|Trussbright" })
           $entries | ForEach-Object { Write-Host "Installed apps list: $($_.DisplayName) in $($_.InstallLocation)" }
-          Check ($entries.Count -eq 1 -and $entries[0].DisplayName -like "Lumeshow*") "Windows lists one app, called Lumeshow"
+          Check ($entries.Count -eq 1 -and $entries[0].DisplayName -like "Trussbright*") "Windows lists one app, called Trussbright"
 
           # The installed program must start, and installing again (a normal update from now on) must work.
-          $app = Start-Process "$programs\Lumeshow\Lumeshow.exe" -PassThru
+          $app = Start-Process "$programs\Trussbright\Trussbright.exe" -PassThru
           Start-Sleep 15
-          Check (-not $app.HasExited) "the installed Lumeshow starts"
+          Check (-not $app.HasExited) "the installed Trussbright starts"
           if (-not $app.HasExited) { Stop-Process -Id $app.Id; Start-Sleep 2 }
-          Setup "installer\Output\Lumeshow-Setup.exe" "again.log"
-          Check (Test-Path "$programs\Lumeshow\Lumeshow.exe") "installing over Lumeshow keeps it in place"
-          Check (-not (Test-Path "$programs\Lumeshow\Lumeshow")) "no nested folder"
-          $log = Join-Path $env:LOCALAPPDATA "Lumeshow\errors.log"
+          Setup "installer\Output\Trussbright-Setup.exe" "again.log"
+          Check (Test-Path "$programs\Trussbright\Trussbright.exe") "installing over Trussbright keeps it in place"
+          Check (-not (Test-Path "$programs\Trussbright\Trussbright")) "no nested folder"
+          $log = Join-Path $env:LOCALAPPDATA "Trussbright\errors.log"
           if (Test-Path $log) { Get-Content $log; $failed = $true }
           if ($failed) { Get-Content upgrade.log -Tail 60; throw "The upgrade from LuxEngine did not go as planned" }
 
       - uses: actions/upload-artifact@v7
         with:
-          name: Lumeshow-Setup
-          path: installer/Output/Lumeshow-Setup.exe
+          name: Trussbright-Setup
+          path: installer/Output/Trussbright-Setup.exe
 
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -490,4 +490,4 @@ jobs:
           # Tags like v1.5.0-preview.1 become a pre-release: not "latest", so normal downloads are unaffected.
           $extra = @()
           if ("${{ github.ref_name }}" -like "*-preview*") { $extra = @("--prerelease", "--notes", "Preview build for testing. Not the current release.") } else { $extra = @("--generate-notes") }
-          gh release create "${{ github.ref_name }}" installer/Output/Lumeshow-Setup.exe --title "Lumeshow ${{ steps.version.outputs.version }}" @extra
+          gh release create "${{ github.ref_name }}" installer/Output/Trussbright-Setup.exe --title "Trussbright ${{ steps.version.outputs.version }}" @extra
