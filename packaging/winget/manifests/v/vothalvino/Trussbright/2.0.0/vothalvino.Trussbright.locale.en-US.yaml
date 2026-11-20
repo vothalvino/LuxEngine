@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: vothalvino.Trussbright
+PackageVersion: 2.0.0
+PackageLocale: en-US
+Publisher: Trussbright contributors
+PublisherUrl: https://github.com/vothalvino/Trussbright
+PublisherSupportUrl: https://github.com/vothalvino/Trussbright/issues
+PackageName: Trussbright
+PackageUrl: https://github.com/vothalvino/Trussbright
+License: MIT
+LicenseUrl: https://github.com/vothalvino/Trussbright/blob/main/LICENSE
+ShortDescription: Free, open-source DMX lighting control for Windows.
+Description: |-
+  Patch your lights, build looks, save them as presets, combine presets into cues and press GO.
+  Art-Net, sACN and USB DMX output, more than 500 fixtures built in, effects and movements to the beat,
+  cue buttons, MIDI, sound-to-light and a phone remote.
+Moniker: trussbright
+Tags:
+- artnet
+- dmx
+- lighting
+- sacn
+- stage-lighting
+ReleaseNotesUrl: https://github.com/vothalvino/Trussbright/releases/tag/v2.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
