@@ -1,6 +1,21 @@
 # Changelog
 
-What changed in each version of LuxEngine. Downloads are on the [releases page](https://github.com/vothalvino/LuxEngine/releases).
+What changed in each version of Trussbright. Downloads are on the [releases page](https://github.com/vothalvino/Trussbright/releases).
+
+Trussbright was called **LuxEngine** up to version 1.8.0.
+
+## 2.0.0
+
+### LuxEngine is now Trussbright
+The software has a new name, because several other programs are already called LuxEngine. It is the same program with the same features; nothing was removed.
+
+- **Updating:** install Trussbright over LuxEngine. The installer replaces the old program, so you have one app, with one entry in the Start menu. Close LuxEngine first.
+- **Your settings** and your own fixture types move to the new folders by themselves the first time Trussbright starts (`Documents\Trussbright\Fixtures` for fixtures).
+- **Your shows keep working.** Show files are still `.luxshow` files, and nothing about them changes.
+- Shows you saved yourself stay where you saved them, also inside `Documents\LuxEngine`.
+- The project's address is now [github.com/vothalvino/Trussbright](https://github.com/vothalvino/Trussbright). Old links are forwarded.
+
+Going back to LuxEngine 1.8 afterwards is possible, but it starts with fresh settings.
 
 ## 1.8.0
 
